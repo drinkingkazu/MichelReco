@@ -8,7 +8,7 @@ namespace michel {
   void ToyBoundary::EventReset()
   {}
     
-  HitIdx_t ToyBoundary::Boundary(const MichelCluster& cluster)
+  HitIdx_t ToyBoundary::Boundary(MichelCluster& cluster)
   { return 0; }
 
 }
