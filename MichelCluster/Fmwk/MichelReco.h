@@ -49,9 +49,9 @@ namespace michel {
     /// Default destructor
     ~MichelReco(){}
 
-    /// cluster register function
-    void Append(const std::vector<michel::HitPt>& hit_v);
-
+    //
+    // Configuration functions
+    //
     /// Reco algorithm setter
     void SetAlgo(const AlgoType_t type, BaseMichelAlgo *algo);
 
@@ -65,6 +65,23 @@ namespace michel {
     /// Verbosity setter
     void SetVerbosity(msg::MSGLevel_t level) { _verbosity = level; }
 
+    //
+    // Data register functions
+    //
+    /// cluster register function
+    void Append(const std::vector<michel::HitPt>& hit_v);
+    /// all-hit register function
+    void RegisterAllHits(const std::vector<michel::HitPt>& all_hit_v);
+#ifndef __CINT__
+    /// cluster register function w/ std::move
+    void Append(std::vector<michel::HitPt>&& hit_v);
+    /// all-hit register function w/ std::move
+    void RegisterAllHits(std::vector<michel::HitPt>&& all_hit_v);
+#endif
+    
+    //
+    // Driver functions (change state)
+    //
     /// Initializer (before event loop)
     void Initialize();
     
@@ -87,6 +104,10 @@ namespace michel {
     MichelClusterArray _input_v;
     /// Output clusters
     MichelClusterArray _output_v;
+    /// "ALL" hit list
+    std::vector< ::michel::HitPt > _all_hit_v;
+    /// Used hit marker for "ALL" hit list
+    std::vector< bool > _used_hit_marker_v;
     //
     // Algorithms
     //

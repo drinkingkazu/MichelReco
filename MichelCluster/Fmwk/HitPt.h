@@ -26,9 +26,10 @@ namespace michel {
   public:
     
     /// Default constructor
-    HitPt(const double q = kINVALID_DOUBLE,
-	  const double w = kINVALID_DOUBLE,
-	  const double t = kINVALID_DOUBLE);
+    HitPt(const double q  = kINVALID_DOUBLE,
+	  const double w  = kINVALID_DOUBLE,
+	  const double t  = kINVALID_DOUBLE,
+	  const size_t id = kINVALID_SIZE);
     
     /// Default destructor
     ~HitPt(){}

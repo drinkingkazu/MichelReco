@@ -32,8 +32,8 @@ namespace michel {
     /// Default destructor
     virtual ~BaseAlgMichelCluster(){}
 
-    virtual Michel Cluster(const MichelCluster& cluster,
-			   const std::vector<HitPt>& hits) = 0;
+    virtual void Cluster(Michel& michel,
+			 const std::vector<HitPt>& hits) = 0;
     
   };
 }
