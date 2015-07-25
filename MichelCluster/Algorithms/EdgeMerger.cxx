@@ -10,10 +10,8 @@ namespace michel{
 
   bool EdgeMerger::Merge(const MichelCluster& a, const MichelCluster& b)
   {
-
     //Do not currently have confiure function yet, just use "6 [cm]" dist as before..."
-    if(a.Touching(b,6)) { return true;  }
-    else                { return false; }
+    return Touching(a,b,6);
   }
 
   double EdgeMerger::Priority(const MichelCluster& cluster)
