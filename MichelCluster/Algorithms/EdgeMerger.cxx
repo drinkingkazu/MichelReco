@@ -22,6 +22,15 @@ namespace michel{
 
     return (double)(cluster._hits.size());
   }
+
+  
+  bool EdgeMerger::Touching (const MichelCluster& lhs,
+			     const MichelCluster& rhs,
+			     const double min_dist) const
+  {
+    return ( lhs._start.Dist(rhs._end)   < min_dist ||
+	     lhs._end.Dist  (rhs._start) < min_dist );
+  }
   
 }
 

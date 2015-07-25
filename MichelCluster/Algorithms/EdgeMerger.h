@@ -38,8 +38,15 @@ namespace michel {
     /// Priority function assign a priority ordering for a merging function to be called
     double Priority(const MichelCluster& cluster);
 
+  private:
+
+    /// Check if two clusters are touching 
+    bool Touching (const MichelCluster& lhs,
+		   const MichelCluster& rhs,
+		   const double min_dist) const;
+
   };
-    
+  
 }
 
 #endif
