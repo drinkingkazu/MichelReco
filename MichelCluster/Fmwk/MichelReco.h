@@ -52,7 +52,7 @@ namespace michel {
     { _min_nhits = min_nhits; _d_cutoff = d_cutoff; }
 
     /// Verbosity setter
-    void SetVerbosity(MSGLevel_t level) { _verbosity = level; }
+    void SetVerbosity(msg::MSGLevel_t level) { _verbosity = level; }
 
     /// Initializer (before event loop)
     void Initialize();
@@ -71,7 +71,7 @@ namespace michel {
     double _d_cutoff;  ///< MichelCluster's cut-off distance for neighboring cluster
     size_t _min_nhits; ///< MichelCluster's min # hits to claim a cluster
     /// Verbosity
-    MSGLevel_t _verbosity;
+    msg::MSGLevel_t _verbosity;
     /// Algorithms to be executed
     std::vector< michel::BaseMichelAlgo* > _alg_v;
     /// Analysis to be executed

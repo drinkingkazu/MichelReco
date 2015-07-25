@@ -8,7 +8,8 @@ namespace michel {
   //-----------------------------------------------------------------
   MichelReco::MichelReco()
   //-----------------------------------------------------------------
-    : _alg_v      ( kAlgoTypeMax, nullptr )
+    : _verbosity  ( msg::kNORMAL )
+    , _alg_v      ( kAlgoTypeMax, nullptr )
     , _alg_time_v ( kAlgoTypeMax, 0.      )
     , _alg_ctr_v  ( kAlgoTypeMax, 0       )
   {}

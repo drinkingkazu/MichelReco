@@ -8,14 +8,16 @@ namespace michel {
   /// Type def for index address
   typedef size_t HitIdx_t;
 
-  /// Verbosity message level
-  enum MSGLevel_t {
-    kDEBUG,
-    kINFO,
-    kNORMAL,
-    kWARNING,
-    kERROR
-  };
+  namespace msg {
+    /// Verbosity message level
+    enum MSGLevel_t {
+      kDEBUG,
+      kINFO,
+      kNORMAL,
+      kWARNING,
+      kERROR
+    };
+  }
 
   ///
   enum AlgoType_t {

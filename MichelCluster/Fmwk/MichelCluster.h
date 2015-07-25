@@ -36,6 +36,24 @@ namespace michel {
     MichelCluster(size_t min_nhits = 0,
 		  double d_cutoff  = kMAX_DOUBLE );
 
+    /// Alternative ctor from hit list reference
+    MichelCluster(const std::vector<HitPt>&,
+		  size_t min_nhits = 0,
+		  double d_cutoff  = kMAX_DOUBLE );
+
+#ifndef __CINT__ // CINT (ROOT5) cannot understand std::move
+    /// Copy ctor
+    //MichelCluster(const MichelCluster& rhs) = default;
+    
+    /// Alternative ctor from hit list reference
+    MichelCluster(const std::vector<HitPt>&&,
+		  size_t min_nhits = 0,
+		  double d_cutoff  = kMAX_DOUBLE );
+    
+    /// Alternative ctor from michel
+    //MichelCluster(const MichelCluster&& rhs);
+#endif
+    
     /// Default destructor
     virtual ~MichelCluster(){}
 
@@ -43,24 +61,18 @@ namespace michel {
     void SetHits(const std::vector<michel::HitPt>& hits);
 
     /// Verbosity level
-    void SetVerbosity(MSGLevel_t level)
+    void SetVerbosity(msg::MSGLevel_t level)
     { _verbosity = level; }
 
     //
     // Operator attributes
     //
-    // Addition
-    MichelCluster operator+(const MichelCluster& other);
-    
-    //
-    // Function attributes
-    //
-    /// Construct ordered index vector for near-by neighbor hits
-    void OrderPoints(size_t start_index,
-		     std::vector<size_t>& ordered_index_v,
-		     std::vector<double>& ds_v,
-		     std::vector<double>& s_v);
+    // Binary addition
+    MichelCluster operator+(const MichelCluster& other) const;
 
+    /// Unary addition
+    MichelCluster& operator+=(const MichelCluster& other);
+    
     /// Check if two clusters are touching 
     bool Touching (const MichelCluster& rhs,
 		   const double min_dist);
@@ -93,13 +105,25 @@ namespace michel {
     std::vector<double>   _t_mean_v;    ///< Truncated mean
     std::vector<double>   _t_dqds_v;    ///< Truncated dqds
 
-  protected:
     //
     // Configurations
     //
-    MSGLevel_t _verbosity; ///< Verbosity level
-    size_t _min_nhits;     ///< Minimum # of hits
-    double _d_cutoff;      ///< Distance cut off value
+    msg::MSGLevel_t _verbosity; ///< Verbosity level
+    size_t _min_nhits;          ///< Minimum # of hits
+    double _d_cutoff;           ///< Distance cut off value
+
+  protected:
+    
+    //
+    // Private attribute functions
+    //
+    /// Process set hits and do ordering
+    void ProcessHits();
+    /// Construct ordered index vector for near-by neighbor hits
+    void OrderPoints(size_t start_index,
+		     std::vector<size_t>& ordered_index_v,
+		     std::vector<double>& ds_v,
+		     std::vector<double>& s_v);
 
   };
 

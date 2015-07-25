@@ -25,13 +25,14 @@ namespace michel {
   public:
     
     /// Default constructor
-    BaseAlgMerger(){}
+    BaseAlgMerger() : BaseMichelAlgo() {}
     
     /// Default destructor
     virtual ~BaseAlgMerger(){}
 
-    /// Merge clusters
+    /// Function to be implemented by children classes
     virtual MichelClusterArray Merge(const MichelClusterArray& input_v) = 0;
+
   };
     
 }

@@ -27,13 +27,13 @@ namespace michel {
   public:
     
     /// Default constructor
-    MichelAnaBase(){}
+    MichelAnaBase(){ _verbosity = msg::kNORMAL; }
     
     /// Default destructor
     virtual ~MichelAnaBase(){}
 
     /// Verbosity setter
-    void SetVerbosity(MSGLevel_t level)
+    void SetVerbosity(msg::MSGLevel_t level)
     { _verbosity = level; }
     
     /// Initialize
@@ -52,7 +52,7 @@ namespace michel {
   protected:
 
     /// Verbosity level
-    MSGLevel_t _verbosity;
+    msg::MSGLevel_t _verbosity;
     
   };
 }

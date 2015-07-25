@@ -10,8 +10,45 @@ namespace michel {
   MichelCluster::MichelCluster(size_t min_nhits, double d_cutoff)
     : _min_nhits ( min_nhits )
     , _d_cutoff  ( d_cutoff  )
-  { _verbosity = kNORMAL; }
+  { _verbosity = msg::kNORMAL; }
 
+  MichelCluster::MichelCluster(const std::vector<HitPt>& hits,
+			       size_t min_nhits,
+			       double d_cutoff)
+    : _hits(hits)
+    , _min_nhits ( min_nhits )
+    , _d_cutoff  ( d_cutoff  )
+  {
+    ProcessHits();
+  }
+
+  MichelCluster::MichelCluster(const std::vector<HitPt>&& hits,
+			       size_t min_nhits,
+			       double d_cutoff)
+    : _hits(std::move(hits))
+    , _min_nhits ( min_nhits )
+    , _d_cutoff  ( d_cutoff  )
+  {
+    ProcessHits();
+  }
+  /*
+  MichelCluster::MichelCluster(const MichelCluster&& rhs)
+    : _hits      ( std::move( rhs._hits     ) )
+    , _start     ( std::move( rhs._start    ) )
+    , _end       ( std::move( rhs._end      ) )
+    , _ordered_pts ( std::move( rhs._ordered_pts ) )
+    , _ds_v      ( std::move( rhs._ds_v     ) )
+    , _s_v       ( std::move( rhs._s_v      ) )
+    , _boundary  ( rhs._boundary              )
+    , _michel    ( std::move( rhs._michel   ) )
+    , _chi2_v    ( std::move( rhs._chi2_v   ) )
+    , _t_mean_v  ( std::move( rhs._t_mean_v ) )
+    , _t_dqds_v  ( std::move( rhs._t_dqds_v ) )
+    , _verbosity ( rhs._verbosity )
+    , _min_nhits ( rhs._min_nhits )
+    , _d_cutoff  ( rhs._d_cutoff  )
+  {}
+  */
   void MichelCluster::Dump()
   {
     std::cout << "\t\n==start dump==\n";
@@ -29,8 +66,14 @@ namespace michel {
 
   void MichelCluster::SetHits(const std::vector<HitPt>& hits)
   {
+    _hits = hits;
+    ProcessHits();
+  }
+
+  void MichelCluster::ProcessHits()
+  {
     // Check if hit count
-    if(hits.size() < _min_nhits)
+    if(_hits.size() < _min_nhits)
       throw MichelException();
 
     // Find min/max hits in terms of wire position
@@ -38,22 +81,19 @@ namespace michel {
     size_t max_index = kINVALID_SIZE;
     double min_wire  = kMAX_DOUBLE;
     double max_wire  = kMIN_DOUBLE;
-    for(size_t i=0; i<hits.size(); ++i) {
-      if(hits[i]._w < min_wire) {
-	min_wire  = hits[i]._w;
+    for(size_t i=0; i<_hits.size(); ++i) {
+      if(_hits[i]._w < min_wire) {
+	min_wire  = _hits[i]._w;
 	min_index = i;
       }
-      if(hits[i]._w > max_wire) {
-	max_wire  = hits[i]._w;
+      if(_hits[i]._w > max_wire) {
+	max_wire  = _hits[i]._w;
 	max_index = i;
       }
     }
-
+    // Check index validity
     if(min_index == kINVALID_SIZE || max_index == kINVALID_SIZE)
       throw MichelException();
-
-    // Copy hits
-    _hits = hits;
 
     //order the points right => left
     OrderPoints(min_index, _ordered_pts, _ds_v, _s_v);
@@ -137,13 +177,13 @@ namespace michel {
     }
 
     // Verbosity report
-    if( _verbosity <= kINFO ) {
+    if( _verbosity <= msg::kINFO ) {
       // INFO level prints out where it starts & # points
       std::cout << "Ordered from index " << start_index
 		<< " ... found " << ordered_index_v.size()
 		<< " points!" <<std::endl;
       // DEBUG level prints out all indeces ... we never understand this anyway
-      if(_verbosity <= kDEBUG ) {
+      if(_verbosity <= msg::kDEBUG ) {
 	for(size_t i=0; i<ordered_index_v.size(); ++i) {
 	  std::cout << ordered_index_v[i] << " ";
 	  if(i%8==0) std::cout<<std::endl;
@@ -153,10 +193,8 @@ namespace michel {
     }
   }
 
-  MichelCluster MichelCluster::operator+(const MichelCluster& rhs)
+  MichelCluster MichelCluster::operator+(const MichelCluster& rhs) const
   {
-    MichelCluster res;
-
     auto const& hits_lhs = (*this)._hits;
     auto const& hits_rhs = rhs._hits;
 
@@ -166,8 +204,20 @@ namespace michel {
     for(auto const& h : hits_lhs) hits.push_back(h);
     for(auto const& h : hits_rhs) hits.push_back(h);
 
-    res.SetHits(hits);
+    MichelCluster res(std::move(hits), _min_nhits, _d_cutoff);
+    res.ProcessHits();
     return res;
+  }
+
+  MichelCluster& MichelCluster::operator+=(const MichelCluster& rhs)
+  {
+    _hits.reserve(_hits.size() + rhs._hits.size());
+
+    for(auto const& h : rhs._hits) _hits.push_back(h);
+
+    ProcessHits();
+
+    return (*this);
   }
 
   bool MichelCluster::Touching(const MichelCluster& rhs,

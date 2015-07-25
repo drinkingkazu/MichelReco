@@ -25,13 +25,13 @@ namespace michel {
     
     /// Default constructor
     BaseMichelAlgo()
-    { _verbosity = kNORMAL; }
+    { _verbosity = msg::kNORMAL; }
     
     /// Default destructor
     virtual ~BaseMichelAlgo(){}
 
     /// Verbosity setter
-    void SetVerbosity(MSGLevel_t level)
+    void SetVerbosity(msg::MSGLevel_t level)
     { _verbosity = level; }
     
     /// Event-wise reset function
@@ -40,7 +40,7 @@ namespace michel {
   protected:
 
     /// Verbosity level
-    MSGLevel_t _verbosity;
+    msg::MSGLevel_t _verbosity;
     
   };
 }
