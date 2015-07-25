@@ -8,16 +8,13 @@ namespace michel {
   void RadiusMichelCluster::EventReset()
   {}
   
-  Michel RadiusMichelCluster::Cluster(const Michel& michel,
-				      const std::vector<HitPt>& hits){
+  void RadiusMichelCluster::Cluster(Michel& michel,
+				    const std::vector<HitPt>& hits){
 
-    if (michel.size() == 0)
-      return michel;
-    
-    
+    if (michel.size() == 0) return;
+
     double min_radius = 10; //hardcoded for now
     double radius = michel._length;
-    
     
     //set to min rad
     if (radius < min_radius)
@@ -33,9 +30,6 @@ namespace michel {
 	michel.push_back(thishit);
       }
     }
-
-      
-    return michel; 
   }
 
 

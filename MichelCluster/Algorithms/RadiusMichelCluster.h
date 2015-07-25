@@ -33,8 +33,8 @@ namespace michel {
     void EventReset();
 
     /// Re-cluster michel electrons w/ un-used hits
-    Michel Cluster(const Michel& cluster,
-		   const std::vector<HitPt>& hits);
+    void Cluster(Michel& cluster,
+		 const std::vector<HitPt>& hits);
     
   };
 }
