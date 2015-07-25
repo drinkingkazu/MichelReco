@@ -220,13 +220,6 @@ namespace michel {
     return (*this);
   }
 
-  bool MichelCluster::Touching(const MichelCluster& rhs,
-			       const double min_dist) const
-  {
-    return ( this->_start.Dist(rhs._end) < min_dist ||
-	     this->_end.Dist(rhs._start) < min_dist );
-  }
-
   const HitPt& MichelCluster::ClosestHit(const HitPt& ref)
   {
     double min_dist  = kMAX_DOUBLE;
