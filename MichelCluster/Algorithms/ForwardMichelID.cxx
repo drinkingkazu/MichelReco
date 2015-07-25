@@ -11,6 +11,8 @@ namespace michel {
   
   Michel ForwardMichelID::Identify(const MichelCluster& cluster)
   {
+
+    //no check on cluster size here...
     
     //Hardcoded for now :)
     double n_cutoff = 2;
@@ -19,7 +21,7 @@ namespace michel {
     bool   forward;
     int    idx = 0;
     size_t the_michel_start; //index in ordered points that is the michel
-
+    
     //get index in ordered_pts that is the boundary point
     
     for(const auto& ordered_hitIDX : cluster._ordered_pts) {
@@ -63,9 +65,10 @@ namespace michel {
 	}
       }
       else {
-	if(i <= the_michel_start) 
+	if(i <= the_michel_start)  {
 	  electron.push_back(cluster._ordered_pts[i]);
 	  ordered_pts_idx.push_back(i);
+	}
       }
     }
     //Do same thing for muon (in future)
@@ -74,7 +77,7 @@ namespace michel {
     
     electron._length = length;
     electron._start  = cluster._hits[cluster._ordered_pts[the_michel_start]];
-  
+    
     //loop over the ordered points, add hits to the electron that are NOT in orderedpts
     //BUT append new hits found in the vicinity of the vertex
     //this now goes into "reclustering"
