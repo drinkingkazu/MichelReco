@@ -1,9 +1,9 @@
 /**
- * \file BaseAlgIdentifier.h
+ * \file BaseAlgMichelID.h
  *
  * \ingroup MichelCluster
  * 
- * \brief Class def header for a class BaseAlgIdentifier
+ * \brief Class def header for a class BaseAlgMichelID
  *
  * @author kazuhiro
  */
@@ -11,26 +11,26 @@
 /** \addtogroup MichelCluster
 
     @{*/
-#ifndef BASEALGIDENTIFIER_H
-#define BASEALGIDENTIFIER_H
+#ifndef BASEALGMICHELID_H
+#define BASEALGMICHELID_H
 
 #include "BaseMichelAlgo.h"
 #include "MichelCluster.h"
 namespace michel {
   /**
-     \class BaseAlgIdentifier
-     User defined class BaseAlgIdentifier ... these comments are used to generate
+     \class BaseAlgMichelID
+     User defined class BaseAlgMichelID ... these comments are used to generate
      doxygen documentation!
   */
-  class BaseAlgIdentifier : public BaseMichelAlgo {
+  class BaseAlgMichelID : public BaseMichelAlgo {
     
   public:
     
     /// Default constructor
-    BaseAlgIdentifier(){}
+    BaseAlgMichelID(){}
     
     /// Default destructor
-    virtual ~BaseAlgIdentifier(){}
+    virtual ~BaseAlgMichelID(){}
 
     virtual Michel Identify(const MichelCluster& cluster) = 0;
     

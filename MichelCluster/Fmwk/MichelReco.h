@@ -18,15 +18,26 @@
 #include "MichelCluster.h"
 #include "BaseAlgMerger.h"
 #include "BaseAlgBoundary.h"
-#include "BaseAlgIdentifier.h"
+#include "BaseAlgMichelID.h"
+#include "BaseAlgMichelCluster.h"
 #include "MichelAnaBase.h"
 #include <TFile.h>
 #include <TStopwatch.h>
 namespace michel {
   /**
      \class MichelReco
-     User defined class MichelReco ... these comments are used to generate
-     doxygen documentation!
+     A class that handles event-wise michel electron identification and reconstruction. \n
+     It takes a list of clusters as an input where each cluster is represented as       \n
+     a collection of michel::HitPt. Internally each cluster is converted into another   \n
+     cluster representation michel::MichelCluster. Then a chain of following algorithms \n
+     are applied to reconstruct michel electron(s):                                     \n
+                                                                                        \n
+     1) Input cluster merging                                                           \n
+     2) Muon/Michel bounary finding                                                     \n
+     3) Michel cluster ID                                                               \n
+     4) Michel re-clustering                                                            \n
+                                                                                        \n
+     in a consecutive order.
   */
   class MichelReco{
     
@@ -72,10 +83,6 @@ namespace michel {
     size_t _min_nhits; ///< MichelCluster's min # hits to claim a cluster
     /// Verbosity
     msg::MSGLevel_t _verbosity;
-    /// Algorithms to be executed
-    std::vector< michel::BaseMichelAlgo* > _alg_v;
-    /// Analysis to be executed
-    std::vector< michel::MichelAnaBase* > _ana_v;
     /// Input clusters
     MichelClusterArray _input_v;
     /// Output clusters
@@ -83,9 +90,15 @@ namespace michel {
     //
     // Algorithms
     //
-    BaseAlgMerger*     _alg_merge;    ///< Merging algorithm 
-    BaseAlgBoundary*   _alg_boundary; ///< Michel/Muon boundary finder algorithm
-    BaseAlgIdentifier* _alg_michel;   ///< Michel identification algorithm
+    BaseAlgMerger*        _alg_merge;          ///< Merging algorithm 
+    BaseAlgBoundary*      _alg_boundary;       ///< Michel/Muon boundary finder algorithm
+    BaseAlgMichelID*      _alg_michel_id;      ///< Michel identification algorithm
+    BaseAlgMichelCluster* _alg_michel_cluster; ///< Michel re-clustering algorithm
+    /// Algorithms to be executed
+    std::vector< michel::BaseMichelAlgo* > _alg_v;
+    /// Analysis to be executed
+    std::vector< michel::MichelAnaBase* > _ana_v;
+
     //
     // Time profilers
     //

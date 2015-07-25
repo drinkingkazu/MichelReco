@@ -1,9 +1,9 @@
 /**
- * \file ToyIdentifier.h
+ * \file ToyMichelID.h
  *
  * \ingroup MichelCluster
  * 
- * \brief Class def header for a class ToyIdentifier
+ * \brief Class def header for a class ToyMichelID
  *
  * @author kazuhiro
  */
@@ -11,23 +11,23 @@
 /** \addtogroup MichelCluster
 
     @{*/
-#ifndef MICHELCLUSTER_TOYIDENTIFIER_H
-#define MICHELCLUSTER_TOYIDENTIFIER_H
+#ifndef MICHELCLUSTER_TOYMICHELID_H
+#define MICHELCLUSTER_TOYMICHELID_H
 
-#include "Fmwk/BaseAlgIdentifier.h"
+#include "Fmwk/BaseAlgMichelID.h"
 namespace michel {
   /**
-     \class ToyIdentifier
+     \class ToyMichelID
   */
-  class ToyIdentifier : public BaseAlgIdentifier {
+  class ToyMichelID : public BaseAlgMichelID {
     
   public:
     
     /// Default constructor
-    ToyIdentifier(){}
+    ToyMichelID(){}
     
     /// Default destructor
-    ~ToyIdentifier(){}
+    ~ToyMichelID(){}
 
     /// Event resetter
     void EventReset();

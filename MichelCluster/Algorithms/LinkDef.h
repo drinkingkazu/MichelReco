@@ -11,7 +11,8 @@
 
 #pragma link C++ class michel::ToyMerger+;
 #pragma link C++ class michel::ToyBoundary+;
-#pragma link C++ class michel::ToyIdentifier+;
-
+#pragma link C++ class michel::ToyMichelID+;
+#pragma link C++ class michel::ToyMichelCluster+;
+#pragma link C++ class michel::EdgeMerger+;
 //ADD_NEW_CLASS ... do not change this line
 #endif

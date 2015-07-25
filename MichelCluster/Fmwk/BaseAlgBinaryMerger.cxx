@@ -18,7 +18,7 @@ namespace michel {
       ::cmtool::CMergeBookKeeper bk(result_v.size());
 
       // Compute the priority order & store in an ordered map
-      std::map<double,size_t> score_index_m;
+      std::multimap<double,size_t> score_index_m;
       for(size_t cluster_index=0; cluster_index<result_v.size(); ++cluster_index) {
 
 	auto const& cluster = result_v[cluster_index];

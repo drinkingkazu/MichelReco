@@ -8,10 +8,18 @@ namespace michel {
   //-----------------------------------------------------------------
   MichelReco::MichelReco()
   //-----------------------------------------------------------------
-    : _verbosity  ( msg::kNORMAL )
-    , _alg_v      ( kAlgoTypeMax, nullptr )
-    , _alg_time_v ( kAlgoTypeMax, 0.      )
-    , _alg_ctr_v  ( kAlgoTypeMax, 0       )
+    : _d_cutoff           ( 0.6 )
+    , _min_nhits          ( 10  )
+    , _verbosity          ( msg::kNORMAL )
+
+    , _alg_merge          ( nullptr )
+    , _alg_boundary       ( nullptr )
+    , _alg_michel_id      ( nullptr )
+    , _alg_michel_cluster ( nullptr )
+
+    , _alg_v        ( kAlgoTypeMax, nullptr )
+    , _alg_time_v   ( kAlgoTypeMax, 0.      )
+    , _alg_ctr_v    ( kAlgoTypeMax, 0       )
   {}
   
   //-----------------------------------------------------------------
@@ -31,9 +39,10 @@ namespace michel {
   //-----------------------------------------------------------------
   {
     switch(type) {
-    case kClusterMerger:  _alg_merge    = (BaseAlgMerger*)algo;     break;
-    case kBoundaryFinder: _alg_boundary = (BaseAlgBoundary*)algo;   break;
-    case kMichelFinder:   _alg_michel   = (BaseAlgIdentifier*)algo; break;
+    case kClusterMerger:  _alg_merge          = (BaseAlgMerger*)algo;        break;
+    case kBoundaryFinder: _alg_boundary       = (BaseAlgBoundary*)algo;      break;
+    case kMichelID:       _alg_michel_id      = (BaseAlgMichelID*)algo;      break;
+    case kMichelCluster:  _alg_michel_cluster = (BaseAlgMichelCluster*)algo; break;
     default:
       std::cerr << "\033[93m[ERROR]\033[00m "
 		<< "Unidentified algorithm type: " << type << std::endl;
@@ -112,15 +121,32 @@ namespace michel {
     //
     // Step 3 ... Identify michel/muon
     //
-    if(!_alg_michel) throw MichelException();
+    if(!_alg_michel_id) throw MichelException();
 
     _watch.Start();
     for(auto& cluster : _output_v)
 
-      cluster._michel = _alg_michel->Identify(cluster);
+      cluster._michel = _alg_michel_id->Identify(cluster);
 
-    _alg_time_v [kMichelFinder] += _watch.RealTime();
-    _alg_ctr_v  [kMichelFinder] += _output_v.size();
+    _alg_time_v [kMichelID] += _watch.RealTime();
+    _alg_ctr_v  [kMichelID] += _output_v.size();
+
+    //
+    // Step 4 ... Michel re-clustering
+    //
+    _watch.Start();
+    if(_alg_michel_cluster) {
+
+      std::vector<HitPt> empty_hits;
+      
+      for(auto& cluster : _output_v)
+
+	cluster._michel = _alg_michel_cluster->Cluster(cluster,empty_hits);
+      
+    }
+    
+    _alg_time_v [kMichelCluster] += _watch.RealTime();
+    _alg_ctr_v  [kMichelCluster] += _output_v.size();
     
     //
     // Finally call analyze
@@ -142,10 +168,16 @@ namespace michel {
   {
     for(auto& ana : _ana_v) ana->Finalize(fout);
 
+    double merge_time     = ( _alg_ctr_v[ kClusterMerger  ] ? _alg_time_v[ kClusterMerger  ] / ((double)(_alg_ctr_v[ kClusterMerger  ])) : 0 );
+    double boundary_time  = ( _alg_ctr_v[ kBoundaryFinder ] ? _alg_time_v[ kBoundaryFinder ] / ((double)(_alg_ctr_v[ kBoundaryFinder ])) : 0 );
+    double id_time        = ( _alg_ctr_v[ kMichelID       ] ? _alg_time_v[ kMichelID       ] / ((double)(_alg_ctr_v[ kMichelID       ])) : 0 );
+    double recluster_time = ( _alg_ctr_v[ kMichelCluster  ] ? _alg_time_v[ kMichelCluster  ] / ((double)(_alg_ctr_v[ kMichelCluster  ])) : 0 );
+
     std::cout << "=================== Time Report =====================" << std::endl
-	      << "Merging    Algo Time: " << _alg_time_v[ kClusterMerger  ] / ((double)(_alg_ctr_v[kClusterMerger]))  << " [s/event]" << std::endl
-	      << "Boudnary   Algo Time: " << _alg_time_v[ kBoundaryFinder ] / ((double)(_alg_ctr_v[kBoundaryFinder])) << " [s/event]" << std::endl
-	      << "Identifier Algo Time: " << _alg_time_v[ kMichelFinder   ] / ((double)(_alg_ctr_v[kMichelFinder]))   << " [s/event]" << std::endl
+	      << "Merging        Algo Time: " << merge_time     << " [s/cluster]" << std::endl
+	      << "Boudnary       Algo Time: " << boundary_time  << " [s/cluster]" << std::endl
+	      << "Michel ID      Algo Time: " << id_time        << " [s/cluster]" << std::endl
+	      << "Michel Cluster Algo Time: " << recluster_time << " [s/cluster]" << std::endl
 	      << "=====================================================" << std::endl
 	      << std::endl;
   }

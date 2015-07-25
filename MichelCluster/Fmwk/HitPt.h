@@ -15,11 +15,11 @@
 #define MICHELCLUSTER_HITPT_H
 
 #include "MichelConstants.h"
+#include "MichelTypes.h"
 namespace michel {
   /**
      \class HitPt
-     User defined class HitPt ... these comments are used to generate
-     doxygen documentation!
+     Represents 2D hit point
   */
   class HitPt{
     
@@ -37,9 +37,10 @@ namespace michel {
 
     double Dist(const HitPt& h) const;
 
-    double _q; ///< Charge in ADC*Ticks scale
-    double _w; ///< Wire in [cm] scale
-    double _t; ///< Time in [cm] scale
+    HitID_t _id; ///< Unique ID
+    double  _q;  ///< Charge in ADC*Ticks scale
+    double  _w;  ///< Wire in [cm] scale
+    double  _t;  ///< Time in [cm] scale
   };
 }
 #endif

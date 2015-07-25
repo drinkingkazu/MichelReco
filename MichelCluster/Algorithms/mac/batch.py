@@ -35,7 +35,10 @@ mgr.SetAlgo(michel.kClusterMerger, michel.ToyMerger())
 mgr.SetAlgo(michel.kBoundaryFinder, michel.ToyBoundary())
 
 # Attach algorithm for finding michel cluster
-mgr.SetAlgo(michel.kMichelFinder, michel.ToyIdentifier())
+mgr.SetAlgo(michel.kMichelID, michel.ToyMichelID())
+
+# Attach algorithm to recluster michel
+mgr.SetAlgo(michel.kMichelCluster, michel.ToyMichelCluster())
 
 # Attach ana unit
 my_proc.add_process(my_unit)

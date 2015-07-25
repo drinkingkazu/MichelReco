@@ -8,6 +8,9 @@ namespace michel {
   /// Type def for index address
   typedef size_t HitIdx_t;
 
+  /// Type def for hit ID
+  typedef size_t HitID_t;
+
   namespace msg {
     /// Verbosity message level
     enum MSGLevel_t {
@@ -23,7 +26,8 @@ namespace michel {
   enum AlgoType_t {
     kClusterMerger,
     kBoundaryFinder,
-    kMichelFinder,
+    kMichelID,
+    kMichelCluster,
     kAlgoTypeMax
   };
   
