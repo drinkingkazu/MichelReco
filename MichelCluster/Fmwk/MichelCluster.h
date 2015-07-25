@@ -75,7 +75,7 @@ namespace michel {
     
     /// Check if two clusters are touching 
     bool Touching (const MichelCluster& rhs,
-		   const double min_dist);
+		   const double min_dist) const;
 
     /// Find the closest hit to the reference from the cluster hit list
     const HitPt& ClosestHit(const HitPt& ref);
