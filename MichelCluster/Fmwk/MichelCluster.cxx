@@ -123,6 +123,10 @@ namespace michel {
     for(auto const& hit_index : _ordered_pts)
       ordered_hits.emplace_back(_hits[hit_index]);
     std::swap(ordered_hits,_hits);
+    
+    for(size_t i=0; i<_ordered_pts.size(); ++i)
+      _ordered_pts[i]=i;
+    
   }
 
   void MichelCluster::OrderPoints(size_t start_index,
