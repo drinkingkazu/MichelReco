@@ -11,7 +11,8 @@ namespace michel {
   
   Michel ForwardMichelID::Identify(const MichelCluster& cluster)
   {
-
+    
+    if(cluster._boundary == kINVALID_SIZE) { return Michel(); }
     //no check on cluster size here...
     
     //Hardcoded for now :)
@@ -19,7 +20,7 @@ namespace michel {
     double c_cutoff = 1.15;
     int    w_cutoff = 10;
     bool   forward;
-    int    idx = 0;
+    int    idx = -1;
     size_t the_michel_start; //index in ordered points that is the michel
     
     //get index in ordered_pts that is the boundary point
@@ -31,7 +32,7 @@ namespace michel {
     
     //Determines which point is the michel start    
     if(determine_forward(cluster,n_cutoff,c_cutoff,w_cutoff,forward)) {
-      
+      std::cout << "my idx before if(forward) is ... \n";
       if(forward) {
 	if(idx >= cluster._ordered_pts.size() - 1) {
 	  the_michel_start = idx;
@@ -56,24 +57,28 @@ namespace michel {
     
     Michel electron;
     std::vector<size_t> ordered_pts_idx;
-    
+    std::cout << "forward: " << forward << "\n";
+    std::cout << "the_michel_star: " << the_michel_start << std::endl;
+    std::cout << "size() of ordered_pts " << cluster._ordered_pts.size() << "\n";
     for( size_t i = 0 ; i < cluster._ordered_pts.size(); ++i) {
       if(forward)  {
 	if(i >= the_michel_start) {
-	  electron.push_back(cluster._ordered_pts[i]);
+	  electron.push_back(cluster._hits[cluster._ordered_pts[i]]);
 	  ordered_pts_idx.push_back(i);
 	}
       }
       else {
 	if(i <= the_michel_start)  {
-	  electron.push_back(cluster._ordered_pts[i]);
+	  electron.push_back(cluster._hits[cluster._ordered_pts[i]]);
 	  ordered_pts_idx.push_back(i);
 	}
       }
     }
+
     //Do same thing for muon (in future)
-    
+    std::cout << "ordered_pts_idx.size() : " << ordered_pts_idx.size() << "\n";
     auto length = determine_length(cluster,ordered_pts_idx); //true radius with no minimum
+    std::cout << "length          : " << length  << "\n";
     
     electron._length = length;
     electron._start  = cluster._hits[cluster._ordered_pts[the_michel_start]];
@@ -165,7 +170,7 @@ namespace michel {
   }
   
   double ForwardMichelID::determine_length(const MichelCluster& c,
-					   const std::vector<size_t> ordered_pts_idx) 
+					   const std::vector<size_t>& ordered_pts_idx) 
   {
     double length = 0;
     

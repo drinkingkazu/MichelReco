@@ -34,7 +34,7 @@ namespace michel {
     
     
     //With this new information, calculate the boundary point between possible muon end and michel start
-      
+    
     auto candidate_loc     = find_max(truncated_mean);
     auto dqdscandidate_loc = find_min(truncated_dqds); 
     
@@ -43,8 +43,9 @@ namespace michel {
       return kINVALID_SIZE;
     
     auto window_size = 20;
-    auto left  = cluster._ordered_pts.size() - 1 - candidate_loc;
-    auto right = candidate_loc;
+    auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
+    auto left  = candidate_loc;
+    
     
     bool right_is_smaller;
     int iMin = 0;
@@ -68,12 +69,11 @@ namespace michel {
       iMin = candidate_loc - left;
       
       if(iMax >= cluster._ordered_pts.size()) iMax = cluster._ordered_pts.size() - 1;
-      
     }
     
     auto k   = 0.0;
     auto idx = 0;
-    
+    //std::cout << "imin: " << iMin << " ~~ imax " << iMax << "\n";
     for(int w = iMin; w <= iMax; ++w) {
       auto c = cluster._hits[cluster._ordered_pts[w]]._q;
       if(c > k) { k = c; idx = w; }
@@ -114,12 +114,13 @@ namespace michel {
     std::vector<double> tdqds;
     tdqds.reserve(tmeans.size());
     
+    if(tmeans.size()) return tdqds;
     for(int o = 0; o < s; ++o) tdqds.push_back(0.0);
     
     //do smooth differentiation
     for(int i = s; i < tmeans.size() - s + 1; ++i) {
-      std::vector<double> f(tmeans.begin() + i - s,tmeans.begin() + i + s);
-      std::vector<double> x(_dist.begin() + i - s,_dist.begin() + i + s);
+      std::vector<double> f(tmeans.begin() + i - s, tmeans.begin() + i + s);
+      std::vector<double> x(_dist.begin() + i - s , _dist.begin() + i + s );
       tdqds.push_back(do_smooth_derive(f,x,2*s+1));
     }
     for(int o = 0; o < s; ++o) tdqds.push_back(0.0);
@@ -157,14 +158,17 @@ namespace michel {
 
     for(const auto& o : cluster._ordered_pts)
       charge.push_back(cluster._hits[o]._q);
-    
-    
+
+    std::cout << "I have some good charges for you... ";
+    for(const auto& c : charge)
+	std::cout << " " << c << ", ";
+      std::cout << std::endl;
+
     for(auto window : get_windows(charge,_n_window_size) ) {
       if(window.size() > window_cutoff) 
 	cut(window,p_above);
       truncatedQ.push_back(calc_mean(window));
     }
-    
     return truncatedQ;
   }
   

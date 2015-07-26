@@ -37,7 +37,7 @@ namespace michel {
 
   private:
     double determine_length(const MichelCluster& c,
-			    const std::vector<size_t> ordered_pts_idx);
+			    const std::vector<size_t>& ordered_pts_idx);
     
     bool determine_forward(const MichelCluster& cluster,
 			   const double n_cutoff,
