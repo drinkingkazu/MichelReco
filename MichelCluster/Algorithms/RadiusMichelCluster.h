@@ -1,9 +1,9 @@
 /**
- * \file ToyMichelCluster.h
+ * \file RadiusMichelCluster.h
  *
  * \ingroup MichelCluster
  * 
- * \brief Class def header for a class ToyMichelCluster
+ * \brief Class def header for a class RadiusMichelCluster
  *
  * @author kazuhiro
  */
@@ -11,29 +11,29 @@
 /** \addtogroup MichelCluster
 
     @{*/
-#ifndef TOYMICHELCLUSTER_H
-#define TOYMICHELCLUSTER_H
+#ifndef RADIUSMICHELCLUSTER_H
+#define RADIUSMICHELCLUSTER_H
 
 #include "Fmwk/BaseAlgMichelCluster.h"
 namespace michel {
   /**
-     \class ToyMichelCluster
+     \class RadiusMichelCluster
   */
-  class ToyMichelCluster : public BaseAlgMichelCluster {
+  class RadiusMichelCluster : public BaseAlgMichelCluster {
     
   public:
     
     /// Default constructor
-    ToyMichelCluster(){}
+    RadiusMichelCluster(){}
     
     /// Default destructor
-    ~ToyMichelCluster(){}
+    ~RadiusMichelCluster(){}
 
     /// Event re-setter
     void EventReset();
 
     /// Re-cluster michel electrons w/ un-used hits
-    void Cluster(Michel& michel,
+    void Cluster(Michel& cluster,
 		 const std::vector<HitPt>& hits);
     
   };

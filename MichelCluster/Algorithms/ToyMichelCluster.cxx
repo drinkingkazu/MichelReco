@@ -8,9 +8,9 @@ namespace michel {
   void ToyMichelCluster::EventReset()
   {}
   
-  Michel ToyMichelCluster::Cluster(const MichelCluster& cluster,
-				   const std::vector<HitPt>& hits)
-  { return cluster._michel; }
+  void ToyMichelCluster::Cluster(Michel& michel,
+				 const std::vector<HitPt>& hits)
+  {}
 
 }
 #endif

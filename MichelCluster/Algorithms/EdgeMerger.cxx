@@ -4,13 +4,15 @@
 #include "EdgeMerger.h"
 
 namespace michel{
-
+  
   void EdgeMerger::EventReset()
   {}
 
   bool EdgeMerger::Merge(const MichelCluster& a, const MichelCluster& b)
   {
     //Do not currently have confiure function yet, just use "6 [cm]" dist as before..."
+    std::cout << "im having fun merging ^^\n";
+    
     return Touching(a,b,6);
   }
 

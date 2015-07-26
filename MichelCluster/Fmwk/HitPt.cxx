@@ -7,10 +7,12 @@ namespace michel {
 
   HitPt::HitPt(const double q,
 	       const double w,
-	       const double t)
-    : _q(q)
-    , _w(w)
-    , _t(t)
+	       const double t,
+	       const size_t id)
+    : _id ( id )
+    , _q  ( q  )
+    , _w  ( w  )
+    , _t  ( t  )
   {}
   
   double HitPt::SqDist(const HitPt& h) const

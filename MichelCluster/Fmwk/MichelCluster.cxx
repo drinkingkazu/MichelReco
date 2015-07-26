@@ -22,7 +22,7 @@ namespace michel {
     ProcessHits();
   }
 
-  MichelCluster::MichelCluster(const std::vector<HitPt>&& hits,
+  MichelCluster::MichelCluster(std::vector<HitPt>&& hits,
 			       size_t min_nhits,
 			       double d_cutoff)
     : _hits(std::move(hits))
@@ -70,6 +70,12 @@ namespace michel {
     ProcessHits();
   }
 
+  void MichelCluster::SetHits(std::vector<HitPt>&& hits)
+  {
+    std::swap(_hits,hits);
+    ProcessHits();
+  }
+
   void MichelCluster::ProcessHits()
   {
     // Check if hit count
@@ -111,7 +117,12 @@ namespace michel {
     }
     _start = _hits[ _ordered_pts.front() ];
     _end   = _hits[ _ordered_pts.back()  ];
-    
+
+    std::vector<HitPt> ordered_hits;
+    ordered_hits.reserve(_ordered_pts.size());
+    for(auto const& hit_index : _ordered_pts)
+      ordered_hits.emplace_back(_hits[hit_index]);
+    std::swap(ordered_hits,_hits);
   }
 
   void MichelCluster::OrderPoints(size_t start_index,
@@ -166,7 +177,6 @@ namespace michel {
 	min_dist  = sq_dist;
 	min_index = h_index;
       }
-
       // If min_dist is above the cut-off, break
       if(min_dist > _d_cutoff) break;
 
@@ -174,8 +184,8 @@ namespace michel {
       ordered_index_v.push_back(min_index);
       ds_v.push_back ( sqrt(min_dist)           );
       s_v.push_back  ( s_v.back() + ds_v.back() );
+      used_v[min_index] = true;
     }
-
     // Verbosity report
     if( _verbosity <= msg::kINFO ) {
       // INFO level prints out where it starts & # points

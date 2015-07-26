@@ -8,7 +8,7 @@ namespace michel {
   //-----------------------------------------------------------------
   MichelReco::MichelReco()
   //-----------------------------------------------------------------
-    : _d_cutoff           ( 0.6 )
+    : _d_cutoff           ( 3.6 )
     , _min_nhits          ( 10  )
     , _verbosity          ( msg::kNORMAL )
 
@@ -30,7 +30,43 @@ namespace michel {
     MichelCluster cluster(_min_nhits, _d_cutoff);
     cluster.SetVerbosity(_verbosity);
     cluster.SetHits(hit_v);
+    if(cluster._hits.empty()) return;
     _input_v.emplace_back(cluster);
+  }
+
+  //---------------------------------------------------------
+  void MichelReco::Append(std::vector<michel::HitPt>&& hit_v)
+  //---------------------------------------------------------
+  {
+    if(hit_v.size() < _min_nhits) return;
+    MichelCluster cluster(std::move(hit_v), _min_nhits, _d_cutoff);
+    cluster.SetVerbosity(_verbosity);
+    if(cluster._hits.empty()) return;
+    _input_v.emplace_back(cluster);
+  }
+
+  //---------------------------------------------------------------------------
+  void MichelReco::RegisterAllHits(const std::vector<michel::HitPt>& all_hit_v)
+  //---------------------------------------------------------------------------
+  {
+    if(all_hit_v.empty()){
+      std::cerr << "\033[93m[ERROR]\033[00m cannot have hit & marker list w/ different length..."
+		<< std::endl;
+      throw MichelException();
+    }
+    _all_hit_v = all_hit_v;
+  }
+
+  //-----------------------------------------------------------------
+  void MichelReco::RegisterAllHits(std::vector<michel::HitPt>&& all_hit_v)
+  //-----------------------------------------------------------------
+  {
+    if(all_hit_v.empty()){
+      std::cerr << "\033[93m[ERROR]\033[00m cannot have hit & marker list w/ different length..."
+		<< std::endl;
+      throw MichelException();
+    }
+    std::swap(_all_hit_v,all_hit_v);
   }
   
   //-----------------------------------------------------------------
@@ -89,6 +125,15 @@ namespace michel {
   {
     // If nothing to be done, return
     if(_input_v.empty()) return;
+
+    // make sure hit vectors provided & cluster list (another hit arrays) are consistent
+    _used_hit_marker_v.resize(_all_hit_v.size(),false);
+    for(size_t i=0; i<_used_hit_marker_v.size(); ++i) {
+      if(_all_hit_v[i]._id != 2) 
+	_used_hit_marker_v[i] = true;
+      else
+	_used_hit_marker_v[i] = false;
+    }
     
     //
     // Step 1 ... merge clusters
@@ -102,6 +147,23 @@ namespace michel {
       _output_v = _alg_merge->Merge(_input_v);
       _alg_time_v [kClusterMerger] += _watch.RealTime();
       _alg_ctr_v  [kClusterMerger] += _input_v.size();
+    }
+
+    // Update "used hits" list
+    for(auto const& cluster : _output_v) {
+      
+      for(auto const& hit_pt : cluster._hits) {
+
+	if(hit_pt._id >= _used_hit_marker_v.size()) {
+
+	  std::cerr << "\033[93m[ERROR]\033[00m "
+		    << "Found a hit index out of range! "
+		    << hit_pt._id << " out of " << _used_hit_marker_v.size()
+		    << std::endl;
+	  throw MichelException();
+	}
+	_used_hit_marker_v[hit_pt._id] = true;
+      }
     }
 
     //
@@ -135,13 +197,21 @@ namespace michel {
     // Step 4 ... Michel re-clustering
     //
     _watch.Start();
-    if(_alg_michel_cluster) {
+    if(_alg_michel_cluster) {      
 
-      std::vector<HitPt> empty_hits;
-      
-      for(auto& cluster : _output_v)
+      size_t ctr = 0;
+      for(auto& cluster : _output_v) {
 
-	cluster._michel = _alg_michel_cluster->Cluster(cluster,empty_hits);
+	std::vector<HitPt> available_hits_v;
+	for( auto const& v : _used_hit_marker_v ) if(v) ++ctr;
+	available_hits_v.reserve(ctr);
+	for(size_t hit_index=0; hit_index<_all_hit_v.size(); ++hit_index)
+
+	  if(!_used_hit_marker_v[hit_index]) available_hits_v.push_back(_all_hit_v[hit_index]);
+	
+	_alg_michel_cluster->Cluster(cluster._michel,available_hits_v);
+
+      }
       
     }
     
@@ -175,11 +245,12 @@ namespace michel {
     double id_time        = ( _alg_ctr_v[ kMichelID       ] ? _alg_time_v[ kMichelID       ] / ((double)(_alg_ctr_v[ kMichelID       ])) : 0 );
     double recluster_time = ( _alg_ctr_v[ kMichelCluster  ] ? _alg_time_v[ kMichelCluster  ] / ((double)(_alg_ctr_v[ kMichelCluster  ])) : 0 );
 
-    std::cout << "=================== Time Report =====================" << std::endl
-	      << "Merging        Algo Time: " << merge_time     << " [s/cluster]" << std::endl
-	      << "Boudnary       Algo Time: " << boundary_time  << " [s/cluster]" << std::endl
-	      << "Michel ID      Algo Time: " << id_time        << " [s/cluster]" << std::endl
-	      << "Michel Cluster Algo Time: " << recluster_time << " [s/cluster]" << std::endl
+    std::cout << std::endl
+	      << "=================== Time Report =====================" << std::endl
+	      << "  Merging        Algo Time: " << merge_time*1.e6     << " [us/cluster]" << std::endl
+	      << "  Boudnary       Algo Time: " << boundary_time*1.e6  << " [us/cluster]" << std::endl
+	      << "  Michel ID      Algo Time: " << id_time*1.e6        << " [us/cluster]" << std::endl
+	      << "  Michel Cluster Algo Time: " << recluster_time*1.e6 << " [us/cluster]" << std::endl
 	      << "=====================================================" << std::endl
 	      << std::endl;
   }

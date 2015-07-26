@@ -46,7 +46,7 @@ namespace michel {
     //MichelCluster(const MichelCluster& rhs) = default;
     
     /// Alternative ctor from hit list reference
-    MichelCluster(const std::vector<HitPt>&&,
+    MichelCluster(std::vector<HitPt>&&,
 		  size_t min_nhits = 0,
 		  double d_cutoff  = kMAX_DOUBLE );
     
@@ -59,6 +59,11 @@ namespace michel {
 
     /// Hit list setter
     void SetHits(const std::vector<michel::HitPt>& hits);
+
+#ifndef __CINT__
+    /// Hit list setter
+    void SetHits(std::vector<michel::HitPt>&& hits);
+#endif
 
     /// Verbosity level
     void SetVerbosity(msg::MSGLevel_t level)
@@ -89,7 +94,7 @@ namespace michel {
 
     // Ordered per-hit or in-between-hit quantities
     std::vector<HitIdx_t> _ordered_pts; ///< Distance ordered points
-    std::vector<double>   _ds_v;        ///< Distance in-between neighboring hits (follows _ordered_pts) 
+    std::vector<double>   _ds_v;        ///< Distance in-between neighboring hits (follows _ordered_pts)
     std::vector<double>   _s_v;         ///< Cumulative neighboring distance between hits
 
     //

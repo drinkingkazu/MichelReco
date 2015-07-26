@@ -22,7 +22,7 @@ namespace michel {
   /**
      \class Michel
   */
-  class Michel : public std::vector<michel::HitIdx_t> {
+  class Michel : public std::vector<michel::HitPt> {
 
   public:
 

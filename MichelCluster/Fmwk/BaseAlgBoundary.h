@@ -31,7 +31,7 @@ namespace michel {
     virtual ~BaseAlgBoundary(){}
 
     /// A function to identify a michel's boundary point
-    virtual HitIdx_t Boundary(const MichelCluster& cluster) = 0;
+    virtual HitIdx_t Boundary(MichelCluster& cluster) = 0;
     
   };
 }

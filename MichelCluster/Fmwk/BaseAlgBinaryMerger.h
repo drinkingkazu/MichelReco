@@ -34,10 +34,10 @@ namespace michel {
 
     /// Merge function to assign a pair-wise score for a decision making (TO BE IMPLEMENTED)
     virtual bool Merge(const MichelCluster& a, const MichelCluster& b) = 0;
-
+    
     /// Priority function assign a priority ordering for a merging function to be called (TO BE IMPLEMENTED)
     virtual double Priority(const MichelCluster& cluster) = 0;
-
+    
     /// Recursive merge flag
     void Recursive(bool doit)
     { _recursive = doit; }      
