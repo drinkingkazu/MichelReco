@@ -47,8 +47,8 @@ namespace larlite {
 
 	auto const& h = (*ev_hit)[hit_index];
 
-	if(h.WireID().Plane != 2) break;
-
+	if(h.WireID().Plane != 2) continue;
+	
 	michel_cluster.emplace_back( h.Integral(),
 				     h.WireID().Wire * 0.3,
 				     (h.PeakTime() - 3200) * 0.0802814 );

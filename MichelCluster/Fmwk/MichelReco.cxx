@@ -160,6 +160,8 @@ namespace michel {
   {
     for(auto& alg : _alg_v) if(alg) alg->EventReset();
     for(auto& ana : _ana_v) ana->EventReset();
+    _input_v.clear();
+    _output_v.clear();
   }
 
   //-----------------------------------------------------------------
