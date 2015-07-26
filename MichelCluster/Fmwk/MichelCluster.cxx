@@ -51,7 +51,7 @@ namespace michel {
     , _d_cutoff  ( rhs._d_cutoff  )
   {}
   */
-  void MichelCluster::Dump()
+  void MichelCluster::Dump() const
   {
     std::cout << "\t\n==start dump==\n";
     std::cout << "A cluster with " << _hits.size() << " hits \n";

@@ -8,7 +8,7 @@ namespace michel {
   void MaxQBoundary::EventReset()
   {}
     
-  HitIdx_t MaxQBoundary::Boundary(const MichelCluster& cluster)
+  HitIdx_t MaxQBoundary::Boundary(MichelCluster& cluster)
   { 
     
     std::vector<double> charges;

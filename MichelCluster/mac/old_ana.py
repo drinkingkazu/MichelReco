@@ -28,6 +28,8 @@ my_unit.SetClusterProducer("fuzzycluster")
 # Get manager for michel reco
 mgr = my_unit.Algo()
 
+#mgr.SetVerbosity(michel.msg.kDEBUG)
+
 # Attach algorithm for merging
 mgr.SetAlgo(michel.kClusterMerger, 
             michel.EdgeMerger())
@@ -45,14 +47,25 @@ mgr.SetAlgo(michel.kMichelCluster,
             michel.RadiusMichelCluster())
 
 # Attach ana unit
+
+mgr.AddAna(michel.AhoAna())
+
+# add process to get moving
 my_proc.add_process(my_unit)
+
+
+#Write aho unit to get out MC vars whatever
+
+# aho_ana=fmwk.AhoAna()
+# my_proc.add_process(aho_ana)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run();
+#my_proc.run(145,5);
+my_proc.run()
 
 # done!
 print

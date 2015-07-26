@@ -10,27 +10,32 @@ namespace michel {
   
   void RadiusMichelCluster::Cluster(Michel& michel,
 				    const std::vector<HitPt>& hits){
-
+    
+    //This michel was bogus when it came in, don't cluster further
     if (michel.size() == 0) return;
 
+    
     double min_radius = 10; //hardcoded for now
     double radius = michel._length;
     
     //set to min rad
-    if (radius < min_radius)
-      radius = min_radius;
+    if (radius < min_radius) radius = min_radius;
     
+    auto michel_start = michel._start;
     
-    
-    HitPt michel_start = michel._start; //probably want to move to end...
-
-    for (const auto& thishit: hits){
-      //if within circle, include in michel
-      if (michel_start.SqDist(thishit) <= radius * radius){
+    for (const auto& thishit: hits)
+      if (michel_start.SqDist(thishit) <= radius * radius)
 	michel.push_back(thishit);
-      }
-    }
+    
+    
+
+    michel._charge = 0;
+    
+    for(const auto& michel_hit : michel)
+      michel._charge += michel_hit._q;
+    
   }
+
 
 
 }

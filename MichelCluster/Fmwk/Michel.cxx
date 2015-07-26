@@ -23,9 +23,9 @@ namespace michel {
   {}
 
 
-  void Michel::Dump() {
+  void Michel::Dump() const {
     std::cout << "\n\t -- Start Michel --\n";
-    std::cout << "\tenergy : " << _charge << " length: " << _length << "\n";
+    std::cout << "\tenergy : " << _energy << " length: " << _length << " charge " << _charge << "\n";
     std::cout << "\tat position : (" << _start._w << "," << _start._t << ")" << std::endl;
     std::cout << "\twith number of hits " << this->size() << std::endl;
     std::cout << "\t -- End Michel --\n";

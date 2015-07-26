@@ -33,8 +33,8 @@ namespace michel {
     void EventReset();
     
     /// A function to identify a michel's boundary point
-    HitIdx_t Boundary(const MichelCluster& cluster);
-    
+    HitIdx_t Boundary(MichelCluster& cluster);
+
   private:
     size_t find_max(const std::vector<double>& data);
 

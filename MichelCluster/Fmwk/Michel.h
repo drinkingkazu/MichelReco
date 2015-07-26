@@ -42,7 +42,7 @@ namespace michel {
     double _length;
     HitPt  _start;
     
-    void Dump();
+    void Dump() const;
   };
 }
 

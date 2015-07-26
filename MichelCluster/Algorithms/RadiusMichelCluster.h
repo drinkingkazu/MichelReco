@@ -15,6 +15,7 @@
 #define RADIUSMICHELCLUSTER_H
 
 #include "Fmwk/BaseAlgMichelCluster.h"
+
 namespace michel {
   /**
      \class RadiusMichelCluster

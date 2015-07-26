@@ -82,7 +82,7 @@ namespace michel {
     const HitPt& ClosestHit(const HitPt& ref);
 
     /// Dumps information about this cluster
-    void Dump();
+    void Dump() const;
 
     //
     // Data attributes

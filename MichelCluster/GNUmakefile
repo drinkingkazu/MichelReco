@@ -1,4 +1,4 @@
-SUBDIRS := Fmwk Algorithms
+SUBDIRS := Fmwk Algorithms Ana
 
 .phony: all clean
 
