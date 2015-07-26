@@ -177,7 +177,6 @@ namespace michel {
 	min_dist  = sq_dist;
 	min_index = h_index;
       }
-
       // If min_dist is above the cut-off, break
       if(min_dist > _d_cutoff) break;
 
@@ -185,8 +184,8 @@ namespace michel {
       ordered_index_v.push_back(min_index);
       ds_v.push_back ( sqrt(min_dist)           );
       s_v.push_back  ( s_v.back() + ds_v.back() );
+      used_v[min_index] = true;
     }
-
     // Verbosity report
     if( _verbosity <= msg::kINFO ) {
       // INFO level prints out where it starts & # points
