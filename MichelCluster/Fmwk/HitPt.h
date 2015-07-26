@@ -16,6 +16,7 @@
 
 #include "MichelConstants.h"
 #include "MichelTypes.h"
+#include <string>
 namespace michel {
   /**
      \class HitPt
@@ -37,6 +38,8 @@ namespace michel {
     double SqDist(const HitPt& h) const;
 
     double Dist(const HitPt& h) const;
+
+    std::string Print() const;
 
     HitID_t _id; ///< Unique ID
     double  _q;  ///< Charge in ADC*Ticks scale

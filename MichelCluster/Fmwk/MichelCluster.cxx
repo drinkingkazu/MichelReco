@@ -19,6 +19,7 @@ namespace michel {
     , _min_nhits ( min_nhits )
     , _d_cutoff  ( d_cutoff  )
   {
+    _verbosity = msg::kNORMAL;
     ProcessHits();
   }
 
@@ -29,6 +30,7 @@ namespace michel {
     , _min_nhits ( min_nhits )
     , _d_cutoff  ( d_cutoff  )
   {
+    _verbosity = msg::kNORMAL;
     ProcessHits();
   }
   /*
@@ -79,8 +81,14 @@ namespace michel {
   void MichelCluster::ProcessHits()
   {
     // Check if hit count
-    if(_hits.size() < _min_nhits)
+    if(_hits.size() < _min_nhits) {
+      std::cerr << "\033[93m[ERROR]\033[00m "
+		<< "<<" << __FUNCTION__ << ">> " 
+		<< "Number of hit ("<< _hits.size() 
+		<< ") is smaller than required (" 
+		<< _min_nhits << ")" << std::endl;
       throw MichelException();
+    }
 
     // Find min/max hits in terms of wire position
     size_t min_index = kINVALID_SIZE;
@@ -98,9 +106,12 @@ namespace michel {
       }
     }
     // Check index validity
-    if(min_index == kINVALID_SIZE || max_index == kINVALID_SIZE)
+    if(min_index == kINVALID_SIZE || max_index == kINVALID_SIZE) {
+      std::cerr << "\033[93m[ERROR]\033[00m <<" << __FUNCTION__ << ">> "
+		<< "Did not find valid edge points..."
+		<< std::endl;
       throw MichelException();
-
+    }
     //order the points right => left
     OrderPoints(min_index, _ordered_pts, _ds_v, _s_v);
 
@@ -140,8 +151,12 @@ namespace michel {
     
     if(_hits.empty()) return;
 
-    if(start_index >= _hits.size())
+    if(start_index >= _hits.size()) {
+      std::cerr << "\033[93m[ERROR]\033[00m <<" << __FUNCTION__ << ">> "
+		<< "Start index (" << start_index << ") is >= hit length "
+		<< "(" << _hits.size() << ")" << std::endl;
       throw MichelException();
+    }
 
     // Result holder, reserve max possible entries
     ordered_index_v.reserve(_hits.size());
@@ -250,7 +265,12 @@ namespace michel {
       }
     }
 
-    if(min_index == kINVALID_SIZE) throw MichelException();
+    if(min_index == kINVALID_SIZE) {
+      std::cerr << "\033[93m[ERROR]\033[00m <<" << __FUNCTION__ << ">> "
+		<< "Did not find the closest hit point to the reference (ref ID="
+		<< ref._id << ")" << std::endl;
+      throw MichelException();
+    }
 
     return _hits[min_index];
   }

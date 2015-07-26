@@ -118,7 +118,7 @@ namespace michel {
     /// Algorithms to be executed
     std::vector< michel::BaseMichelAlgo* > _alg_v;
     /// Analysis to be executed
-    std::vector< michel::MichelAnaBase* > _ana_v;
+    std::vector< michel::MichelAnaBase* >  _ana_v;
 
     //
     // Time profilers

@@ -159,11 +159,6 @@ namespace michel {
     for(const auto& o : cluster._ordered_pts)
       charge.push_back(cluster._hits[o]._q);
 
-    std::cout << "I have some good charges for you... ";
-    for(const auto& c : charge)
-	std::cout << " " << c << ", ";
-      std::cout << std::endl;
-
     for(auto window : get_windows(charge,_n_window_size) ) {
       if(window.size() > window_cutoff) 
 	cut(window,p_above);

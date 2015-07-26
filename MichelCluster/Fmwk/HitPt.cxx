@@ -3,6 +3,8 @@
 
 #include "HitPt.h"
 #include <cmath>
+#include <sstream>
+
 namespace michel {
 
   HitPt::HitPt(const double q,
@@ -20,5 +22,15 @@ namespace michel {
   
   double HitPt::Dist(const HitPt& h) const
   { return sqrt(SqDist(h)); }
+
+  std::string HitPt::Print() const
+  {
+    std::stringstream ss;
+    ss << " ID : " << _id << " ... "
+       << " Q = " << _q << " : "
+       << " W = " << _w << " : "
+       << " T = " << _t << std::endl;
+    return ss.str();
+  }
 }
 #endif

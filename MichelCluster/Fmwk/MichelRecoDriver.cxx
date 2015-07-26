@@ -15,6 +15,8 @@ namespace larlite {
     
     _tree = new TTree("tree","");
 
+    _mgr.Initialize();
+
     return true;
   }
   

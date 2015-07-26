@@ -30,7 +30,7 @@ namespace michel {
     MichelCluster cluster(_min_nhits, _d_cutoff);
     cluster.SetVerbosity(_verbosity);
     cluster.SetHits(hit_v);
-    if(cluster._hits.empty()) return;
+    if(cluster._hits.size() < _min_nhits) return;
     _input_v.emplace_back(cluster);
   }
 
@@ -41,7 +41,7 @@ namespace michel {
     if(hit_v.size() < _min_nhits) return;
     MichelCluster cluster(std::move(hit_v), _min_nhits, _d_cutoff);
     cluster.SetVerbosity(_verbosity);
-    if(cluster._hits.empty()) return;
+    if(cluster._hits.size() < _min_nhits) return;
     _input_v.emplace_back(cluster);
   }
 
@@ -123,6 +123,10 @@ namespace michel {
   void MichelReco::Process()
   //-----------------------------------------------------------------
   {
+    if(_verbosity <= msg::kDEBUG)
+
+      std::cout << "<<Process>> start!" << std::endl;
+
     // If nothing to be done, return
     if(_input_v.empty()) return;
 
@@ -134,6 +138,10 @@ namespace michel {
       else
 	_used_hit_marker_v[i] = false;
     }
+
+    if(_verbosity <= msg::kDEBUG)
+
+      std::cout << "<<Process>> running kClusterMerge..." << std::endl;
     
     //
     // Step 1 ... merge clusters
@@ -156,7 +164,7 @@ namespace michel {
 
 	if(hit_pt._id >= _used_hit_marker_v.size()) {
 
-	  std::cerr << "\033[93m[ERROR]\033[00m "
+	  std::cout << "\033[93m[ERROR]\033[00m "
 		    << "Found a hit index out of range! "
 		    << hit_pt._id << " out of " << _used_hit_marker_v.size()
 		    << std::endl;
@@ -165,6 +173,10 @@ namespace michel {
 	_used_hit_marker_v[hit_pt._id] = true;
       }
     }
+
+    if(_verbosity <= msg::kDEBUG)
+
+      std::cout << "<<Process>> running kBoundayFinder..." << std::endl;
 
     //
     // Step 2 ... find muon/michel boundary
@@ -180,6 +192,10 @@ namespace michel {
     _alg_time_v [kBoundaryFinder] += _watch.RealTime();
     _alg_ctr_v  [kBoundaryFinder] += _output_v.size();
 
+    if(_verbosity <= msg::kDEBUG)
+
+      std::cout << "<<Process>> running kMichelID..." << std::endl;
+
     //
     // Step 3 ... Identify michel/muon
     //
@@ -192,6 +208,10 @@ namespace michel {
 
     _alg_time_v [kMichelID] += _watch.RealTime();
     _alg_ctr_v  [kMichelID] += _output_v.size();
+
+    if(_verbosity <= msg::kDEBUG)
+
+      std::cout << "<<Process>> running kMichelCluster..." << std::endl;
 
     //
     // Step 4 ... Michel re-clustering
@@ -222,6 +242,10 @@ namespace michel {
     // Finally call analyze
     //
     for(auto& ana : _ana_v) ana->Analyze(_input_v,_output_v);
+
+    if(_verbosity <= msg::kDEBUG)
+
+      std::cout << "<<Process>> end!" << std::endl;
   }
   
   //-----------------------------------------------------------------

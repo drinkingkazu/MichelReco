@@ -32,7 +32,6 @@ namespace michel {
     
     //Determines which point is the michel start    
     if(determine_forward(cluster,n_cutoff,c_cutoff,w_cutoff,forward)) {
-      std::cout << "my idx before if(forward) is ... \n";
       if(forward) {
 	if(idx >= cluster._ordered_pts.size() - 1) {
 	  the_michel_start = idx;
@@ -57,9 +56,7 @@ namespace michel {
     
     Michel electron;
     std::vector<size_t> ordered_pts_idx;
-    std::cout << "forward: " << forward << "\n";
-    std::cout << "the_michel_star: " << the_michel_start << std::endl;
-    std::cout << "size() of ordered_pts " << cluster._ordered_pts.size() << "\n";
+
     for( size_t i = 0 ; i < cluster._ordered_pts.size(); ++i) {
       if(forward)  {
 	if(i >= the_michel_start) {
@@ -76,9 +73,7 @@ namespace michel {
     }
 
     //Do same thing for muon (in future)
-    std::cout << "ordered_pts_idx.size() : " << ordered_pts_idx.size() << "\n";
     auto length = determine_length(cluster,ordered_pts_idx); //true radius with no minimum
-    std::cout << "length          : " << length  << "\n";
     
     electron._length = length;
     electron._start  = cluster._hits[cluster._ordered_pts[the_michel_start]];

@@ -11,8 +11,15 @@ namespace michel{
   bool EdgeMerger::Merge(const MichelCluster& a, const MichelCluster& b)
   {
     //Do not currently have confiure function yet, just use "6 [cm]" dist as before..."
-    std::cout << "im having fun merging ^^\n";
-    
+    if(_verbosity <=  msg::kDEBUG) {
+      std::cout << "Cluster A start/end:" << std::endl
+		<< a._start.Print().c_str() << std::endl
+		<< a._end.Print().c_str() << std::endl;
+      std::cout << "Cluster B start/end:" << std::endl
+		<< b._start.Print().c_str() << std::endl
+		<< b._end.Print().c_str() << std::endl
+		<< std::endl;
+    }
     return Touching(a,b,6);
   }
 
@@ -28,8 +35,8 @@ namespace michel{
 			     const MichelCluster& rhs,
 			     const double min_dist) const
   {
-    return ( lhs._start.Dist(rhs._end)   < min_dist ||
-	     lhs._end.Dist  (rhs._start) < min_dist );
+    return  ( lhs._start.Dist(rhs._end)   < min_dist ||
+	      lhs._end.Dist  (rhs._start) < min_dist );
   }
   
 }
