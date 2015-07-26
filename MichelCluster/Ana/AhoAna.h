@@ -16,6 +16,8 @@
 
 #include "Fmwk/MichelAnaBase.h"
 
+#include "TTree.h"
+
 namespace michel {
   /**
      \class AhoAna
@@ -44,9 +46,14 @@ namespace michel {
     
     /// Finalize
     void Finalize(TFile* fout);
-
+    
     
   protected:
+    
+    TTree* _out_tree;
+    double _largest_cluster_charge;
+    double _n_hits_in_largest_cluster;
+    double _n_hits_in_largest_cluster_michel;
 
   };
 }
