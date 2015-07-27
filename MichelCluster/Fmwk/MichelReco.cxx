@@ -123,8 +123,8 @@ namespace michel {
   void MichelReco::Process()
   //-----------------------------------------------------------------
   {
+   	
     if(_verbosity <= msg::kDEBUG)
-
       std::cout << "<<Process>> start!" << std::endl;
 
     // If nothing to be done, return
@@ -133,7 +133,7 @@ namespace michel {
     // make sure hit vectors provided & cluster list (another hit arrays) are consistent
     _used_hit_marker_v.resize(_all_hit_v.size(),false);
     for(size_t i=0; i<_used_hit_marker_v.size(); ++i) {
-      if(_all_hit_v[i]._id != 2) 
+      if(_all_hit_v[i]._pl != 2) //check plane
 	_used_hit_marker_v[i] = true;
       else
 	_used_hit_marker_v[i] = false;
@@ -156,10 +156,10 @@ namespace michel {
       _alg_time_v [kClusterMerger] += _watch.RealTime();
       _alg_ctr_v  [kClusterMerger] += _input_v.size();
     }
-
+    
     // Update "used hits" list
     for(auto const& cluster : _output_v) {
-      
+     
       for(auto const& hit_pt : cluster._hits) {
 
 	if(hit_pt._id >= _used_hit_marker_v.size()) {
@@ -173,7 +173,7 @@ namespace michel {
 	_used_hit_marker_v[hit_pt._id] = true;
       }
     }
-
+    
     if(_verbosity <= msg::kDEBUG)
 
       std::cout << "<<Process>> running kBoundayFinder..." << std::endl;
@@ -212,12 +212,30 @@ namespace michel {
     if(_verbosity <= msg::kDEBUG)
 
       std::cout << "<<Process>> running kMichelCluster..." << std::endl;
+    
+    // vic - if we didn't find a michel
+    // Update "used hits" list
+    for(auto const& cluster : _output_v) {
+      
+      for(auto const& hit_pt : cluster._hits) {
+
+	if(hit_pt._id >= _used_hit_marker_v.size()) {
+
+	  std::cout << "\033[93m[ERROR]\033[00m "
+		    << "Found a hit index out of range! "
+		    << hit_pt._id << " out of " << _used_hit_marker_v.size()
+		    << std::endl;
+	  throw MichelException();
+	}
+	_used_hit_marker_v[hit_pt._id] = true;
+      }
+    }
 
     //
     // Step 4 ... Michel re-clustering
     //
     _watch.Start();
-    if(_alg_michel_cluster) {      
+    if(_alg_michel_cluster) {
 
       size_t ctr = 0;
       for(auto& cluster : _output_v) {

@@ -54,16 +54,12 @@ namespace michel {
     
     for(auto& output : output_cluster_v) {
       _number_of_clusters++;  
-      std::cout << "    " << output._hits.size() << "number of hits in this fuck\n";
-      std::cout << "size is " << sizE << "\n";
+
       if((int)output._hits.size() > sizE) {
 	charge_in_largest_cluster.clear();
 	truncated_charge_in_largest_cluster.clear();
 	truncated_dqds_in_largest_cluster.clear();
 	s.clear();
-	
-	std::cout << "before I do anything t_mean" << output._t_mean_v.size();
-	std::cout << "before I do anything t_dqds" << output._t_dqds_v.size();
 	
 	for(const auto& hits : output._hits)
 	  charge_in_largest_cluster.push_back(hits._q);
@@ -81,10 +77,6 @@ namespace michel {
 	// truncated_dqds_in_largest_cluster   = output._t_dqds_v;
 	// s                                   = output._s_v;
 	
-	std::cout << "s.size() " << s.size() << "\n";
-	std::cout << "trucnated_charge_in_largest_cluster.size() " << truncated_charge_in_largest_cluster.size() << "\n";
-	std::cout << "trucnated_dqds_in_largest_cluster.size() " << truncated_dqds_in_largest_cluster.size() << "\n";
-	std::cout << "im in here s,zize() "<<s.size() << "\n";
 	sizE = (int)output._hits.size();
 	
 	if(output._michel.size()) {
@@ -97,7 +89,7 @@ namespace michel {
     }
     
     //No real check on anything just fill it whatever
-    std::cout << "right before fill... " << truncated_charge_in_largest_cluster.size()<< " \n";
+
     _out_tree->Fill();
     
     //Clear variables

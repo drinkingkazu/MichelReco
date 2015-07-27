@@ -10,8 +10,10 @@ namespace michel {
   HitPt::HitPt(const double q,
 	       const double w,
 	       const double t,
-	       const size_t id)
+	       const size_t id,
+	       const int    pl)
     : _id ( id )
+    , _pl ( pl )
     , _q  ( q  )
     , _w  ( w  )
     , _t  ( t  )
@@ -27,6 +29,7 @@ namespace michel {
   {
     std::stringstream ss;
     ss << " ID : " << _id << " ... "
+       << " PL = " << _pl << " : "
        << " Q = " << _q << " : "
        << " W = " << _w << " : "
        << " T = " << _t << std::endl;

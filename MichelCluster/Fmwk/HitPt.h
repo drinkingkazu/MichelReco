@@ -30,11 +30,12 @@ namespace michel {
     HitPt(const double q  = kINVALID_DOUBLE,
 	  const double w  = kINVALID_DOUBLE,
 	  const double t  = kINVALID_DOUBLE,
-	  const size_t id = kINVALID_SIZE);
+	  const size_t id = kINVALID_SIZE,
+	  const int    pl = kINVALID_INT);
     
     /// Default destructor
     ~HitPt(){}
-
+    
     double SqDist(const HitPt& h) const;
 
     double Dist(const HitPt& h) const;
@@ -42,6 +43,7 @@ namespace michel {
     std::string Print() const;
 
     HitID_t _id; ///< Unique ID
+    int     _pl; ///< Plane
     double  _q;  ///< Charge in ADC*Ticks scale
     double  _w;  ///< Wire in [cm] scale
     double  _t;  ///< Time in [cm] scale

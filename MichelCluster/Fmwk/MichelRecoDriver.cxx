@@ -27,7 +27,7 @@ namespace larlite {
 
     if(!ev_cluster || ev_cluster->empty()) return false;
 
-    // Get hits & association 
+    // Get hits & association
     event_hit* ev_hit = nullptr;
     auto const& hit_ass_set = storage->find_one_ass(ev_cluster->id(), ev_hit, ev_cluster->name());
 
@@ -42,12 +42,13 @@ namespace larlite {
       all_hits_v.emplace_back( h.Integral(),
 			       h.WireID().Wire * 0.3,
 			       (h.PeakTime() - 3200) * 0.0802814,
-			       hit_index );
+			       hit_index,
+			       h.WireID().Plane);
     }
     
     // Reaching this point means we have something to process. Prepare.
     _mgr.EventReset();
-    
+        
     // Loop over clusters & add them to our algorithm manager
     for(auto const& hit_ass : hit_ass_set) {
 
@@ -59,18 +60,18 @@ namespace larlite {
       for(auto const& hit_index : hit_ass) {
 
 	auto const& h = (*ev_hit)[hit_index];
-
+	
 	if(h.WireID().Plane != 2) continue;
-
+	
 	michel_cluster.emplace_back( h.Integral(),
 				     h.WireID().Wire * 0.3,
 				     (h.PeakTime() - 3200) * 0.0802814,
-				     hit_index );
+				     hit_index ,
+				     h.WireID().Plane);
       }
-
+      
       // Append a hit-list (cluster) to a manager if not empty
       if(michel_cluster.size())
-	//_mgr.Append(michel_cluster);
 	_mgr.Append(std::move(michel_cluster));
     }
 

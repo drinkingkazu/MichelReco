@@ -14,5 +14,7 @@ namespace michel {
   
   static const size_t kINVALID_SIZE = std::numeric_limits<size_t>::max();
 
+  static const size_t kINVALID_INT = std::numeric_limits<int>::max();
+
 }
 #endif

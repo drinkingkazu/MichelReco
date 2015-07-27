@@ -16,6 +16,7 @@
 
 #include "MichelCluster.h"
 #include <TFile.h>
+
 namespace michel {
   /**
      \class MichelAnaBase
@@ -42,7 +43,6 @@ namespace michel {
     /// Analyze
     virtual void Analyze(const MichelClusterArray& input_cluster_v,
 			 const MichelClusterArray& output_cluster_v) = 0;
-
     /// Event Reset
     virtual void EventReset() = 0;
 
