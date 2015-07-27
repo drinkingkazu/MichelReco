@@ -139,7 +139,7 @@ namespace michel {
       std::vector<double> x(_dist.begin() + i - s , _dist.begin() + i + s );
       tdqds.push_back(do_smooth_derive(f,x,2*s+1));
     }
-    for(int o = 0; o < s; ++o) tdqds.push_back(0.0);
+    for(int o = 0; o < s - 1; ++o) tdqds.push_back(0.0);
     
     return tdqds;
 

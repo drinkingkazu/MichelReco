@@ -11,7 +11,7 @@ namespace michel {
   void ChiBoundary::EventReset()
   {}
     
-  HitIdx_t ChiBoundary::Boundary(const MichelCluster& cluster) {
+  HitIdx_t ChiBoundary::Boundary(MichelCluster& cluster) {
 
     //stolen from run_michel
     float  _chi2_rise = 5;
