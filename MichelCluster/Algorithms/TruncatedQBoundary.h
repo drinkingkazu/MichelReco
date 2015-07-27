@@ -42,8 +42,8 @@ namespace michel {
 
     double coeff(double k, double N);
     
-    std::vector<double> calc_smooth_derive(const std::vector<double> _dist,
-					   const std::vector<double> tmeans, 
+    std::vector<double> calc_smooth_derive(const std::vector<double>& _dist,
+					   const std::vector<double>& tmeans, 
 					   const int s);
     std::vector<double> calc_smooth_mean  (const MichelCluster& cluster,
 					   const double _n_window_size,

@@ -20,7 +20,7 @@ namespace michel {
     
     //hardcoded for now will become configurable
     double _n_window_size = 15;
-    double _p_above       = 0.20;
+    double _p_above       = 0.25;
     int    _window_cutoff = 3;
 
     //do truncated mean
@@ -29,14 +29,32 @@ namespace michel {
 				      _window_cutoff,
 				      _p_above);
     
+    for(int i = 0 ; i < 3; ++i) {
+      truncated_mean.at(i) = truncated_mean[3];
+      truncated_mean.at(truncated_mean.size() - i - 1) = truncated_mean[truncated_mean.size() - 3];
+    }
+    
+    
+    
     int s = 3; // must be odd, currently has no setter, sorry that this method has no info on it, ask vic
     truncated_dqds = calc_smooth_derive(cluster._s_v,truncated_mean,s);
     
+    //Lets play with truncated mean shaving...
+    
+    if(_verbosity <= msg::kINFO) {
+      std::cout << "\n\t\tIn TruncatedQBoundary\n"
+		<< "\tI have " << truncated_mean.size() << " truncated mean size\n"
+		<< "\twith   " << truncated_dqds.size() << " derivative points.\n"
+		<< "\tMy incoming cluster has " << cluster._hits.size() << " hits in it...\n";
+    }
     
     //With this new information, calculate the boundary point between possible muon end and michel start
     
     auto candidate_loc     = find_max(truncated_mean);
     auto dqdscandidate_loc = find_min(truncated_dqds); 
+
+    std::swap(cluster._t_mean_v,truncated_mean);
+    std::swap(cluster._t_dqds_v,truncated_dqds);
     
     //20 is hardcoded
     if(abs(dqdscandidate_loc - candidate_loc) > 20)
@@ -48,8 +66,8 @@ namespace michel {
     
     
     bool right_is_smaller;
-    int iMin = 0;
-    int iMax = 0;
+    int  iMin = 0;
+    int  iMax = 0;
     
     if(right < left)
       right_is_smaller = true;
@@ -73,15 +91,12 @@ namespace michel {
     
     auto k   = 0.0;
     auto idx = 0;
-    //std::cout << "imin: " << iMin << " ~~ imax " << iMax << "\n";
+
     for(int w = iMin; w <= iMax; ++w) {
       auto c = cluster._hits[cluster._ordered_pts[w]]._q;
       if(c > k) { k = c; idx = w; }
     }
     
-    //attached truncatedQ/dqds to cluster
-    cluster._t_mean_v = truncated_mean;
-    cluster._t_dqds_v = truncated_dqds;
     
     return cluster._ordered_pts[idx];
   }
@@ -107,14 +122,15 @@ namespace michel {
     return 1.0/pow(2,2*m+1) * (nCk(2*m,m-k+1) - nCk(2*m,m-k-1));
   }
 
-  std::vector<double> TruncatedQBoundary::calc_smooth_derive(const std::vector<double> _dist,
-							     const std::vector<double> tmeans, 
+  std::vector<double> TruncatedQBoundary::calc_smooth_derive(const std::vector<double>& _dist,
+							     const std::vector<double>& tmeans, 
 							     const int s)
   {
     std::vector<double> tdqds;
     tdqds.reserve(tmeans.size());
     
-    if(tmeans.size()) return tdqds;
+    if(!tmeans.size()) return tdqds;
+
     for(int o = 0; o < s; ++o) tdqds.push_back(0.0);
     
     //do smooth differentiation

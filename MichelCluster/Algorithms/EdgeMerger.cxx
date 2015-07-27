@@ -20,6 +20,8 @@ namespace michel{
 		<< b._end.Print().c_str() << std::endl
 		<< std::endl;
     }
+    // auto kk = Touching(a,b,6);
+    // return kk;
     return Touching(a,b,6);
   }
 
@@ -36,7 +38,9 @@ namespace michel{
 			     const double min_dist) const
   {
     return  ( lhs._start.Dist(rhs._end)   < min_dist ||
-	      lhs._end.Dist  (rhs._start) < min_dist );
+	      lhs._end.Dist  (rhs._start) < min_dist ||
+	      lhs._start.Dist(rhs._start) < min_dist ||
+	      lhs._end.Dist  (rhs._end)   < min_dist );
   }
   
 }

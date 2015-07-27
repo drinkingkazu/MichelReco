@@ -9,7 +9,7 @@ namespace michel {
   MichelReco::MichelReco()
   //-----------------------------------------------------------------
     : _d_cutoff           ( 3.6 )
-    , _min_nhits          ( 10  )
+    , _min_nhits          ( 25  )
     , _verbosity          ( msg::kNORMAL )
 
     , _alg_merge          ( nullptr )
@@ -230,7 +230,7 @@ namespace michel {
 	  if(!_used_hit_marker_v[hit_index]) available_hits_v.push_back(_all_hit_v[hit_index]);
 	
 	_alg_michel_cluster->Cluster(cluster._michel,available_hits_v);
-
+	
       }
       
     }

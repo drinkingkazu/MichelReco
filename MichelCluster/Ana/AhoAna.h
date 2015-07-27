@@ -54,7 +54,24 @@ namespace michel {
     double _largest_cluster_charge;
     double _n_hits_in_largest_cluster;
     double _n_hits_in_largest_cluster_michel;
+    
+    int _number_of_clusters;
+    
+    //Hits in the clusters
+    std::vector<double> _Z;
+    std::vector<double> _X;
 
+    //Michels
+    std::vector<double> michel_Z;
+    std::vector<double> michel_X;
+    
+    //Etc...
+    std::vector<double> charge_in_largest_cluster;
+    std::vector<double> truncated_charge_in_largest_cluster;
+    std::vector<double> truncated_dqds_in_largest_cluster;
+    std::vector<double> s;
+    
+    
   };
 }
 
