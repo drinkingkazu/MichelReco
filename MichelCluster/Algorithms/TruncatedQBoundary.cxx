@@ -15,12 +15,11 @@ namespace michel {
     
     std::vector<double> truncated_mean;
     std::vector<double> truncated_dqds;
-    std::vector<double> covariance; // not to be saved ?
+    std::vector<double> covariance; 
     
     truncated_mean.reserve(cluster._ordered_pts.size());
     truncated_dqds.reserve(cluster._ordered_pts.size());
-
-    covariance.reserve(cluster._ordered_pts.size());
+    covariance.reserve    (cluster._ordered_pts.size());
     
     //hardcoded for now will become configurable
     double _n_window_size = 15;
@@ -57,11 +56,9 @@ namespace michel {
     auto candidate_loc     = find_max(truncated_mean);
     auto dqdscandidate_loc = find_min(truncated_dqds); 
 
-
     std::swap(cluster._t_mean_v,truncated_mean);
     std::swap(cluster._t_dqds_v,truncated_dqds);
     
-    //20 is hardcoded
     if((candidate_loc     >= cluster._hits.size()))
       return kINVALID_SIZE;
     
@@ -72,13 +69,11 @@ namespace michel {
       return kINVALID_SIZE;
     
 
-    
+    //20 is hardcoded
     auto window_size = 20;
     auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
     auto left  = candidate_loc;
     
-    
-    bool right_is_smaller;
     int  iMin = 0;
     int  iMax = 0;
     
@@ -86,49 +81,21 @@ namespace michel {
     if(right >= window_size) iMax  = window_size   + candidate_loc;
     if(left  >= window_size) iMin  = candidate_loc - window_size;
 
-    if(right < window_size) iMax  = cluster._hits.size() - 1;
-    if(left  < window_size) iMin  = 0;
-    
-    if(iMax >= cluster._hits.size())
-      throw MichelException();
-    if(iMin < 0)
-      throw MichelException();
-
-    // else if(right_is_smaller) {
-    //   iMax = right + candidate_loc;
-    //   iMin = candidate_loc - window_size;
-    //   if(iMin < 0) iMin = 0;
-      
-    // } else {
-    //   iMax = candidate_loc + window_size;
-    //   iMin = candidate_loc - left;
-      
-    //   if(iMax >= cluster._ordered_pts.size()) iMax = cluster._ordered_pts.size() - 1;
-    // }
+    if(right < window_size)  iMax  = cluster._hits.size() - 1;
+    if(left  < window_size)  iMin  = 0;
     
     auto k   = 0.0;
     auto idx = 0;
     
-    cluster._IMIN = iMin;    
-    cluster._IMAX = iMax;
-    
-    std::cout << "(iMin,iMax): ("<<iMin<<","<<iMax<<")\n";
-    
-
     for(int w = iMin; w <= iMax; ++w) {
       auto c = cluster._hits[cluster._ordered_pts[w]]._q;
       if(c > k) { k = c; idx = w; }
     }
     
-    
     std::swap(cluster._chi2_v,covariance);
 
-    cluster._chi_at_boundary = cluster._chi2_v[idx];
-
-    
     return cluster._ordered_pts[idx];
   }
-  
   
   unsigned int TruncatedQBoundary::nCk( unsigned int n, unsigned int k )
   {
@@ -214,6 +181,7 @@ namespace michel {
   template<typename S>
   S TruncatedQBoundary::calc_mean(const std::vector<S>& data)
   {
+    if(!data.size()){ std::cout << "You have me nill to calc_mean\n"; throw MichelException(); }
     auto sum = S{0.0};
     for(const auto& d : data) sum += d;
     return sum / ( (S) data.size() ); //hopefully this isn't int :)
@@ -327,6 +295,7 @@ namespace michel {
       auto sY = stdev(Y);
 
       R.push_back(c / ( sX * sY));
+
       X.clear(); Y.clear();
     }    
     
@@ -337,6 +306,9 @@ namespace michel {
   double TruncatedQBoundary::cov (const std::vector<double>& data1,
 				  const std::vector<double>& data2)
   {
+    if(!data1.size()){ std::cout << "You have me nill to cov\n"; throw MichelException(); }
+    if(!data2.size()){ std::cout << "You have me nill to cov\n"; throw MichelException(); }
+
     double result = 0.0;
     auto   mean1  = mean(data1);
     auto   mean2  = mean(data2);
@@ -346,9 +318,11 @@ namespace michel {
     
     return result/((double)data1.size());
   }
+  
   double TruncatedQBoundary::stdev(const std::vector<double>& data)
-
   {
+    if(!data.size()){ std::cout << "You have me nill to stdev\n"; throw MichelException(); }
+
     double result = 0.0;
     auto    avg   = mean(data);
     for(const auto& d: data)
@@ -359,12 +333,13 @@ namespace michel {
   
   double TruncatedQBoundary::mean(const std::vector<double>& data)
   {
+    if(!data.size()){ std::cout << "You have me nill to mean\n"; throw MichelException(); }
+	
     double result = 0.0;
     for(const auto& d : data)
       result += d;
 
     return (result / ((double)data.size()));
-    
   }
 
 

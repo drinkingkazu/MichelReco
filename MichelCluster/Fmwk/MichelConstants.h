@@ -12,9 +12,9 @@ namespace michel {
   
   static const double kMIN_DOUBLE = std::numeric_limits<double>::min();
   
-  static const size_t kINVALID_SIZE = std::numeric_limits<size_t>::max();
+  static const std::size_t kINVALID_SIZE = std::numeric_limits<std::size_t>::max();
 
-  static const size_t kINVALID_INT = std::numeric_limits<int>::max();
+  static const int kINVALID_INT = std::numeric_limits<int>::max();
 
 }
 #endif

@@ -32,7 +32,7 @@ my_unit.SetClusterProducer("fuzzycluster")
 # Get manager for michel reco
 mgr = my_unit.Algo()
 
-mgr.SetVerbosity(michel.msg.kDEBUG)
+#mgr.SetVerbosity(michel.msg.kDEBUG)
 
 # Attach algorithm for merging
 mgr.SetAlgo(michel.kClusterMerger, 
