@@ -16,6 +16,8 @@
 
 #include "Fmwk/MichelAnaBase.h"
 
+#include "Fmwk/MichelException.h"
+
 #include "TTree.h"
 
 namespace michel {

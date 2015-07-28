@@ -41,7 +41,7 @@ namespace michel {
     
     int s = 3; // must be odd, currently has no setter, sorry that this method has no info on it, ask vic
     truncated_dqds = calc_smooth_derive(cluster._s_v,truncated_mean,s);
-    covariance = calc_covariance(cluster._hits,11);
+    covariance     = calc_covariance(cluster._hits,11);
     
     //Lets play with truncated mean shaving...
     if(_verbosity <= msg::kINFO) {
@@ -286,6 +286,7 @@ namespace michel {
     Y.reserve(_n_window_size);
 
     for(const auto& window : get_windows(hits,_n_window_size) ) {
+      
       for(const auto& hit : window) {
 	X.push_back(hit._w); Y.push_back(hit._t);
       }
@@ -293,11 +294,24 @@ namespace michel {
       auto c  = cov(X,Y);
       auto sX = stdev(X);
       auto sY = stdev(Y);
+      auto r  = c/(sX * sY);
+      
+      // std::cout << "c: "  << c <<  "\n";
+      // std::cout << "sX: " << sX <<  "\n";
+      // std::cout << "sY: " << sY <<  "\n";
+      // std::cout << "r: "  << r <<  "\n";
+      if(isnan(r)) r = 0.0; 
+      R.push_back(r);
+      
 
-      R.push_back(c / ( sX * sY));
-
+      // if(R.size() != 1 && R.size() != hits.size())
+      // 	if(isnan(r)) { std::cout<<"Covariance is nan not on edge\n"; throw MichelException();}
+      
       X.clear(); Y.clear();
     }    
+    //first and last points will be nan. Lets set them equal to the points just above and below
+    R.at(0)            = R.at(1);
+    R.at(R.size() - 1) = R.at(R.size() - 2);
     
     return R;
   }
@@ -306,8 +320,8 @@ namespace michel {
   double TruncatedQBoundary::cov (const std::vector<double>& data1,
 				  const std::vector<double>& data2)
   {
-    if(!data1.size()){ std::cout << "You have me nill to cov\n"; throw MichelException(); }
-    if(!data2.size()){ std::cout << "You have me nill to cov\n"; throw MichelException(); }
+    if(data1.size() == 0){ std::cout << "You have me nill to cov\n"; throw MichelException(); }
+    if(data2.size() == 0){ std::cout << "You have me nill to cov\n"; throw MichelException(); }
 
     double result = 0.0;
     auto   mean1  = mean(data1);
@@ -317,11 +331,12 @@ namespace michel {
       result += (data1[i] - mean1)*(data2[i] - mean2);
     
     return result/((double)data1.size());
+      
   }
   
   double TruncatedQBoundary::stdev(const std::vector<double>& data)
   {
-    if(!data.size()){ std::cout << "You have me nill to stdev\n"; throw MichelException(); }
+    if(data.size() == 0){ std::cout << "You have me nill to stdev\n"; throw MichelException(); }
 
     double result = 0.0;
     auto    avg   = mean(data);
@@ -333,12 +348,14 @@ namespace michel {
   
   double TruncatedQBoundary::mean(const std::vector<double>& data)
   {
-    if(!data.size()){ std::cout << "You have me nill to mean\n"; throw MichelException(); }
+    if(data.size() == 0){ std::cout << "You have me nill to mean\n"; throw MichelException(); }
 	
     double result = 0.0;
-    for(const auto& d : data)
-      result += d;
 
+    for(const auto& d : data) 
+      result += d;
+    
+    
     return (result / ((double)data.size()));
   }
 

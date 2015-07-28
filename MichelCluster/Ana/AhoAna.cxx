@@ -67,6 +67,7 @@ namespace michel {
 	charge_in_largest_cluster.clear();
 	truncated_charge_in_largest_cluster.clear();
 	truncated_dqds_in_largest_cluster.clear();
+	covariance_in_largest_cluster.clear();
 	s.clear();
 	
 	for(const auto& hits : output._hits)
@@ -81,9 +82,14 @@ namespace michel {
 	for(const auto& c : output._s_v)
 	  s.push_back(c);
 	
-	for(const auto& c : output._chi2_v)
+	std::cout << "{";
+	for(const auto& c : output._chi2_v) {
 	  covariance_in_largest_cluster.push_back(c);
-	
+	  std::cout << c << ",";
+	  if(isnan(c)) { throw MichelException(); }
+	}
+	std::cout << "}";
+
 	// truncated_charge_in_largest_cluster = output._t_mean_v;
 	// truncated_dqds_in_largest_cluster   = output._t_dqds_v;
 	// s                                   = output._s_v;
