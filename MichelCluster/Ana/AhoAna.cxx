@@ -87,15 +87,9 @@ namespace michel {
 	// truncated_charge_in_largest_cluster = output._t_mean_v;
 	// truncated_dqds_in_largest_cluster   = output._t_dqds_v;
 	// s                                   = output._s_v;
-	
 	sizE     = (int)output._hits.size();
 	boundary = (int)output._boundary;
 
-	chi_at_boundary = (double)output._chi_at_boundary;
-
-	IMIN     = output._IMIN;
-	IMAX     = output._IMAX;
-	
 	if(output._michel.size()) {
 	  _largest_cluster_charge           = output._michel._charge;
 	  _n_hits_in_largest_cluster        = output._hits.size();
@@ -121,9 +115,6 @@ namespace michel {
     covariance_in_largest_cluster.clear();
     s.clear();
     boundary = -1;
-    chi_at_boundary = -1.0;
-    IMAX = -1;
-    IMIN = -1;
   }
   
   /// Event Reset
