@@ -20,8 +20,10 @@ HOST            = $(shell uname -n)
 OSNAMEMODE      = $(OSNAME)
 
 LDFLAGS += -L$(LARLITE_LIBDIR) -lMichelReco_MichelClusterFmwk
+LDFLAGS += -lSpectrum
 # call kernel specific compiler setup
 include $(LARLITE_BASEDIR)/Makefile/Makefile.${OSNAME}
 
 # call the common GNUmakefile
 include $(LARLITE_BASEDIR)/Makefile/GNUmakefile.CORE
+
