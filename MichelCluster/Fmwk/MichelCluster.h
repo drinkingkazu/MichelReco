@@ -105,6 +105,12 @@ namespace michel {
     std::vector<double>   _chi2_v;      ///< Local linear chi2 fit 
     std::vector<double>   _t_mean_v;    ///< Truncated mean
     std::vector<double>   _t_dqds_v;    ///< Truncated dqds
+    
+ 
+    double _chi_at_boundary;
+
+    int _IMAX;
+    int _IMIN;
 
     //
     // Configurations

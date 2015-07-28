@@ -16,6 +16,12 @@ namespace michel {
 
     _out_tree->Branch("_number_of_clusters",&_number_of_clusters,"_number_of_clusters/I");
 
+    _out_tree->Branch("boundary", &boundary, "boundary/I");
+    _out_tree->Branch("IMAX", &IMAX, "IMAX/I");
+    _out_tree->Branch("IMIN", &IMIN, "IMIN/I");
+
+    _out_tree->Branch("chi_at_boundary", &chi_at_boundary, "chi_at_boundary/D");
+    
     _out_tree->Branch("_Z", "std::vector<double>" , &_Z);
     _out_tree->Branch("_X", "std::vector<double>" , &_X);
 
@@ -25,6 +31,8 @@ namespace michel {
     _out_tree->Branch("charge_in_largest_cluster",          "std::vector<double>", &charge_in_largest_cluster);
     _out_tree->Branch("truncated_charge_in_largest_cluster","std::vector<double>", &truncated_charge_in_largest_cluster);
     _out_tree->Branch("truncated_dqds_in_largest_cluster",  "std::vector<double>", &truncated_dqds_in_largest_cluster);
+
+    _out_tree->Branch("covariance_in_largest_cluster",  "std::vector<double>", &covariance_in_largest_cluster);
     
     _out_tree->Branch("s","std::vector<double>", &s);
     
@@ -73,11 +81,20 @@ namespace michel {
 	for(const auto& c : output._s_v)
 	  s.push_back(c);
 	
+	for(const auto& c : output._chi2_v)
+	  covariance_in_largest_cluster.push_back(c);
+	
 	// truncated_charge_in_largest_cluster = output._t_mean_v;
 	// truncated_dqds_in_largest_cluster   = output._t_dqds_v;
 	// s                                   = output._s_v;
 	
-	sizE = (int)output._hits.size();
+	sizE     = (int)output._hits.size();
+	boundary = (int)output._boundary;
+
+	chi_at_boundary = (double)output._chi_at_boundary;
+
+	IMIN     = output._IMIN;
+	IMAX     = output._IMAX;
 	
 	if(output._michel.size()) {
 	  _largest_cluster_charge           = output._michel._charge;
@@ -101,7 +118,12 @@ namespace michel {
     charge_in_largest_cluster.clear();
     truncated_charge_in_largest_cluster.clear();
     truncated_dqds_in_largest_cluster.clear();
+    covariance_in_largest_cluster.clear();
     s.clear();
+    boundary = -1;
+    chi_at_boundary = -1.0;
+    IMAX = -1;
+    IMIN = -1;
   }
   
   /// Event Reset

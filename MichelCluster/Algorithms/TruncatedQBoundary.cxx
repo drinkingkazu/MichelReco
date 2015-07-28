@@ -2,6 +2,7 @@
 #define MICHELCLUSTER_TRUNCATEDQBOUNDARY_CXX
 
 #include "TruncatedQBoundary.h"
+#include "Fmwk/MichelException.h"
 #include <cmath>
 
 namespace michel {
@@ -14,9 +15,12 @@ namespace michel {
     
     std::vector<double> truncated_mean;
     std::vector<double> truncated_dqds;
+    std::vector<double> covariance; // not to be saved ?
     
     truncated_mean.reserve(cluster._ordered_pts.size());
     truncated_dqds.reserve(cluster._ordered_pts.size());
+
+    covariance.reserve(cluster._ordered_pts.size());
     
     //hardcoded for now will become configurable
     double _n_window_size = 15;
@@ -38,9 +42,9 @@ namespace michel {
     
     int s = 3; // must be odd, currently has no setter, sorry that this method has no info on it, ask vic
     truncated_dqds = calc_smooth_derive(cluster._s_v,truncated_mean,s);
+    covariance = calc_covariance(cluster._hits,11);
     
     //Lets play with truncated mean shaving...
-    
     if(_verbosity <= msg::kINFO) {
       std::cout << "\n\t\tIn TruncatedQBoundary\n"
 		<< "\tI have " << truncated_mean.size() << " truncated mean size\n"
@@ -53,12 +57,21 @@ namespace michel {
     auto candidate_loc     = find_max(truncated_mean);
     auto dqdscandidate_loc = find_min(truncated_dqds); 
 
+
     std::swap(cluster._t_mean_v,truncated_mean);
     std::swap(cluster._t_dqds_v,truncated_dqds);
     
     //20 is hardcoded
+    if((candidate_loc     >= cluster._hits.size()))
+      return kINVALID_SIZE;
+    
+    if((dqdscandidate_loc >= cluster._hits.size()))
+      return kINVALID_SIZE;
+    
     if(abs(dqdscandidate_loc - candidate_loc) > 20)
       return kINVALID_SIZE;
+    
+
     
     auto window_size = 20;
     auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
@@ -69,34 +82,49 @@ namespace michel {
     int  iMin = 0;
     int  iMax = 0;
     
-    if(right < left)
-      right_is_smaller = true;
-    else
-      right_is_smaller = false;
     
-    if(right > window_size) right = window_size;
-    if(left  > window_size) left  = window_size;
+    if(right >= window_size) iMax  = window_size   + candidate_loc;
+    if(left  >= window_size) iMin  = candidate_loc - window_size;
+
+    if(right < window_size) iMax  = cluster._hits.size() - 1;
+    if(left  < window_size) iMin  = 0;
     
-    if(right_is_smaller) {
-      iMax = right + candidate_loc;
-      iMin = candidate_loc - window_size;
-      if(iMin < 0) iMin = 0;
+    if(iMax >= cluster._hits.size())
+      throw MichelException();
+    if(iMin < 0)
+      throw MichelException();
+
+    // else if(right_is_smaller) {
+    //   iMax = right + candidate_loc;
+    //   iMin = candidate_loc - window_size;
+    //   if(iMin < 0) iMin = 0;
       
-    } else {
-      iMax = candidate_loc + window_size;
-      iMin = candidate_loc - left;
+    // } else {
+    //   iMax = candidate_loc + window_size;
+    //   iMin = candidate_loc - left;
       
-      if(iMax >= cluster._ordered_pts.size()) iMax = cluster._ordered_pts.size() - 1;
-    }
+    //   if(iMax >= cluster._ordered_pts.size()) iMax = cluster._ordered_pts.size() - 1;
+    // }
     
     auto k   = 0.0;
     auto idx = 0;
+    
+    cluster._IMIN = iMin;    
+    cluster._IMAX = iMax;
+    
+    std::cout << "(iMin,iMax): ("<<iMin<<","<<iMax<<")\n";
+    
 
     for(int w = iMin; w <= iMax; ++w) {
       auto c = cluster._hits[cluster._ordered_pts[w]]._q;
       if(c > k) { k = c; idx = w; }
     }
     
+    
+    std::swap(cluster._chi2_v,covariance);
+
+    cluster._chi_at_boundary = cluster._chi2_v[idx];
+
     
     return cluster._ordered_pts[idx];
   }
@@ -265,7 +293,7 @@ namespace michel {
   size_t TruncatedQBoundary::find_min(const std::vector<double>& data) {
   
     //get lowest dqds
-    auto the_min = double{0.0};
+    auto the_min = double{999999.0};
     size_t idx= kINVALID_SIZE;
   
     for(size_t i = 0; i < data.size(); ++i) {
@@ -277,6 +305,68 @@ namespace michel {
     return idx;
 
   }
+
+  std::vector<double>  TruncatedQBoundary::calc_covariance(const std::vector<::michel::HitPt>& hits, 
+							   const int _n_window_size)
+  {
+    std::vector<double> R;
+    R.reserve(hits.size());
+
+    std::vector<double> X;
+    std::vector<double> Y;
+    X.reserve(_n_window_size);
+    Y.reserve(_n_window_size);
+
+    for(const auto& window : get_windows(hits,_n_window_size) ) {
+      for(const auto& hit : window) {
+	X.push_back(hit._w); Y.push_back(hit._t);
+      }
+      
+      auto c  = cov(X,Y);
+      auto sX = stdev(X);
+      auto sY = stdev(Y);
+
+      R.push_back(c / ( sX * sY));
+      X.clear(); Y.clear();
+    }    
+    
+    return R;
+  }
   
+  
+  double TruncatedQBoundary::cov (const std::vector<double>& data1,
+				  const std::vector<double>& data2)
+  {
+    double result = 0.0;
+    auto   mean1  = mean(data1);
+    auto   mean2  = mean(data2);
+    
+    for(int i = 0; i < data1.size(); ++i)
+      result += (data1[i] - mean1)*(data2[i] - mean2);
+    
+    return result/((double)data1.size());
+  }
+  double TruncatedQBoundary::stdev(const std::vector<double>& data)
+
+  {
+    double result = 0.0;
+    auto    avg   = mean(data);
+    for(const auto& d: data)
+      result += (d - avg)*(d - avg);
+    
+    return sqrt(result/((double)data.size()));
+  }
+  
+  double TruncatedQBoundary::mean(const std::vector<double>& data)
+  {
+    double result = 0.0;
+    for(const auto& d : data)
+      result += d;
+
+    return (result / ((double)data.size()));
+    
+  }
+
+
 }
 #endif

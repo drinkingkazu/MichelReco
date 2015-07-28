@@ -65,6 +65,17 @@ namespace michel {
     std::vector<std::vector<T> > get_windows(const std::vector<T>& the_thing,
 					     const int window_size);
 
+
+
+    std::vector<double> calc_covariance(const std::vector<::michel::HitPt>& hits, 
+					const int _n_window_size);
+    
+    double cov (const std::vector<double>& data1,
+		const std::vector<double>& data2);
+
+    double stdev(const std::vector<double>& data);
+    double mean (const std::vector<double>& data);
+
     size_t find_max(const std::vector<double>& data);
     size_t find_min(const std::vector<double>& data);
     

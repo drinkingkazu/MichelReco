@@ -70,8 +70,13 @@ namespace michel {
     std::vector<double> truncated_charge_in_largest_cluster;
     std::vector<double> truncated_dqds_in_largest_cluster;
     std::vector<double> s;
+    std::vector<double> covariance_in_largest_cluster;
+
+    double chi_at_boundary;
     
-    
+    int boundary;
+    int IMAX;
+    int IMIN;
   };
 }
 
