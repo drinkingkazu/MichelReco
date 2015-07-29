@@ -21,6 +21,10 @@ namespace michel {
     _out_tree->Branch("IMIN", &IMIN, "IMIN/I");
 
     _out_tree->Branch("chi_at_boundary", &chi_at_boundary, "chi_at_boundary/D");
+    _out_tree->Branch("mean_chi",   &mean_chi, "mean_chi/D");
+    _out_tree->Branch("rms_chi",    &rms_chi, "rms_chi/D");
+    _out_tree->Branch("lowest_chi", &lowest_chi, "lowest_chi/D");
+	
     
     _out_tree->Branch("_Z", "std::vector<double>" , &_Z);
     _out_tree->Branch("_X", "std::vector<double>" , &_X);
@@ -42,6 +46,29 @@ namespace michel {
   void AhoAna::Analyze(const MichelClusterArray& input_cluster_v,
 		       const MichelClusterArray& output_cluster_v)
   {
+
+    //Clear variables
+    _largest_cluster_charge           = -1.0;
+    _n_hits_in_largest_cluster        = -1.0;
+    _n_hits_in_largest_cluster_michel = -1.0;
+    _Z.clear(); _X.clear();
+    michel_Z.clear(); michel_X.clear();
+    charge_in_largest_cluster.clear();
+    truncated_charge_in_largest_cluster.clear();
+    truncated_dqds_in_largest_cluster.clear();
+    covariance_in_largest_cluster.clear();
+
+    s.clear();
+    boundary = -1;
+
+
+    chi_at_boundary = -1.0;
+    mean_chi        = -1.0;
+    rms_chi         = -1.0;
+    lowest_chi      = -1.0;
+
+
+
     
     //Write out this event to the TTree no matter what, whether I see the michel or not
     
@@ -82,17 +109,10 @@ namespace michel {
 	for(const auto& c : output._s_v)
 	  s.push_back(c);
 	
-	std::cout << "{";
-	for(const auto& c : output._chi2_v) {
-	  covariance_in_largest_cluster.push_back(c);
-	  std::cout << c << ",";
-	  if(isnan(c)) { throw MichelException(); }
-	}
-	std::cout << "}";
+	for(const auto& c : output._chi2_v)
+	  covariance_in_largest_cluster.push_back(std::abs(c));
 
-	// truncated_charge_in_largest_cluster = output._t_mean_v;
-	// truncated_dqds_in_largest_cluster   = output._t_dqds_v;
-	// s                                   = output._s_v;
+	
 	sizE     = (int)output._hits.size();
 	boundary = (int)output._boundary;
 
@@ -107,20 +127,16 @@ namespace michel {
     
     //No real check on anything just fill it whatever
 
+    if(covariance_in_largest_cluster.size() > 0) {
+      chi_at_boundary = covariance_in_largest_cluster.at(boundary);
+      mean_chi        = get_mean(covariance_in_largest_cluster);
+      rms_chi         = get_rms(covariance_in_largest_cluster);
+      lowest_chi      = get_lowest(covariance_in_largest_cluster);
+    }
+    
     _out_tree->Fill();
     
-    //Clear variables
-    _largest_cluster_charge           = -1.0;
-    _n_hits_in_largest_cluster        = -1.0;
-    _n_hits_in_largest_cluster_michel = -1.0;
-    _Z.clear(); _X.clear();
-    michel_Z.clear(); michel_X.clear();
-    charge_in_largest_cluster.clear();
-    truncated_charge_in_largest_cluster.clear();
-    truncated_dqds_in_largest_cluster.clear();
-    covariance_in_largest_cluster.clear();
-    s.clear();
-    boundary = -1;
+
   }
   
   /// Event Reset
@@ -135,6 +151,53 @@ namespace michel {
     _out_tree->Write();
     //fout->Write();
   }
+
+
+
+  double AhoAna::get_mean(const std::vector<double>& data) {
+
+    if(data.size() == 0){ std::cout << "You have me nill to mean\n"; throw MichelException(); }
+    
+    double result = 0.0;
+
+    for(const auto& d : data) 
+      result += d;
+    
+    
+    return (result / ((double)data.size()));
+
+    
+  }
+  double AhoAna::get_rms(const std::vector<double>& data){
+
+    if(data.size() == 0){ std::cout << "You have me nill to stdev\n"; throw MichelException(); }
+
+    double result = 0.0;
+    auto    avg   = get_mean(data);
+    for(const auto& d: data)
+      result += (d - avg)*(d - avg);
+    
+    return sqrt(result/((double)data.size()));
+
+    
+  }
+  double AhoAna::get_lowest(const std::vector<double>& data){
+    
+    //get lowest dqds
+    auto the_min = double{999999.0};
+    size_t idx= 1;
+    
+    for(size_t i = 0; i < data.size(); ++i) {
+      if(data[i] < the_min) {
+	the_min = data[i]; idx = i;
+      }
+    }
+    
+    return the_min;
+
+    
+  }
+		    
   
 }
 #endif

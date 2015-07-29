@@ -15,7 +15,7 @@
 #define MICHELCLUSTER_TRUNCATEDQBOUNDARY_H
 
 #include "Fmwk/BaseAlgBoundary.h"
-
+#include <algorithm>
 namespace michel {
   /**
      \class TruncatedQBoundary

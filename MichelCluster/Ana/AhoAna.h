@@ -75,10 +75,23 @@ namespace michel {
     std::vector<double> covariance_in_largest_cluster;
 
     double chi_at_boundary;
+    double mean_chi;
+    double lowest_chi;
+    double rms_chi;
+
+
+    
     
     int boundary;
     int IMAX;
     int IMIN;
+
+
+    double get_lowest(const std::vector<double>& data);
+    double get_rms(const std::vector<double>& data);
+    double get_mean(const std::vector<double>& data);
+
+    
   };
 }
 
