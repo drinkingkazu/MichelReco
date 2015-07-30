@@ -202,10 +202,7 @@ namespace michel {
 		return a < b;	      
 	      });
     
-    //if(above) 
     data.erase(data.begin() + to_stay, data.end());
-    //else 
-    //data.erase(data.begin() , data.begin()+to_stay);
   }
   
   
@@ -354,8 +351,7 @@ namespace michel {
 
     for(const auto& d : data) 
       result += d;
-    
-    
+        
     return (result / ((double)data.size()));
   }
 
