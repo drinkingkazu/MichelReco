@@ -1,4 +1,4 @@
-SUBDIRS := Fmwk Algo Ana
+SUBDIRS := Fmwk Algo Ana App
 
 .phony: all clean
 
