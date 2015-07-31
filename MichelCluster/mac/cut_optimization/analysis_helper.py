@@ -7,15 +7,18 @@ from analysis_constants import *
 
 
 
+# def calc_sig(S,B):
+#     sig = 0
+#     for i in xrange(len(S)): 
+#         if (S[i] + B[i]) == 0:
+#            continue
+#         sig += S[i]/np.sqrt(S[i]+B[i])
+#     return sig
+
+
+
 def calc_sig(S,B):
-    sig = 0
-    for i in xrange(len(S)): 
-        if (S[i] + B[i]) == 0:
-           continue
-        sig += S[i]/np.sqrt(S[i]+B[i])
-    return sig
-
-
+    return np.nansum( S / (np.sqrt(S+B)))
 
 
 class DataHolder:
@@ -105,7 +108,7 @@ class DataHolder:
         return np.histogram(self.muonDF[(self.muonDF[cut1Name] <= cut1 ) & (self.muonDF[cut2Name] <= cut2)][self.parameter]*QtoE,
                             bins=binz,
                             range=(0,xhigh))[0]
-
+        
     def get_histogram_2cuts_S_2_below(self,
                                       cut1Name,
                                       cut2Name,
@@ -117,3 +120,81 @@ class DataHolder:
         return np.histogram(self.michelDF[(self.michelDF[cut1Name] <= cut1 ) & (self.michelDF[cut2Name] <= cut2)][self.parameter]*QtoE,
                             bins=binz,
                             range=(0,xhigh))[0]
+
+
+    def get_histogram_3cuts_B_2_below_1_above(self,
+                                              cut1Name,
+                                              cut2Name,
+                                              cut3Name,
+                                              cut1,
+                                              cut2,
+                                              cut3,
+                                              xhigh,
+                                              binz) :
+        
+        return np.histogram(self.muonDF[(self.muonDF[cut1Name] <= cut1 ) & 
+                                        (self.muonDF[cut2Name] <= cut2 ) &
+                                        (self.muonDF[cut3Name] >= cut3 )][self.parameter]*QtoE,
+                            bins=binz,
+                            range=(0,xhigh))[0]
+        
+        
+        
+    def get_histogram_3cuts_S_2_below_1_above(self,
+                                              cut1Name,
+                                              cut2Name,
+                                              cut3Name,
+                                              cut1,
+                                              cut2,
+                                              cut3,
+                                              xhigh,
+                                              binz) :
+        
+        return np.histogram(self.michelDF[(self.michelDF[cut1Name] <= cut1 ) & 
+                                          (self.michelDF[cut2Name] <= cut2 ) &
+                                          (self.michelDF[cut3Name] >= cut3 )][self.parameter]*QtoE,
+                            bins=binz,
+                            range=(0,xhigh))[0]
+        
+
+
+
+
+    def get_histogram_3cuts_B_2_below_2_above(self,
+                                              cut1Name,
+                                              cut2Name,
+                                              cut3Name,
+                                              cut4Name,
+                                              cut1,
+                                              cut2,
+                                              cut3,
+                                              cut4,
+                                              xhigh,
+                                              binz) :
+        
+        return np.histogram(self.muonDF[(self.muonDF[cut1Name] <= cut1 ) & 
+                                        (self.muonDF[cut2Name] <= cut2 ) &
+                                        (self.muonDF[cut3Name] >= cut3 )][self.parameter]*QtoE,
+                            bins=binz,
+                            range=(0,xhigh))[0]
+        
+        
+        
+    def get_histogram_3cuts_S_2_below_2_above(self,
+                                              cut1Name,
+                                              cut2Name,
+                                              cut3Name,
+                                              cut4Name,
+                                              cut1,
+                                              cut2,
+                                              cut3,
+                                              cut4,
+                                              xhigh,
+                                              binz) :
+        
+        return np.histogram(self.michelDF[(self.michelDF[cut1Name] <= cut1 ) & 
+                                          (self.michelDF[cut2Name] <= cut2 ) &
+                                          (self.michelDF[cut3Name] >= cut3 )][self.parameter]*QtoE,
+                            bins=binz,
+                            range=(0,xhigh))[0]
+        
