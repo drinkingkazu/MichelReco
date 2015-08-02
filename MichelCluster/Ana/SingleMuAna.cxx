@@ -1,12 +1,12 @@
-#ifndef AHOANA_CXX
-#define AHOANA_CXX
+#ifndef SINGLEMUANA_CXX
+#define SINGLEMUANA_CXX
 
-#include "AhoAna.h"
+#include "SingleMuAna.h"
 
 namespace michel {
 
   /// Initialize
-  void AhoAna::Initialize()
+  void SingleMuAna::Initialize()
   {
     std::cout << "Initializing.. tree...\n";
     _out_tree = new TTree("out_tree","aho_tree");
@@ -43,7 +43,7 @@ namespace michel {
   }
   
   /// Analyze
-  void AhoAna::Analyze(const MichelClusterArray& input_cluster_v,
+  void SingleMuAna::Analyze(const MichelClusterArray& input_cluster_v,
 		       const MichelClusterArray& output_cluster_v)
   {
 
@@ -140,13 +140,13 @@ namespace michel {
   }
   
   /// Event Reset
-  void AhoAna::EventReset()
+  void SingleMuAna::EventReset()
   {
     
   }
   
   /// Finalize
-  void AhoAna::Finalize(TFile* fout)
+  void SingleMuAna::Finalize(TFile* fout)
   {
     _out_tree->Write();
     //fout->Write();
@@ -154,7 +154,7 @@ namespace michel {
 
 
 
-  double AhoAna::get_mean(const std::vector<double>& data) {
+  double SingleMuAna::get_mean(const std::vector<double>& data) {
 
     if(data.size() == 0){ std::cout << "You have me nill to mean\n"; throw MichelException(); }
     
@@ -168,7 +168,7 @@ namespace michel {
 
     
   }
-  double AhoAna::get_rms(const std::vector<double>& data){
+  double SingleMuAna::get_rms(const std::vector<double>& data){
 
     if(data.size() == 0){ std::cout << "You have me nill to stdev\n"; throw MichelException(); }
 
@@ -181,7 +181,7 @@ namespace michel {
 
     
   }
-  double AhoAna::get_lowest(const std::vector<double>& data){
+  double SingleMuAna::get_lowest(const std::vector<double>& data){
     
     //get lowest dqds
     auto the_min = double{999999.0};

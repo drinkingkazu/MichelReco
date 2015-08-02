@@ -1,9 +1,9 @@
 /**
- * \file AhoAna.h
+ * \file SingleMuAna.h
  *
  * \ingroup MichelCluster
  * 
- * \brief Class def header for a class AhoAna
+ * \brief Class def header for a class SingleMuAna
  *
  * @author kazuhir0
  */
@@ -11,8 +11,8 @@
 /** \addtogroup MichelCluster
 
     @{*/
-#ifndef AHOANA_H
-#define AHOANA_H
+#ifndef SINGLEMUANA_H
+#define SINGLEMUANA_H
 
 #include "Fmwk/MichelAnaBase.h"
 
@@ -22,19 +22,19 @@
 
 namespace michel {
   /**
-     \class AhoAna
-     User defined class AhoAna ... these comments are used to generate
+     \class SingleMuAna
+     User defined class SingleMuAna ... these comments are used to generate
      doxygen documentation!
   */
-  class AhoAna : public MichelAnaBase {
+  class SingleMuAna : public MichelAnaBase {
     
   public:
     
     /// Default constructor
-    AhoAna(){ _verbosity = msg::kNORMAL; }
+    SingleMuAna(){ _verbosity = msg::kNORMAL; }
     
     /// Default destructor
-    ~AhoAna(){}
+    ~SingleMuAna(){}
     
     /// Initialize
     void Initialize();
