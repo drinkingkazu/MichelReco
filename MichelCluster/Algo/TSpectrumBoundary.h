@@ -14,6 +14,8 @@
 #ifndef MICHELCLUSTER_TSPECTRUMBOUNDARY_H
 #define MICHELCLUSTER_TSPECTRUMBOUNDARY_H
 
+#include <algorithm>
+
 #include "Fmwk/BaseAlgBoundary.h"
 
 #include "TSpectrum.h"

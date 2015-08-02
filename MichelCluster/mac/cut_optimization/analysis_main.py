@@ -42,64 +42,46 @@ data = DataHolder(4828,  #nmichels
                   '_largest_cluster_charge')
 
 
+
+
 print "Creating cuts..."
-#.....! 2 Above
-# cut1Name = '_n_hits_in_largest_cluster_michel'
-# cut2Name = '_largest_cluster_charge'
-# cut1Vars  = np.arange(0,50, 1)
-# cut2Vars  = np.arange(0,100,2)
+cuts = {'_n_hits_in_largest_cluster_michel' : np.arange(0,50,1),
+        '_largest_cluster_charge'           : np.arange(0,100,2),
+        'lowest_chi'                        : np.arange(0,1,0.05),
+        'mean_chi'                          : np.arange(0,1,0.05),
+        'chi_at_boundary'                   : np.arange(0,1,0.05)
+        }
+
+print "Choose from possible cuts..."
+for key in cuts:
+    print key
 
 
-#Good! 1st below, 1st above..
-# cut1Name = 'lowest_chi'
-# cut2Name = '_n_hits_in_largest_cluster'
-# cut1Vars  = np.arange(0,1,0.05)
-# cut2Vars  = np.arange(0,100,5)
+cut1Name = ''
+cut2Name = ''
+cut1Vars = ''
+cut2Vars = ''
 
-#Good 1st below, 1st above..
-# cut1Name = 'lowest_chi'
-# cut2Name = 'mean_chi'
-# cut1Vars  = np.arange(0,1,0.05)
-# cut2Vars  = np.arange(0,1,0.05)
+while True:
+    try:
+        cut1Name = str(raw_input('Cut1 Name: '))
+        cut2Name = str(raw_input('Cut2 Name: '))
+        cut1Vars = cuts[cut1Name]
+        cut2Vars = cuts[cut2Name]
+    except KeyError:
+        print 'Chosen key did not exist in list of'
+        print 'available cuts. Try again.'
+        continue
 
-#Ok... 1st below, 1st above..
-# cut1Name = 'chi_at_boundary'
-# cut2Name = 'mean_chi'
-# cut1Vars  = np.arange(0,1,0.05)
-# cut2Vars  = np.arange(0,1,0.05)
+    break
+    
 
-# # #....... 2 below
 # cut1Name = 'chi_at_boundary'
 # cut2Name = 'lowest_chi'
-# cut1Vars  = np.arange(0,1,0.01)
-# cut2Vars  = np.arange(0,1,0.01)
-
-# cut1Name = 'lowest_chi'
-# cut2Name = '_n_hits_in_largest_cluster_michel'
-# cut1Vars  = np.arange(0,1,0.01)
-# cut2Vars  = np.arange(0,50, .5)
-
-
-#.....! 2 Above
-# cut1Name = 'mean_chi'
-# cut2Name = '_n_hits_in_largest_cluster_michel'
-# cut1Vars = np.arange(0,1,0.05)
-# cut2Vars = np.arange(0,50, 1)
-
-
-#Good 1st below, 1st above..
-# cut1Name = 'lowest_chi'
-# cut2Name = 'mean_chi'
-# cut1Vars  = np.arange(0,1,0.05)
-# cut2Vars  = np.arange(0,1,0.05)
-
-#ok... 1st below, 1st above..
-cut1Name = 'chi_at_boundary'
-cut2Name = 'lowest_chi'
-cut3Name = 'mean_chi'
-cut1Vars  = np.arange(0,1,0.02)
-cut2Vars  = np.arange(0,1,0.02)
-cut3Vars  = np.arange(0,1,0.02)
+# cut3Name = 'mean_chi'
+# cut1Vars  = np.arange(0,1,0.02)
+# cut2Vars  = np.arange(0,1,0.02)
+# cut3Vars  = np.arange(0,1,0.02)
 
 
 
