@@ -54,18 +54,25 @@ namespace michel {
     
     TTree* _out_tree;
 
-    std::vector<double> _michel_clustered_charge;
-    std::vector<double> _michel_n_hits;
-    int _number_of_clusters;
+    double _michel_clustered_charge;
+    double _michel_n_hits;
+    int    _number_of_clusters;
 
-    std::vector<int>    _boundary;
+    int    _boundary;
 
-    std::vector<double> _chi_at_boundary;
-    std::vector<double> _mean_chi;
-    std::vector<double> _rms_chi;
-    std::vector<double> _lowest_chi;
+    double _chi_at_boundary;
+    double _mean_chi;
+    double _rms_chi;
+    double _lowest_chi;
 
-    std::vector<bool> _has_michel;
+    bool _has_michel;
+    
+    std::vector<double> _q_v;
+    std::vector<double> _t_q_v;
+    std::vector<double> _t_dqds_v;
+    std::vector<double> _chi_v;
+    
+    std::vector<double> _s_v;
     
     std::vector<double> _Z;
     std::vector<double> _X;

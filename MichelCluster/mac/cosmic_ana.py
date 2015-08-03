@@ -22,8 +22,8 @@ my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 my_proc.set_ana_output_file("ana.root")
 
 #Cheat and send in signal
-#my_proc.enable_filter(True)
-#the_filter = fmwk.MichelFilter()
+my_proc.enable_filter(True)
+the_filter = fmwk.MichelFilter()
 #the_filter = fmwk.RemoveMichel()
 
 # Michel reco driver code
@@ -56,7 +56,7 @@ mgr.SetAlgo(michel.kMichelCluster,
 mgr.AddAna(michel.CosmicAna())
 
 # add process to get moving
-# my_proc.add_process(the_filter)
+my_proc.add_process(the_filter)
 my_proc.add_process(my_unit)
 
 
