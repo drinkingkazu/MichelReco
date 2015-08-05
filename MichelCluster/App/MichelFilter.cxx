@@ -11,8 +11,12 @@ namespace larlite {
 
   bool MichelFilter::initialize() {
     
-    //n_events_tree = new TTree("n_events_tree","n_events_tree");
+    michel_filter_tree = new TTree("michel_filter_tree","michel_filter_tree");
 
+    michel_filter_tree->Branch("_michel_charge",&_michel_charge,"_michel_charge/D");
+    michel_filter_tree->Branch("_michel_det",&_michel_det,"_michel_det/D");
+    michel_filter_tree->Branch("_lifetime_correction",&_lifetime_correction,"_lifetime_correction/D");
+    
     total_evts = 0;
     kept_evts = 0;
 
@@ -40,6 +44,14 @@ namespace larlite {
 	 (mcs.DetProfile().E()/mcs.Start().E()  > 0.5
 	  || mcs.DetProfile().E() >= 15)) {
 	kept_evts++;
+
+	_michel_charge = mcs.Charge(2);
+	_michel_det    = mcs.DetProfile().E();
+	auto t = mcs.DetProfile().X()/160.0;
+	_lifetime_correction = exp(t/3.0);
+
+	michel_filter_tree->Fill();
+	
 	return true;
       }
     }
@@ -50,6 +62,8 @@ namespace larlite {
 
   bool MichelFilter::finalize() {
 
+    michel_filter_tree->Write();
+    
     print(larlite::msg::kNORMAL,__FUNCTION__,Form("~~~~MichelFiltering~~~~"));
     print(larlite::msg::kNORMAL,__FUNCTION__,Form("Total events considered = %zu, kept events = %zu.",total_evts,kept_evts));
     print(larlite::msg::kNORMAL,__FUNCTION__,Form("Total events considered = %zu, kept events = %zu.",total_evts,kept_evts));

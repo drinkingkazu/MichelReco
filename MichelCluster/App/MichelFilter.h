@@ -58,6 +58,11 @@ namespace larlite {
     size_t total_evts;
     size_t kept_evts;
     
+    TTree* michel_filter_tree;
+    
+    double _michel_charge;
+    double _michel_det;
+    double _lifetime_correction;
     
   };
 }

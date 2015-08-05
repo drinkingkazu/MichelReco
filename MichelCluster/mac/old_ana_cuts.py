@@ -23,8 +23,8 @@ my_proc.set_ana_output_file("ana.root")
 
 #Cheat and send in signal
 my_proc.enable_filter(True)
-the_filter = fmwk.MichelFilter()
-#the_filter = fmwk.RemoveMichel()
+#the_filter = fmwk.MichelFilter()
+the_filter = fmwk.RemoveMichel()
 
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
@@ -53,7 +53,7 @@ mgr.SetAlgo(michel.kMichelCluster,
 
 # Attach ana unit
 
-mgr.AddAna(michel.SingleMuAna())
+mgr.AddAna(michel.SingleMuAnaWCuts())
 
 # add process to get moving
 my_proc.add_process(the_filter)

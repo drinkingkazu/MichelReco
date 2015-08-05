@@ -1,12 +1,12 @@
-#ifndef SINGLEMUANA_CXX
-#define SINGLEMUANA_CXX
+#ifndef SINGLEMUANAWCUTS_CXX
+#define SINGLEMUANAWCUTS_CXX
 
-#include "SingleMuAna.h"
+#include "SingleMuAnaWCuts.h"
 
 namespace michel {
 
   /// Initialize
-  void SingleMuAna::Initialize()
+  void SingleMuAnaWCuts::Initialize()
   {
     std::cout << "Initializing.. tree...\n";
     _out_tree = new TTree("out_tree","aho_tree");
@@ -43,7 +43,7 @@ namespace michel {
   }
   
   /// Analyze
-  void SingleMuAna::Analyze(const MichelClusterArray& input_cluster_v,
+  void SingleMuAnaWCuts::Analyze(const MichelClusterArray& input_cluster_v,
 			    const MichelClusterArray& output_cluster_v)
   {
     
@@ -133,20 +133,38 @@ namespace michel {
       rms_chi         = get_rms(covariance_in_largest_cluster);
       lowest_chi      = get_lowest(covariance_in_largest_cluster);
     }
-    
-    _out_tree->Fill();
-    
 
+
+    //From ipython notebooks:
+    // S = SIGNAL.query('_largest_cluster_charge > 0')
+    //   S = S.query('_number_of_clusters >= 1')
+    //   S = S.query('_n_hits_in_largest_cluster_michel >= 10')
+    //   S = S.query('lowest_chi < 0.28')
+    //   S = S.query('chi_at_boundary < 0.68')
+    //   S = S.query('mean_chi > 0.98')
+
+    if(_largest_cluster_charge > 0 && 
+       _number_of_clusters >= 1 &&
+       _n_hits_in_largest_cluster_michel >= 10 &&
+       lowest_chi < 0.28 &&
+       chi_at_boundary < 0.68 &&
+       mean_chi > 0.98 &&
+       _largest_cluster_charge < 8929)
+      
+      _out_tree->Fill();
+    
+    
+    
   }
   
   /// Event Reset
-  void SingleMuAna::EventReset()
+  void SingleMuAnaWCuts::EventReset()
   {
     
   }
   
   /// Finalize
-  void SingleMuAna::Finalize(TFile* fout)
+  void SingleMuAnaWCuts::Finalize(TFile* fout)
   {
     _out_tree->Write();
     //fout->Write();
@@ -154,7 +172,7 @@ namespace michel {
 
 
 
-  double SingleMuAna::get_mean(const std::vector<double>& data) {
+  double SingleMuAnaWCuts::get_mean(const std::vector<double>& data) {
 
     if(data.size() == 0){ std::cout << "You have me nill to mean\n"; throw MichelException(); }
     
@@ -168,7 +186,7 @@ namespace michel {
 
     
   }
-  double SingleMuAna::get_rms(const std::vector<double>& data){
+  double SingleMuAnaWCuts::get_rms(const std::vector<double>& data){
 
     if(data.size() == 0){ std::cout << "You have me nill to stdev\n"; throw MichelException(); }
 
@@ -181,7 +199,7 @@ namespace michel {
 
     
   }
-  double SingleMuAna::get_lowest(const std::vector<double>& data){
+  double SingleMuAnaWCuts::get_lowest(const std::vector<double>& data){
     
     //get lowest dqds
     auto the_min = double{999999.0};
