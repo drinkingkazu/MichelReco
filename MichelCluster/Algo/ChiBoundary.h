@@ -15,6 +15,7 @@
 #define MICHELCLUSTER_CHIBOUNDARY_H
 
 #include "Fmwk/BaseAlgBoundary.h"
+#include <math.h>
 
 namespace michel {
   /**

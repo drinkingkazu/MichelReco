@@ -19,6 +19,7 @@
 #include "Fmwk/MichelException.h"
 
 #include "TTree.h"
+#include <math.h>
 
 namespace michel {
   /**

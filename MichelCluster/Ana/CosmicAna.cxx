@@ -74,8 +74,8 @@ namespace michel {
 	continue;
       
       for(const auto& c : out._chi2_v) {
-	covariance_in_largest_cluster.push_back( std::abs(c) );
-	_chi_v.push_back                       ( std::abs(c) );
+	covariance_in_largest_cluster.push_back( abs(c) );
+	_chi_v.push_back                       ( abs(c) );
       }
       
       //parse the hits...

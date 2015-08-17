@@ -15,7 +15,7 @@
 #define MICHELCLUSTEREXCEPTION_H
 
 #include <iostream>
-
+#include <exception>
 namespace michel {
   /**
      \class MichelException
