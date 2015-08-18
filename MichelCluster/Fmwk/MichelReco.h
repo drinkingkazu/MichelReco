@@ -94,6 +94,10 @@ namespace michel {
     /// Finalizer (after event loop)
     void Finalize(TFile *fout);
 
+    /// Getter for MichelClusterArray
+    const MichelClusterArray& GetResult()
+    { return _output_v; }
+
   protected:
     // MichelCluster configuration parameters
     double _d_cutoff;  ///< MichelCluster's cut-off distance for neighboring cluster
