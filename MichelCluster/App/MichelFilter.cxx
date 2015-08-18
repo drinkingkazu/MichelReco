@@ -25,7 +25,7 @@ namespace larlite {
   
   bool MichelFilter::analyze(storage_manager* storage) {
     total_evts++;
-    
+
     //Grab the MCShowers
     auto ev_mcshower = storage->get_data<event_mcshower>("mcreco");    
     if(!ev_mcshower) {
@@ -35,15 +35,17 @@ namespace larlite {
     
     //If no MCShowers in event, no michels for sure
     if(!ev_mcshower->size()){
-      return false;
+      if(_flip) { kept_evts++; return true; }
     }
+
+    bool there_is_michel = false;
+
     //Loop over MCShowers, ask if they came from a muon decay
     for(auto const& mcs : *ev_mcshower){
       if((mcs.MotherPdgCode() == 13                &&
 	  mcs.Process() == "muMinusCaptureAtRest") &&
 	 (mcs.DetProfile().E()/mcs.Start().E()  > 0.5
 	  || mcs.DetProfile().E() >= 15)) {
-	kept_evts++;
 
 	_michel_charge = mcs.Charge(2);
 	_michel_det    = mcs.DetProfile().E();
@@ -51,13 +53,17 @@ namespace larlite {
 	_lifetime_correction = exp(t/3.0);
 
 	michel_filter_tree->Fill();
-	
-	return true;
+	there_is_michel = true;
       }
     }
     
-    //std::cout<<"michel filter returning false!"<<std::endl;
-    return false;
+    if (_flip){
+      if(!there_is_michel) kept_evts++;
+      return !there_is_michel;
+    }
+
+    if(there_is_michel) kept_evts++;
+    return there_is_michel;
   }
 
   bool MichelFilter::finalize() {
