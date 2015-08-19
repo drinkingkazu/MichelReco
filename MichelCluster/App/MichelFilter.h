@@ -29,7 +29,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    MichelFilter(){ _name="MichelFilter"; _fout=0;}
+    MichelFilter(){ _name="MichelFilter"; _fout=0; _flip=false;}
 
     /// Default destructor
     virtual ~MichelFilter(){}
@@ -51,10 +51,14 @@ namespace larlite {
 
     Int_t get_num_filtered() { return kept_evts; }
 
+    void flip_filter(bool doit) { _flip = doit; }
+
   protected:
     
     //TTree* n_events_tree;
-    
+    //Whether to flip the output of the filter
+    bool _flip;
+
     size_t total_evts;
     size_t kept_evts;
     

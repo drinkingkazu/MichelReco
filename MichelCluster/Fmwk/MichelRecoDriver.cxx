@@ -22,6 +22,8 @@ namespace larlite {
   
   bool MichelRecoDriver::analyze(storage_manager* storage) {
 
+    _mgr.EventReset();
+
     // Get data products
     auto ev_cluster = storage->get_data<event_cluster>(_producer);
 
