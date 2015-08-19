@@ -110,7 +110,7 @@ namespace michel {
 	  s.push_back(c);
 	
 	for(const auto& c : output._chi2_v)
-	  covariance_in_largest_cluster.push_back(abs(c));
+	  covariance_in_largest_cluster.push_back(fabs(c));
 
 	
 	sizE     = (int)output._hits.size();
