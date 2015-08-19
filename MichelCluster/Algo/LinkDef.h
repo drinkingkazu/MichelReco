@@ -17,6 +17,7 @@
 #pragma link C++ class michel::ToyMichelCluster+;
 #pragma link C++ class michel::EdgeMerger+;
 #pragma link C++ class michel::ForwardMichelID+;
+#pragma link C++ class michel::RadiusMichelCluster+;
 
 //ADD_NEW_CLASS ... do not change this line
 #endif
