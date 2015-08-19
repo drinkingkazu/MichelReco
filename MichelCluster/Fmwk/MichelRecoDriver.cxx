@@ -80,6 +80,51 @@ namespace larlite {
     // Now process
     _mgr.Process();
 
+    // We may want to save the michels we found as clusters
+    // if this option is selected, take the michel hits
+    // and group them in "michel" clusters
+    if (_save_clusters){
+
+      auto michel_cluster = storage->get_data<event_cluster>("michel");
+      // create association object for clusters
+      auto cluster_ass_v = storage->get_data<event_ass>(michel_cluster->name());
+      // set event ID through storage manager
+      storage->set_id(storage->get_data<event_cluster>(_producer)->run(),
+		      storage->get_data<event_cluster>(_producer)->subrun(),
+		      storage->get_data<event_cluster>(_producer)->event_id()); 
+
+      // create a vector where to store the cluster -> hit association
+      std::vector<std::vector<unsigned int> > clus_hit_ass_v;
+      // we need to loop over the michel hits and add them to new clusters
+
+      // get the vector of MichelCluster objects
+      auto const& michels = _mgr.GetResult();
+      // for each get the hits associated
+      for (auto const& michelClus : michels){
+	// prepare an empty cluster
+	larlite::cluster clus;
+	michel_cluster->push_back(clus);
+	// get the hits (in "michel" notation) for this cluster
+	auto const& michel = michelClus._michel; // this is a vector of HitPt
+	// michel is a list of HitPt
+	// each one has a HitID_t unique ID which we can use
+	// to trace it back to the larlite hit it came from
+	// the hit index is indeed the position inside the larlite::hit vector
+	// we basically need to create an association between the cluster
+	// and all the hits in this michel
+	// empty vector where to store hits associated for this specific cluster
+	std::vector<unsigned int> clus_hits;
+	for (auto const& michel_hit : michel)
+	  clus_hits.push_back(michel_hit._id);
+	// add this vector to the associations
+	if (clus_hits.size() > 0)
+	  clus_hit_ass_v.push_back(clus_hits);
+	
+      }// loop over all found michels
+      // now save the association information
+      cluster_ass_v->set_association(michel_cluster->id(),product_id(data::kHit,ev_hit->name()),clus_hit_ass_v);
+    }// if we should save cluster
+
     return true;
   }
 

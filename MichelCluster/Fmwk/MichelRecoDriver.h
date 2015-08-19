@@ -28,7 +28,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    MichelRecoDriver(){ _name="MichelRecoDriver"; _fout=0;}
+    MichelRecoDriver(){ _name="MichelRecoDriver"; _fout=0; _save_clusters=false; }
 
     /// Default destructor
     virtual ~MichelRecoDriver(){}
@@ -48,6 +48,11 @@ namespace larlite {
     /// Reco manager getter
     ::michel::MichelReco& Algo() { return _mgr; }
 
+    /**
+     * @brief Set boolean to decide if to save michels in output cluster
+     */
+    void saveMichelClusters(bool on) { _save_clusters = on; }
+    
     /// Producer setter
     void SetClusterProducer(const std::string& name) { _producer = name; }
 
@@ -61,6 +66,11 @@ namespace larlite {
 
     /// Output analysis TTree ptr
     TTree* _tree;
+
+    /// boolean to select if to save Michel Clusters or not
+    bool _save_clusters;
+
+
   };
 }
 #endif

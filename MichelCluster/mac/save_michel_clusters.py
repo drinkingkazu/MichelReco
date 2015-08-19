@@ -19,14 +19,22 @@ my_proc = fmwk.ana_processor()
 for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(sys.argv[x+1])
 
-my_proc.set_io_mode(fmwk.storage_manager.kREAD)
+my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
-my_proc.set_ana_output_file("ana.root")
+my_proc.set_ana_output_file("")
+
+my_proc.set_output_file("michel_clusters.root")
+
+#Cheat and send in signal
+my_proc.enable_filter(True)
+the_filter = fmwk.MichelFilter()
+#the_filter = fmwk.RemoveMichel()
 
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
-#my_unit.SetClusterProducer("fuzzycluster")
-my_unit.SetClusterProducer("linecluster")
+my_unit.SetClusterProducer("fuzzycluster")
+# set here if you want to save michels as an output cluster
+my_unit.saveMichelClusters(True)
 
 # Get manager for michel reco
 mgr = my_unit.Algo()
@@ -54,6 +62,7 @@ mgr.SetAlgo(michel.kMichelCluster,
 mgr.AddAna(michel.CosmicAna())
 
 # add process to get moving
+#my_proc.add_process(the_filter)
 my_proc.add_process(my_unit)
 
 
@@ -68,18 +77,7 @@ print
 
 # Let's run it.
 #my_proc.run(145,5);
-
-while (my_proc.process_event()):
-
-    print "next event..."
-    alg = my_unit.Algo()
-    michels = alg.GetResult()
-    for x in xrange(michels.size()):
-        m = michels[x]._michel
-        print "size of this michel: ",  m.size()
-    print
-
-#my_proc.run()
+my_proc.run()
 
 # done!
 print
