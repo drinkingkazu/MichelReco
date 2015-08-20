@@ -37,8 +37,7 @@ namespace michel {
     _out_tree->Branch("_s_v",    "std::vector<double>" , &_s_v);
 
     _out_tree->Branch("_has_michel", &_has_michel, "_has_michel/O");
-    
-    
+    _michel_hit_qs = new TH1F("michel_hit_qs","Michel Hit Charges",500,0,10000);
   }
   
   /// Analyze
@@ -71,61 +70,62 @@ namespace michel {
       covariance_in_largest_cluster.clear();
 
       if(out._chi2_v.size() == 0)
-	continue;
-      
+       continue;
+
       for(const auto& c : out._chi2_v) {
-	covariance_in_largest_cluster.push_back( fabs(c) );
-	_chi_v.push_back                       ( fabs(c) );
+        covariance_in_largest_cluster.push_back( fabs(c) );
+        _chi_v.push_back                       ( fabs(c) );
       }
-      
+
       //parse the hits...
-      for(const auto& hit : out._hits)  {
-	_Z.push_back(hit._w); _X.push_back(hit._t); _q_v.push_back(hit._q);
-      }
-      
-      _t_q_v    = out._t_mean_v;
-      _t_dqds_v = out._t_dqds_v;
-      _s_v      = out._s_v;
+     for(const auto& hit : out._hits)  {
+       _Z.push_back(hit._w); _X.push_back(hit._t); _q_v.push_back(hit._q);
+     }
+
+     _t_q_v    = out._t_mean_v;
+     _t_dqds_v = out._t_dqds_v;
+     _s_v      = out._s_v;
 
       //get the boundary
-      auto boundary = (int)out._boundary;
-      
-      //parse the chi^2
-      _boundary         =  boundary                                   ;
-      _chi_at_boundary  =  covariance_in_largest_cluster.at(boundary) ;
-      _mean_chi         =  get_mean   (covariance_in_largest_cluster) ;
-      _rms_chi          =  get_rms    (covariance_in_largest_cluster) ;
-      _lowest_chi       =  get_lowest (covariance_in_largest_cluster) ;
-      
-      
-      //if there is a michel...
-      if(out._michel.size()) {
-	
-	_has_michel = true;
-	auto total_charge = double{0.0};
-	
-	for(const auto& mhit : out._michel) {
-	  _michel_Z.push_back(mhit._w); 
-	  _michel_X.push_back(mhit._t);
-	  total_charge += mhit._q;
-	} 
-	
-	_michel_clustered_charge = total_charge;
-	_michel_n_hits           = out._michel.size();
+     auto boundary = (int)out._boundary;
 
-      }
-      else {
-	_michel_clustered_charge = -1;
-	_michel_n_hits           = -1;
-	_michel_Z                = EMPTYVEC;
-	_michel_X                = EMPTYVEC;
-	_has_michel              = false;
-      }
-		
-      _out_tree->Fill();      
-    }
-    
-  }
+      //parse the chi^2
+     _boundary         =  boundary                                   ;
+     _chi_at_boundary  =  covariance_in_largest_cluster.at(boundary) ;
+     _mean_chi         =  get_mean   (covariance_in_largest_cluster) ;
+     _rms_chi          =  get_rms    (covariance_in_largest_cluster) ;
+     _lowest_chi       =  get_lowest (covariance_in_largest_cluster) ;
+
+
+      //if there is a michel...
+     if(out._michel.size()) {
+
+       _has_michel = true;
+       auto total_charge = double{0.0};
+
+       for(const auto& mhit : out._michel) {
+         _michel_Z.push_back(mhit._w); 
+         _michel_X.push_back(mhit._t);
+         total_charge += mhit._q;
+         _michel_hit_qs->Fill(mhit._q);
+       } 
+
+       _michel_clustered_charge = total_charge;
+       _michel_n_hits           = out._michel.size();
+
+     }
+     else {
+       _michel_clustered_charge = -1;
+       _michel_n_hits           = -1;
+       _michel_Z                = EMPTYVEC;
+       _michel_X                = EMPTYVEC;
+       _has_michel              = false;
+     }
+
+     _out_tree->Fill();      
+   }
+
+ }
   
   /// Event Reset
   void CosmicAna::EventReset()
@@ -137,6 +137,7 @@ namespace michel {
   void CosmicAna::Finalize(TFile* fout)
   {
     _out_tree->Write();
+    _michel_hit_qs->Write();
     //fout->Write();
   }
 
