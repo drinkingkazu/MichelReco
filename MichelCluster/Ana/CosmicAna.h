@@ -19,6 +19,7 @@
 #include "Fmwk/MichelException.h"
 
 #include "TTree.h"
+#include "TH1F.h"
 #include <math.h>
 
 namespace michel {
@@ -86,6 +87,8 @@ namespace michel {
     double get_rms   (const std::vector<double>& data);
     double get_mean  (const std::vector<double>& data);
     void   clear_all();
+    
+    TH1F* _michel_hit_qs;
     
   };
 }
