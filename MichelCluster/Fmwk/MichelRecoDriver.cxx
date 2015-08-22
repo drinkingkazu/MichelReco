@@ -25,6 +25,13 @@ namespace larlite {
     // Get data products
     auto ev_cluster = storage->get_data<event_cluster>(_producer);
 
+    // get event information:
+    auto run_num    = storage->get_data<event_cluster>(_producer)->run();
+    auto subrun_num = storage->get_data<event_cluster>(_producer)->subrun();
+    auto event_num  = storage->get_data<event_cluster>(_producer)->event_id();
+    // keep track of the michel number we are adding
+    int n_michel = 0;
+
     if(!ev_cluster || ev_cluster->empty()) return false;
 
     // Get hits & association
@@ -71,8 +78,10 @@ namespace larlite {
       }
       
       // Append a hit-list (cluster) to a manager if not empty
-      if(michel_cluster.size())
-	_mgr.Append(std::move(michel_cluster));
+      if(michel_cluster.size()){
+	_mgr.Append(std::move(michel_cluster),run_num,subrun_num,event_num,n_michel);
+	n_michel += 1;
+      }
     }
 
     _mgr.RegisterAllHits( std::move(all_hits_v) );

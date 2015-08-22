@@ -37,6 +37,11 @@ namespace michel {
     _out_tree->Branch("_s_v",    "std::vector<double>" , &_s_v);
 
     _out_tree->Branch("_has_michel", &_has_michel, "_has_michel/O");
+    _out_tree->Branch("_run", &_run, "_run/I");
+    _out_tree->Branch("_subrun", &_subrun, "_subrun/I");
+    _out_tree->Branch("_event", &_event, "_event/I");
+    _out_tree->Branch("_clus_idx", &_clus_idx, "_clus_idx/I");
+
     _michel_hit_qs = new TH1F("michel_hit_qs","Michel Hit Charges",500,0,10000);
   }
   
@@ -85,6 +90,12 @@ namespace michel {
      _t_q_v    = out._t_mean_v;
      _t_dqds_v = out._t_dqds_v;
      _s_v      = out._s_v;
+
+     // saving event information for this michel
+     _run      = out._run;
+     _subrun   = out._subrun;
+     _event    = out._event;
+     _clus_idx = out._clus_idx;
 
       //get the boundary
      auto boundary = (int)out._boundary;
@@ -202,6 +213,12 @@ namespace michel {
     
     _Z.clear();
     _X.clear();
+
+    /// reset event info
+    _run = -1;
+    _subrun = -1;
+    _event = -1;
+    _clus_idx = -1;
     
     _michel_Z.clear();
     _michel_X.clear();

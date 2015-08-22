@@ -81,6 +81,12 @@ namespace michel {
     
     std::vector<double> _michel_Z;
     std::vector<double> _michel_X;
+
+    // also keep track of event information in the TTree
+    int _run;
+    int _subrun;
+    int _event;
+    int _clus_idx;
     
     
     double get_lowest(const std::vector<double>& data);

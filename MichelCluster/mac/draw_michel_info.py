@@ -4,6 +4,16 @@ import matplotlib.pyplot as plt
 from root_numpy import root2array, root2rec, tree2rec, array2root
 import sys
 
+if (len(sys.argv) < 2):
+    print
+    print "Incorrect Use"
+    print "Please provide the path to the file containing the tree which stores info on the reco'ed Michel"
+    print
+    sys.exit(0)
+
+
+fin = sys.argv[-1]
+
 # interactive matplotlib
 plt.ion()
 
@@ -12,12 +22,13 @@ plt.rcParams.update({'font.size': 14})
 fig, axarr = plt.subplots(2,2,figsize=(13,13))
 
 
-f = ROOT.TFile('michel_clusters.root')
+f = ROOT.TFile(fin)
 
 t = f.Get('out_tree')
 
 arr = tree2rec(t,branches=['_michel_clustered_charge','_michel_Z','_michel_X','_X','_Z','_q_v','_s_v','_chi_v','_t_dqds_v',
-                           '_t_q_v','_mean_chi','_lowest_chi','_rms_chi','_boundary','_chi_at_boundary'])
+                           '_t_q_v','_mean_chi','_lowest_chi','_rms_chi','_boundary','_chi_at_boundary',
+                           '_event','_run','_subrun','_clus_idx'])
 
 for n in xrange(len(arr)):
 
@@ -41,12 +52,16 @@ for n in xrange(len(arr)):
 
     Qtot = arr['_michel_clustered_charge'][n]
 
+    evt = arr['_event'][n]
+    run = arr['_run'][n]
+    idx = arr['_clus_idx'][n]
+
     # drawing michel cluster hit position
     axarr[0,0].set_xlabel('x [cm]')
     axarr[0,0].set_ylabel('z [cm]')
     axarr[0,0].scatter(clus_x,clus_z,c='k',s=10)
     axarr[0,0].scatter(michel_x,michel_z,c='r',edgecolor='none',s=30)
-    axarr[0,0].set_title('Qtot: %.02f'%Qtot)
+    axarr[0,0].set_title('Evt: %i Run: %i Idx: %i'%(evt,run,idx))
     axarr[0,0].grid()
 
 
@@ -71,9 +86,17 @@ for n in xrange(len(arr)):
     axarr[1,0].grid()
 
     # drawing truncated Q vs. distance from beginning of cluster
+    # also truncated dQds vs. distance from beginning of cluster
     axarr[1,1].set_xlabel('S [cm]')
-    axarr[1,1].set_ylabel('Truncated Q')
+    axarr[1,1].set_ylabel('Truncated Q',color='b')
     axarr[1,1].plot(ds,tdq,'bo--')
+    for ti in axarr[1,1].get_yticklabels():
+        ti.set_color('b')
+    scale2 = axarr[1,1].twinx()
+    scale2.plot(ds,tdqds,'mo--')
+    scale2.set_ylabel('Truncated dQ/ds',color='m')
+    for ti in scale2.get_yticklabels():
+        ti.set_color('m')
     axarr[1,1].axvline(ds[boundary],lw=3,color='r')
     axarr[1,1].grid()
 
@@ -83,3 +106,4 @@ for n in xrange(len(arr)):
     if ( usrinput == "q" ):                                                                                                                  
         sys.exit(0)
 
+sys.exit(0)
