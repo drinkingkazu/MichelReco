@@ -30,23 +30,6 @@ namespace michel {
     MichelCluster cluster(_min_nhits, _d_cutoff);
     cluster.SetVerbosity(_verbosity);
     cluster.SetHits(hit_v);
-    std::cout << "cluster event: " << cluster._event << std::endl;
-    if(cluster._hits.size() < _min_nhits) return;
-    _input_v.emplace_back(cluster);
-  }
-
-  //-----------------------------------------------------------------
-  void MichelReco::Append(const std::vector<michel::HitPt>& hit_v,
-			  const int& run, const int& subrun,
-			  const int& event, const int& idx)
-  //-----------------------------------------------------------------
-  {
-    if(hit_v.size() < _min_nhits) return;
-    MichelCluster cluster(_min_nhits, _d_cutoff);
-    cluster.SetVerbosity(_verbosity);
-    cluster.SetHits(hit_v);
-    cluster.SetEventInfo(run,subrun,event,idx);
-    std::cout << "cluster event: " << cluster._event << std::endl;
     if(cluster._hits.size() < _min_nhits) return;
     _input_v.emplace_back(cluster);
   }
@@ -58,23 +41,6 @@ namespace michel {
     if(hit_v.size() < _min_nhits) return;
     MichelCluster cluster(std::move(hit_v), _min_nhits, _d_cutoff);
     cluster.SetVerbosity(_verbosity);
-    std::cout << "cluster event: " << cluster._event << std::endl;
-    if(cluster._hits.size() < _min_nhits) return;
-    _input_v.emplace_back(cluster);
-  }
-
-
-  //---------------------------------------------------------
-  void MichelReco::Append(std::vector<michel::HitPt>&& hit_v,
-			  const int& run, const int& subrun,
-			  const int& event, const int& idx)
-  //---------------------------------------------------------
-  {
-    if(hit_v.size() < _min_nhits) return;
-    MichelCluster cluster(std::move(hit_v), _min_nhits, _d_cutoff);
-    cluster.SetEventInfo(run,subrun,event,idx);
-    cluster.SetVerbosity(_verbosity);
-    std::cout << "cluster event: " << cluster._event << std::endl;
     if(cluster._hits.size() < _min_nhits) return;
     _input_v.emplace_back(cluster);
   }
@@ -293,7 +259,11 @@ namespace michel {
     //
     // Finally call analyze
     //
-    for(auto& ana : _ana_v) ana->Analyze(_input_v,_output_v);
+    for(auto& ana : _ana_v){
+      // firs set the event id for the ana
+      ana->SetEventID(_id);
+      ana->Analyze(_input_v,_output_v);
+    }
 
     if(_verbosity <= msg::kDEBUG)
 

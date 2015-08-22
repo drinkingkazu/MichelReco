@@ -25,12 +25,15 @@ namespace larlite {
     // Get data products
     auto ev_cluster = storage->get_data<event_cluster>(_producer);
 
-    // get event information:
-    auto run_num    = storage->get_data<event_cluster>(_producer)->run();
-    auto subrun_num = storage->get_data<event_cluster>(_producer)->subrun();
-    auto event_num  = storage->get_data<event_cluster>(_producer)->event_id();
-    // keep track of the michel number we are adding
-    int n_michel = 0;
+    // get ID information
+    auto run = storage->get_data<event_cluster>(_producer)->run();
+    auto subrun = storage->get_data<event_cluster>(_producer)->subrun();
+    auto event = storage->get_data<event_cluster>(_producer)->event_id();
+    
+    michel::EventID id;
+    id.run = run;
+    id.subrun = subrun;
+    id.event = event;
 
     if(!ev_cluster || ev_cluster->empty()) return false;
 
@@ -55,6 +58,9 @@ namespace larlite {
     
     // Reaching this point means we have something to process. Prepare.
     _mgr.EventReset();
+
+    /// set event info
+    _mgr.SetEventInfo(id);
         
     // Loop over clusters & add them to our algorithm manager
     for(auto const& hit_ass : hit_ass_set) {
@@ -78,10 +84,8 @@ namespace larlite {
       }
       
       // Append a hit-list (cluster) to a manager if not empty
-      if(michel_cluster.size()){
-	_mgr.Append(std::move(michel_cluster),run_num,subrun_num,event_num,n_michel);
-	n_michel += 1;
-      }
+      if(michel_cluster.size())
+	_mgr.Append(std::move(michel_cluster));
     }
 
     _mgr.RegisterAllHits( std::move(all_hits_v) );

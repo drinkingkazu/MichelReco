@@ -49,10 +49,16 @@ namespace michel {
     /// Finalize
     virtual void Finalize(TFile* fout) = 0;
 
+    /// Event ID Setter
+    void SetEventID(EventID id) { _id = id; }
+
   protected:
 
     /// Verbosity level
     msg::MSGLevel_t _verbosity;
+
+    /// event id struct
+    EventID _id;
     
   };
 }

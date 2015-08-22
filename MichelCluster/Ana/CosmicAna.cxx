@@ -67,6 +67,9 @@ namespace michel {
     
     //get the number of clusters
     int number_of_good_clusters = 0;
+
+    // count number of output clusters
+    int n_clus = 0;
     
     //fill cluster-wise info
     for(const auto& out : output_cluster_v) {
@@ -91,12 +94,6 @@ namespace michel {
      _t_dqds_v = out._t_dqds_v;
      _s_v      = out._s_v;
 
-     // saving event information for this michel
-     _run      = out._run;
-     _subrun   = out._subrun;
-     _event    = out._event;
-     _clus_idx = out._clus_idx;
-
       //get the boundary
      auto boundary = (int)out._boundary;
 
@@ -107,6 +104,12 @@ namespace michel {
      _rms_chi          =  get_rms    (covariance_in_largest_cluster) ;
      _lowest_chi       =  get_lowest (covariance_in_largest_cluster) ;
 
+
+     _event    = _id.event;
+     _run      = _id.run;
+     _subrun   = _id.subrun;
+     _clus_idx = n_clus;
+     n_clus += 1;
 
       //if there is a michel...
      if(out._michel.size()) {

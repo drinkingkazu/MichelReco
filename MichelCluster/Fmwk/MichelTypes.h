@@ -30,6 +30,12 @@ namespace michel {
     kMichelCluster,
     kAlgoTypeMax
   };
+
+  struct EventID {
+    int run;
+    int subrun;
+    int event;
+  };
   
 }
 #endif

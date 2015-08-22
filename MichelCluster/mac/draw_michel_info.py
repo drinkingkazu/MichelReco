@@ -20,7 +20,7 @@ plt.ion()
 plt.rcParams.update({'font.size': 14})
 
 fig, axarr = plt.subplots(2,2,figsize=(13,13))
-
+scale2 = axarr[1,1].twinx()
 
 f = ROOT.TFile(fin)
 
@@ -36,6 +36,7 @@ for n in xrange(len(arr)):
     axarr[0,1].cla()
     axarr[1,0].cla()
     axarr[1,1].cla()
+    scale2.cla()
     fig.gca()
 
     clus_x = arr['_X'][n]
@@ -92,7 +93,7 @@ for n in xrange(len(arr)):
     axarr[1,1].plot(ds,tdq,'bo--')
     for ti in axarr[1,1].get_yticklabels():
         ti.set_color('b')
-    scale2 = axarr[1,1].twinx()
+
     scale2.plot(ds,tdqds,'mo--')
     scale2.set_ylabel('Truncated dQ/ds',color='m')
     for ti in scale2.get_yticklabels():

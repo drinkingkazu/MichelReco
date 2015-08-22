@@ -17,6 +17,7 @@
 
 #include "Analysis/ana_base.h"
 #include "MichelReco.h"
+#include "MichelTypes.h"
 #include <TTree.h>
 
 namespace larlite {

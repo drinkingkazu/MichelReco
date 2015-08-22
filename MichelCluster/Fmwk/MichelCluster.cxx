@@ -12,10 +12,6 @@ namespace michel {
     , _d_cutoff  ( d_cutoff  )
   { 
     _verbosity = msg::kNORMAL;
-    _run = -1;
-    _subrun = -1;
-    _event = -1;
-    _clus_idx = -1;
 }
 
   MichelCluster::MichelCluster(const std::vector<HitPt>& hits,
@@ -26,10 +22,6 @@ namespace michel {
     , _d_cutoff  ( d_cutoff  )
   {
     _verbosity = msg::kNORMAL;
-    _run = -1;
-    _subrun = -1;
-    _event = -1;
-    _clus_idx = -1;
     ProcessHits();
   }
 
@@ -41,10 +33,6 @@ namespace michel {
     , _d_cutoff  ( d_cutoff  )
   {
     _verbosity = msg::kNORMAL;
-    _run = -1;
-    _subrun = -1;
-    _event = -1;
-    _clus_idx = -1;
     ProcessHits();
   }
   /*
@@ -84,15 +72,6 @@ namespace michel {
   {
     _hits = hits;
     ProcessHits();
-  }
-
-  void MichelCluster::SetEventInfo(const int& run, const int& subrun,
-				   const int& event, const int& idx)
-  {
-    _run = run;
-    _subrun = subrun;
-    _event = event;
-    _clus_idx = idx;
   }
 
   void MichelCluster::SetHits(std::vector<HitPt>&& hits)

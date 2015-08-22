@@ -70,19 +70,11 @@ namespace michel {
     //
     /// cluster register function
     void Append(const std::vector<michel::HitPt>& hit_v);
-    /// Cluster register function w/ event info
-    void Append(const std::vector<michel::HitPt>& hit_v,
-		const int& run, const int& subrun,
-		const int& event, const int& idx);
     /// all-hit register function
     void RegisterAllHits(const std::vector<michel::HitPt>& all_hit_v);
 #ifndef __CINT__
     /// cluster register function w/ std::move
     void Append(std::vector<michel::HitPt>&& hit_v);
-    /// cluster register function w/ std::move w/ event info
-    void Append(std::vector<michel::HitPt>&& hit_v,
-		const int& run, const int& subrun,
-		const int& event, const int& idx);
     /// all-hit register function w/ std::move
     void RegisterAllHits(std::vector<michel::HitPt>&& all_hit_v);
 #endif
@@ -101,6 +93,9 @@ namespace michel {
 
     /// Finalizer (after event loop)
     void Finalize(TFile *fout);
+
+    /// Setter for event info
+    void SetEventInfo(EventID id) { _id = id; }
 
     /// Getter for MichelClusterArray
     const MichelClusterArray& GetResult()
@@ -138,6 +133,9 @@ namespace michel {
     TStopwatch _watch; ///< For profiling
     std::vector<double> _alg_time_v; ///< Overall time for processing
     std::vector<size_t> _alg_ctr_v;  ///< Overall number of clusters processed by algo
+
+    /// Event information
+    EventID _id;
 
   };
 }
