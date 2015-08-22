@@ -79,7 +79,6 @@ namespace michel {
       
     }
     
-    //cluster._chi2_v = chi;
     return chi;
 
 

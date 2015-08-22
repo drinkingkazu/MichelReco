@@ -9,7 +9,7 @@ namespace michel {
   void ForwardMichelID::EventReset()
   {}
   
-  Michel ForwardMichelID::Identify(const MichelCluster& cluster)
+  Michel ForwardMichelID::Identify(const MichelCluster& cluster, bool& forward)
   {
     
     if(cluster._boundary == kINVALID_SIZE) { return Michel(); }
@@ -19,7 +19,6 @@ namespace michel {
     double n_cutoff = 2;
     double c_cutoff = 1.15;
     int    w_cutoff = 10;
-    bool   forward;
     int    idx = -1;
     size_t the_michel_start; //index in ordered points that is the michel
     

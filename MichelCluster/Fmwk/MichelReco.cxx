@@ -203,8 +203,8 @@ namespace michel {
 
     _watch.Start();
     for(auto& cluster : _output_v)
-
-      cluster._michel = _alg_michel_id->Identify(cluster);
+      
+      cluster._michel = _alg_michel_id->Identify(cluster,cluster._forward);
 
     _alg_time_v [kMichelID] += _watch.RealTime();
     _alg_ctr_v  [kMichelID] += _output_v.size();
