@@ -65,6 +65,12 @@ namespace michel {
     void SetHits(std::vector<michel::HitPt>&& hits);
 #endif
 
+    /// Set cluster's event information
+    /// run, subrun, event numbers
+    /// as well as index within "michel" cluster vector
+    void SetEventInfo(const int& run, const int& subrun,
+		      const int& event, const int& idx);
+
     /// Verbosity level
     void SetVerbosity(msg::MSGLevel_t level)
     { _verbosity = level; }
@@ -112,6 +118,12 @@ namespace michel {
     msg::MSGLevel_t _verbosity; ///< Verbosity level
     size_t _min_nhits;          ///< Minimum # of hits
     double _d_cutoff;           ///< Distance cut off value
+
+    // Event information
+    int _run;
+    int _subrun;
+    int _event;
+    int _clus_idx;
 
   protected:
     

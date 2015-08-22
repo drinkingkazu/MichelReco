@@ -32,7 +32,8 @@ the_filter = fmwk.MichelFilter()
 
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
-my_unit.SetClusterProducer("fuzzycluster")
+#my_unit.SetClusterProducer("fuzzycluster")
+my_unit.SetClusterProducer("rawclusters")
 # set here if you want to save michels as an output cluster
 my_unit.saveMichelClusters(True)
 
@@ -65,7 +66,11 @@ mgr.AddAna(michel.CosmicAna())
 #my_proc.add_process(the_filter)
 my_proc.add_process(my_unit)
 
-
+my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
+my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
+my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
+my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
+my_proc.set_data_to_write(fmwk.data.kAssociation,'rawclusters')
 #Write aho unit to get out MC vars whatever
 
 # aho_ana=fmwk.AhoAna()

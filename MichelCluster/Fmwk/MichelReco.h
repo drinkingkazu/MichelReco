@@ -70,11 +70,19 @@ namespace michel {
     //
     /// cluster register function
     void Append(const std::vector<michel::HitPt>& hit_v);
+    /// Cluster register function w/ event info
+    void Append(const std::vector<michel::HitPt>& hit_v,
+		const int& run, const int& subrun,
+		const int& event, const int& idx);
     /// all-hit register function
     void RegisterAllHits(const std::vector<michel::HitPt>& all_hit_v);
 #ifndef __CINT__
     /// cluster register function w/ std::move
     void Append(std::vector<michel::HitPt>&& hit_v);
+    /// cluster register function w/ std::move w/ event info
+    void Append(std::vector<michel::HitPt>&& hit_v,
+		const int& run, const int& subrun,
+		const int& event, const int& idx);
     /// all-hit register function w/ std::move
     void RegisterAllHits(std::vector<michel::HitPt>&& all_hit_v);
 #endif
