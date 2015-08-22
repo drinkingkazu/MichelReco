@@ -32,7 +32,7 @@ namespace michel {
     /// Default destructor
     virtual ~BaseAlgMichelID(){}
 
-    virtual Michel Identify(const MichelCluster& cluster) = 0;
+    virtual Michel Identify(const MichelCluster& cluster, bool& forward) = 0;
     
   };
 }

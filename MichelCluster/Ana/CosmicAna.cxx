@@ -37,6 +37,7 @@ namespace michel {
     _out_tree->Branch("_s_v",    "std::vector<double>" , &_s_v);
 
     _out_tree->Branch("_has_michel", &_has_michel, "_has_michel/O");
+    _out_tree->Branch("_forward", &_forward, "_forward/I");
     _out_tree->Branch("_run", &_run, "_run/I");
     _out_tree->Branch("_subrun", &_subrun, "_subrun/I");
     _out_tree->Branch("_event", &_event, "_event/I");
@@ -93,6 +94,12 @@ namespace michel {
      _t_q_v    = out._t_mean_v;
      _t_dqds_v = out._t_dqds_v;
      _s_v      = out._s_v;
+
+     // which section of the hit-list if the michel?
+     // (forward == 1) -> the second half
+     // (forward == 0) -> the first half
+     _forward = 0;
+     if (out._forward) _forward = 1;
 
       //get the boundary
      auto boundary = (int)out._boundary;
@@ -216,6 +223,8 @@ namespace michel {
     
     _Z.clear();
     _X.clear();
+
+    _forward = -1;
 
     /// reset event info
     _run = -1;

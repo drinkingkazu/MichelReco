@@ -82,6 +82,9 @@ namespace michel {
     std::vector<double> _michel_Z;
     std::vector<double> _michel_X;
 
+    // which part of the hit-list is the michel?
+    int _forward;
+
     // also keep track of event information in the TTree
     int _run;
     int _subrun;

@@ -33,7 +33,7 @@ namespace michel {
     void EventReset();
 
     /// Toy Michel identifier
-    Michel Identify(const MichelCluster& cluster);
+    Michel Identify(const MichelCluster& cluster, bool& forward);
 
   private:
     double determine_length(const MichelCluster& c,
