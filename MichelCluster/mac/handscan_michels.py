@@ -53,36 +53,33 @@ if does_outfile_exist:
             scanned_events_dict[(myrun,mysubrun,myeventid)] = [myidx]
         else:
             scanned_events_dict[(myrun,mysubrun,myeventid)].append(myidx)
-
+print scanned_events_dict
 #Open the output text file
 fout = open(handscan_textfilename,'a')
-#start on first event always
-user_input_evt_no = 0;
+
+try: user_input_evt_no = int(input('Hit Enter to start on the first event, or type an int to jump to that event index.'))
+except SyntaxError:
+    user_input_evt_no = 0
 
 while True:
-
-    try:
-        user_input_evt_no = int(input('Hit Enter to continue to next evt, or type in an event number to jump to that event:'))
-    except SyntaxError:
-        user_input_evt_no = user_input_evt_no + 1
 
     my_proc.process_event(user_input_evt_no)
 
     plane = 2
     for cindex in xrange(raw_viewer.ClusterCount(plane)):
 
-
         res = raw_viewer.DrawOneClusterGraphAndHits(plane,cindex)
-        if (res.runnumber,res.subrunnumber,res.eventid) in scanned_events_dict.keys():
-            if res.index in scanned_events_dict[(res.runnumber,res.subrunnumber,res.eventid)]:
-                print "Whoops this cluster (run %d, subrun %d, eventid %d, index %d) has already been scanned. Skipping..." %(res.runnumber,res.subrunnumber,res.eventid,res.index)
+        run, subrun, evtid, idx = int(res.runnumber), int(res.subrunnumber), int(res.eventid), int(res.index)
+        if (run, subrun, evtid) in scanned_events_dict.keys():
+              if idx in scanned_events_dict[(run, subrun, evtid)]:
+                print "Whoops this cluster (run %d, subrun %d, eventid %d, index %d) has already been scanned. Skipping..." %(run, subrun, evtid, idx)
                 continue
 
         while True:
             try: 
                 good_or_bad = int(input('Type 0 if bad, 1 if good, 2 to skip cluster.'))
                 if good_or_bad not in [0, 1, 2]:
-                    print "You didn't input 0, 1, or 2! Try again..."
+                    print "You didn't input 0, 1, 2, or 3! Try again..."
                     continue
             except ValueError:
                 print "You didn't input an integer."
@@ -96,10 +93,13 @@ while True:
             else:
                 break
         if good_or_bad in [0, 1]:
-            if (int(res.runnumber),int(res.subrunnumber),int(res.eventid)) not in scanned_events_dict.keys():
-                scanned_events_dict[(int(res.runnumber),int(res.subrunnumber),int(res.eventid))] = [int(res.index)]
+            if (run, subrun, evtid) not in scanned_events_dict.keys():
+                scanned_events_dict[(run, subrun, evtid)] = [idx]
             else:
-                if int(res.index) not in scanned_events_dict[(int(res.runnumber),int(res.subrunnumber),int(res.eventid))]:
-                    scanned_events_dict[(int(res.runnumber),int(res.subrunnumber),int(res.eventid))].append(int(res.index))
-            fout.write('%d %d %d %d %d\n'%(int(res.runnumber),int(res.subrunnumber),int(res.eventid),int(res.index),good_or_bad))
+                if idx not in scanned_events_dict[(run, subrun, evtid)]:
+                    scanned_events_dict[(run, subrun, evtid)].append(idx)
+            fout.write('%d %d %d %d %d\n'%(run, subrun, evtid, idx,good_or_bad))
+
+    user_input_evt_no = user_input_evt_no + 1
+
 
