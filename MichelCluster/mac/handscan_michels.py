@@ -49,6 +49,7 @@ if does_outfile_exist:
     for line in open(handscan_textfilename,'r'):
         columns = line.split(' ')
         myrun, mysubrun, myeventid, myidx = columns[0],columns[1],columns[2],columns[3]
+        myrun, mysubrun, myeventid, myidx = int(myrun), int(mysubrun), int(myeventid), int(myidx)
         if (myrun, mysubrun, myeventid) not in scanned_events_dict.keys():
             scanned_events_dict[(myrun,mysubrun,myeventid)] = [myidx]
         else:
@@ -71,7 +72,7 @@ while True:
         res = raw_viewer.DrawOneClusterGraphAndHits(plane,cindex)
         run, subrun, evtid, idx = int(res.runnumber), int(res.subrunnumber), int(res.eventid), int(res.index)
         if (run, subrun, evtid) in scanned_events_dict.keys():
-              if idx in scanned_events_dict[(run, subrun, evtid)]:
+            if idx in scanned_events_dict[(run, subrun, evtid)]:
                 print "Whoops this cluster (run %d, subrun %d, eventid %d, index %d) has already been scanned. Skipping..." %(run, subrun, evtid, idx)
                 continue
 
