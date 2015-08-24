@@ -17,10 +17,13 @@ namespace michel {
 
     _out_tree->Branch("_boundary", &_boundary, "_boundary/I");
 
+    _out_tree->Branch("_chi_v",    "std::vector<double>" , &_chi_v);
     _out_tree->Branch("_chi_at_boundary", &_chi_at_boundary, "_chi_at_boundary/D");
     _out_tree->Branch("_mean_chi"       , &_mean_chi       , "_mean_chi/D");
     _out_tree->Branch("_rms_chi"        , &_rms_chi        , "_rms_chi/D");
     _out_tree->Branch("_lowest_chi"     , &_lowest_chi     , "_lowest_chi/D");
+    _out_tree->Branch("_mean_chi_muon",&_mean_chi_muon,"_mean_chi_muon/D");
+    _out_tree->Branch("_mean_chi_michel",&_mean_chi_michel,"_mean_chi_michel/D");
     
     _out_tree->Branch("_Z", "std::vector<double>" , &_Z);
     _out_tree->Branch("_X", "std::vector<double>" , &_X);
@@ -32,7 +35,7 @@ namespace michel {
 
     _out_tree->Branch("_t_q_v",    "std::vector<double>" , &_t_q_v);
     _out_tree->Branch("_t_dqds_v", "std::vector<double>" , &_t_dqds_v);
-    _out_tree->Branch("_chi_v",    "std::vector<double>" , &_chi_v);
+
 
     _out_tree->Branch("_s_v",    "std::vector<double>" , &_s_v);
 
@@ -110,6 +113,27 @@ namespace michel {
      _mean_chi         =  get_mean   (covariance_in_largest_cluster) ;
      _rms_chi          =  get_rms    (covariance_in_largest_cluster) ;
      _lowest_chi       =  get_lowest (covariance_in_largest_cluster) ;
+     // get chi for muon and michel segments
+     // get chi for "forward" and "backward" sections
+     double mean_chi_forward  = 0;
+     double mean_chi_backward = 0;
+     for (size_t n=0; n < _chi_v.size(); n++){
+       if (n < _boundary)
+	 mean_chi_backward += _chi_v[n];
+       else
+	 mean_chi_forward  += _chi_v[n];
+     }
+     if (mean_chi_backward != 0) mean_chi_backward /= _boundary;
+     if (mean_chi_forward  != 0) mean_chi_forward  /= (_chi_v.size()-_boundary);
+     // assign to muon and michel according to value of "_forward"
+     if (_forward){
+       _mean_chi_muon   = mean_chi_backward;
+       _mean_chi_michel = mean_chi_forward;
+     }
+     else{
+       _mean_chi_muon   = mean_chi_forward;
+       _mean_chi_michel = mean_chi_backward;
+     }
 
 
      _event    = _id.event;
@@ -220,6 +244,8 @@ namespace michel {
     _mean_chi        = -1;
     _rms_chi         = -1;
     _lowest_chi      = -1;
+    _mean_chi_muon   = -1;
+    _mean_chi_michel = -1;
     
     _Z.clear();
     _X.clear();

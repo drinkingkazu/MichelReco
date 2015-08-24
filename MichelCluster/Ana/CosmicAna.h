@@ -62,14 +62,17 @@ namespace michel {
 
     int    _boundary;
 
+    std::vector<double> _q_v;
     double _chi_at_boundary;
     double _mean_chi;
     double _rms_chi;
     double _lowest_chi;
+    double _mean_chi_michel;
+    double _mean_chi_muon;
 
     bool _has_michel;
     
-    std::vector<double> _q_v;
+
     std::vector<double> _t_q_v;
     std::vector<double> _t_dqds_v;
     std::vector<double> _chi_v;
