@@ -11,6 +11,55 @@ if (len(sys.argv) < 2):
     print
     sys.exit(0)
 
+# do you want to scan only throgh signal or background?
+print
+print "Do you want to scan only through Signal/Background events?"
+print "[ \'s\' = signal. \'b\' = background. \'q\' = no thanks, scan everything]" 
+print
+# how many times have we tried getting the correct input from the user
+attempts = 0
+# parameter deciding if to scan signal (1) or background (0)
+# value of 2 will scan everything
+# set to -1 by default
+whattoscan = -1
+# text file where to search for signal/background handscan result
+handscanresults = 'mac/michelcluster_cchit_fromfuzzycluster_handscanning_results.txt'
+while (whattoscan == -1):
+    ret = raw_input('Enter command...')
+    if (ret == 's'):
+        print
+        print 'Great! Looking for signal events in %s'%handscanresults
+        whattoscan = 1
+    elif (ret == 'b'):
+        print 'Great! Looking for background events in %s'%handscanresults
+        whattoscan = 0
+    elif (ret == 'q'):
+        print 'Great! Looping through all events in %s'%handscanresults
+        whattoscan = 2
+    else:
+        if (attempts >= 10):
+            print 'Ok...we are done here...we will scan everything...'
+            print
+            whattoscan = 2
+        else:
+            print
+            print 'You have failed at entering the requested input...try again...'
+            print "Do you want to scan only through Signal/Background events?"
+            print "[ \'s\' = signal. \'b\' = background. \'q\' = no thanks, scan everything]" 
+            attempts += 1
+
+scanDict = {}
+
+if ((whattoscan == 0) or (whattoscan == 1)):
+    fin = open(handscanresults)
+    for line in fin:
+        words = line.split()
+        run    = int(words[0])
+        subrun = int(words[1])
+        event  = int(words[2])
+        index  = int(words[3])
+        what   = int(words[4])
+        scanDict[(run,event,index)] = what
 
 fin = sys.argv[-1]
 
@@ -31,6 +80,22 @@ arr = tree2rec(t,branches=['_michel_clustered_charge','_michel_Z','_michel_X','_
                            '_event','_run','_subrun','_clus_idx','_forward'])
 
 for n in xrange(len(arr)):
+
+    # first make sure that if we are scanning through signal or background only
+    # we are only looping through those events
+
+    evt = arr['_event'][n]
+    run = arr['_run'][n]
+    subrun = arr['_subrun'][n]
+    idx = arr['_clus_idx'][n]
+
+    if (whattoscan == 0):
+        if (scanDict[(run,evt,idx)] != 0):
+            continue
+    if (whattoscan == 1):
+        if (scanDict[(run,evt,idx)] != 1):
+            continue
+
 
     axarr[0,0].cla()
     axarr[0,1].cla()
@@ -54,9 +119,6 @@ for n in xrange(len(arr)):
 
     Qtot = arr['_michel_clustered_charge'][n]
 
-    evt = arr['_event'][n]
-    run = arr['_run'][n]
-    idx = arr['_clus_idx'][n]
 
 
     # drawing chi vector vs. distance from beginning of cluster
