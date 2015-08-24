@@ -11,6 +11,7 @@
 
 #pragma link C++ class michel::ToyMerger+;
 #pragma link C++ class michel::ToyBoundary+;
+#pragma link C++ class michel::ChiBoundary+;
 #pragma link C++ class michel::TruncatedQBoundary+;
 #pragma link C++ class michel::TSpectrumBoundary+;
 #pragma link C++ class michel::ToyMichelID+;
