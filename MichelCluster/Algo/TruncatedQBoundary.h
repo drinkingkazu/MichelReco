@@ -25,7 +25,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    TruncatedQBoundary(){}
+    TruncatedQBoundary(){_maxDistance=20;}
     
     /// Default destructor
     ~TruncatedQBoundary(){}
@@ -35,6 +35,10 @@ namespace michel {
     
     /// A function to identify a michel's boundary point
     HitIdx_t Boundary(MichelCluster& cluster);
+
+    /// setter function for max distance between min in dQds
+    /// and max in dQ
+    void SetMaxDistanceTruncatedPeaks(int n) { _maxDistance = n; }
 
     
   private:
@@ -78,6 +82,12 @@ namespace michel {
 
     size_t find_max(const std::vector<double>& data);
     size_t find_min(const std::vector<double>& data);
+
+    /// number of hits that sets max allowed distance between
+    /// min in trunc. dQdx and max in trunc. dQ
+    /// if the min and max are more than this number of hits
+    /// apart -> do not create a michel
+    int _maxDistance;
     
   };
 }

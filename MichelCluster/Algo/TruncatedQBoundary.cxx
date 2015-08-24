@@ -65,12 +65,10 @@ namespace michel {
     if((dqdscandidate_loc >= cluster._hits.size()))
       return kINVALID_SIZE;
     
-    if(abs(dqdscandidate_loc - candidate_loc) > 20)
+    if(abs(dqdscandidate_loc - candidate_loc) > _maxDistance)
       return kINVALID_SIZE;
     
 
-    //20 is hardcoded
-    auto window_size = 20;
     auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
     auto left  = candidate_loc;
     
@@ -78,17 +76,20 @@ namespace michel {
     int  iMax = 0;
     
     
-    if(right >= window_size) iMax  = window_size   + candidate_loc;
-    if(left  >= window_size) iMin  = candidate_loc - window_size;
+    if(right >= _maxDistance) iMax  = _maxDistance   + candidate_loc;
+    if(left  >= _maxDistance) iMin  = candidate_loc - _maxDistance;
 
-    if(right < window_size)  iMax  = cluster._hits.size() - 1;
-    if(left  < window_size)  iMin  = 0;
-    
+    if(right < _maxDistance)  iMax  = cluster._hits.size() - 1;
+    if(left  < _maxDistance)  iMin  = 0;
+
+    // holder for hit with largest charge -> this will identify the location
+    // of the hit that defines the michel boundary
     auto k   = 0.0;
     auto idx = 0;
     
     for(int w = iMin; w <= iMax; ++w) {
       auto c = cluster._hits[cluster._ordered_pts[w]]._q;
+      // if this hit has more charge than any other
       if(c > k) { k = c; idx = w; }
     }
     
