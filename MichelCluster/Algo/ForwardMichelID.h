@@ -24,7 +24,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    ForwardMichelID(){}
+    ForwardMichelID(){_maxHits=0;}
     
     /// Default destructor
     ~ForwardMichelID(){}
@@ -35,6 +35,9 @@ namespace michel {
     /// Toy Michel identifier
     Michel Identify(const MichelCluster& cluster, bool& forward);
 
+    /// Setter for max number of hits allowed
+    void SetMaxMichelHits(size_t n) { _maxHits = n; std::cout << "max hits: " << _maxHits << std::endl; }
+
   private:
     double determine_length(const MichelCluster& c,
 			    const std::vector<size_t>& ordered_pts_idx);
@@ -44,6 +47,9 @@ namespace michel {
 			   const double c_cutoff,
 			   const double w_cutoff,
 			   bool&  forward);
+
+    /// variable to determine max number of hits allowed in michel cluster
+    size_t _maxHits;
     
   };
 }

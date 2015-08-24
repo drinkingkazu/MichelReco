@@ -71,6 +71,10 @@ namespace michel {
       }
     }
 
+    // if the michel has more than _maxHits points -> do not return a michel...it is probably garbage
+    if ( (electron.size() > _maxHits) and (_maxHits != 0) )
+      return Michel();
+
     //Do same thing for muon (in future)
     auto length = determine_length(cluster,ordered_pts_idx); //true radius with no minimum
     
