@@ -58,14 +58,6 @@ for n in xrange(len(arr)):
     run = arr['_run'][n]
     idx = arr['_clus_idx'][n]
 
-    # drawing michel cluster hit position
-    axarr[0,0].set_xlabel('x [cm]')
-    axarr[0,0].set_ylabel('z [cm]')
-    axarr[0,0].scatter(clus_x,clus_z,c='k',s=10)
-    axarr[0,0].scatter(michel_x,michel_z,c='r',edgecolor='none',s=30)
-    axarr[0,0].set_title('Evt: %i Run: %i Idx: %i'%(evt,run,idx))
-    axarr[0,0].grid()
-
 
     # drawing chi vector vs. distance from beginning of cluster
     chi_v = arr['_chi_v'][n]
@@ -88,6 +80,9 @@ for n in xrange(len(arr)):
     if (forward):
         chi_muon = chi_backward;
         chi_michel = chi_forward;
+        # get points asociated with michel
+        #for x in xrange(boundary,len(chi_v)):
+        #    michel_x.append(
     else:
         chi_muon = chi_forward;
         chi_michel = chi_backward;
@@ -105,6 +100,15 @@ for n in xrange(len(arr)):
     else:
         axarr[1,0].axvspan(ds[0],ds[boundary],color='r',alpha=0.2)
     axarr[1,0].grid()
+
+    # drawing michel cluster hit position
+    axarr[0,0].set_xlabel('x [cm]')
+    axarr[0,0].set_ylabel('z [cm]')
+    #axarr[0,0].scatter(clus_x,clus_z,c=dq,s=50,edgecolor='none')
+    axarr[0,0].scatter(clus_x,clus_z,c='k',s=30,edgecolor='none')
+    axarr[0,0].scatter(michel_x,michel_z,c='r',edgecolor='none',s=50)
+    axarr[0,0].set_title('Evt: %i Run: %i Idx: %i'%(evt,run,idx))
+    axarr[0,0].grid()
 
 
     # drawing charge vs. distance from beginning of cluster
