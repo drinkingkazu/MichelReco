@@ -25,7 +25,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    RadiusMichelCluster(){}
+    RadiusMichelCluster() : _min_radius(10.0) {}
     
     /// Default destructor
     ~RadiusMichelCluster(){}
@@ -36,6 +36,15 @@ namespace michel {
     /// Re-cluster michel electrons w/ un-used hits
     void Cluster(Michel& cluster,
 		 const std::vector<HitPt>& hits);
+    
+    /// Setter for minimum radius
+    void SetMinRadius(double r) { _min_radius = r; }
+
+    
+  private:
+    
+    /// Minimum radius from michel start point.
+    double _min_radius;
     
   };
 }
