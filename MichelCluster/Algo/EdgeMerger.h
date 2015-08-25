@@ -24,7 +24,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    EdgeMerger(){}
+    EdgeMerger() : _edge_dist(6.0) {}
     
     /// Default destructor
     ~EdgeMerger(){}
@@ -37,14 +37,19 @@ namespace michel {
 
     /// Priority function assign a priority ordering for a merging function to be called
     double Priority(const MichelCluster& cluster);
-
+    
+    /// setter function _edge_distance
+    void SetEdgeDistance(double d) { _edge_dist = d; }
+    
   private:
 
     /// Check if two clusters are touching 
     bool Touching (const MichelCluster& lhs,
 		   const MichelCluster& rhs,
 		   const double min_dist) const;
-
+    
+    /// Edge distance between two clusters to define "touching"
+    double _edge_dist;
   };
   
 }

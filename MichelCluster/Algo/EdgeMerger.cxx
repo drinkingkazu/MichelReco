@@ -10,7 +10,7 @@ namespace michel{
 
   bool EdgeMerger::Merge(const MichelCluster& a, const MichelCluster& b)
   {
-    //Do not currently have confiure function yet, just use "6 [cm]" dist as before..."
+    /// Do not currently have confiure function yet, just use "6 [cm]" dist as before..."
     if(_verbosity <=  msg::kDEBUG) {
       std::cout << "Cluster A start/end:" << std::endl
 		<< a._start.Print().c_str() << std::endl
@@ -20,9 +20,9 @@ namespace michel{
 		<< b._end.Print().c_str() << std::endl
 		<< std::endl;
     }
-    // auto kk = Touching(a,b,6);
-    // return kk;
-    return Touching(a,b,6);
+    
+    /// True if near, false if not
+    return Touching(a,b,_edge_dist);
   }
 
   double EdgeMerger::Priority(const MichelCluster& cluster)
