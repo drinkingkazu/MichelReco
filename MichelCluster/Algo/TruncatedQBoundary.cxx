@@ -16,10 +16,12 @@ namespace michel {
     std::vector<double> truncated_mean;
     std::vector<double> truncated_dqds;
     std::vector<double> covariance; 
+    std::vector<double> slope; 
     
     truncated_mean.reserve(cluster._ordered_pts.size());
     truncated_dqds.reserve(cluster._ordered_pts.size());
     covariance.reserve    (cluster._ordered_pts.size());
+    slope.reserve         (cluster._ordered_pts.size());
     
     //hardcoded for now will become configurable
     double _n_window_size = 15;
@@ -37,12 +39,16 @@ namespace michel {
       truncated_mean.at(truncated_mean.size() - i - 1) = truncated_mean[truncated_mean.size() - 3];
     }
     
+    //Directionality considerations
+    int dir_window = 11;
+    covariance     = calc_covariance(cluster._hits,dir_window);
+    slope          = calc_slope     (cluster._hits,dir_window);
     
-    
-    int s = 3; // must be odd, currently has no setter, sorry that this method has no info on it, ask vic
+    // must be odd, currently has no setter,
+    // sorry that this method has no info on it, ask vic
+    int s = 3; 
     truncated_dqds = calc_smooth_derive(cluster._s_v,truncated_mean,s);
-    covariance     = calc_covariance(cluster._hits,11);
-    
+        
     //Lets play with truncated mean shaving...
     if(_verbosity <= msg::kINFO) {
       std::cout << "\n\t\tIn TruncatedQBoundary\n"
@@ -94,6 +100,7 @@ namespace michel {
     }
     
     std::swap(cluster._chi2_v,covariance);
+    std::swap(cluster._dirs_v,slope);
 
     return cluster._ordered_pts[idx];
   }
@@ -271,9 +278,40 @@ namespace michel {
     return idx;
 
   }
+  
+  std::vector<double> TruncatedQBoundary::calc_slope(const std::vector<::michel::HitPt>& hits,
+						     const int _n_window_size)
+  {
+    std::vector<double> S;
+    S.reserve(hits.size());
 
-  std::vector<double>  TruncatedQBoundary::calc_covariance(const std::vector<::michel::HitPt>& hits, 
-							   const int _n_window_size)
+    std::vector<double> X;
+    std::vector<double> Y;
+    X.reserve(_n_window_size);
+    Y.reserve(_n_window_size);
+
+    for(const auto& window : get_windows(hits,_n_window_size) ) { 
+      for(const auto& hit : window) {
+	X.push_back(hit._w); Y.push_back(hit._t);
+      }
+      
+      //http://mathworld.wolfram.com/LeastSquaresFitting.html
+      auto c   = cov(X,Y);
+      auto sX  = stdev(X);
+      if(sX == 0.0) {c = 0.0; sX = 1.0;} //might have a problem with floating point error here
+      auto b   = c/(sX*sX) ;
+      
+      S.push_back(b);
+      X.clear(); Y.clear();
+    }
+    S.at(0)            = S.at(1);
+    S.at(S.size() - 1) = S.at(S.size() - 2);
+    
+    return S;
+  }
+  
+  std::vector<double> TruncatedQBoundary::calc_covariance(const std::vector<::michel::HitPt>& hits, 
+							  const int _n_window_size)
   {
     std::vector<double> R;
     R.reserve(hits.size());

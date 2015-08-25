@@ -13,7 +13,6 @@ namespace michel {
 
     _out_tree->Branch("_michel_clustered_charge", &_michel_clustered_charge, "_michel_clustered_charge/D");
     _out_tree->Branch("_michel_n_hits"          , &_michel_n_hits, "_michel_n_hits/D"          );
-    //_out_tree->Branch("_number_of_clusters"     , &_number_of_clusters , "_number_of_clusters/I");
 
     _out_tree->Branch("_boundary", &_boundary, "_boundary/I");
 
@@ -32,11 +31,9 @@ namespace michel {
     _out_tree->Branch("_michel_X", "std::vector<double>" , &_michel_X);
 
     _out_tree->Branch("_q_v",    "std::vector<double>" , &_q_v);
-
     _out_tree->Branch("_t_q_v",    "std::vector<double>" , &_t_q_v);
     _out_tree->Branch("_t_dqds_v", "std::vector<double>" , &_t_dqds_v);
-
-
+    _out_tree->Branch("_dirs_v", "std::vector<double>" , &_dirs_v);
     _out_tree->Branch("_s_v",    "std::vector<double>" , &_s_v);
 
     _out_tree->Branch("_has_michel", &_has_michel, "_has_michel/O");
@@ -92,11 +89,12 @@ namespace michel {
       //parse the hits...
      for(const auto& hit : out._hits)  {
        _Z.push_back(hit._w); _X.push_back(hit._t); _q_v.push_back(hit._q);
-     }
+    }
 
      _t_q_v    = out._t_mean_v;
      _t_dqds_v = out._t_dqds_v;
      _s_v      = out._s_v;
+     _dirs_v   = out._dirs_v; 
 
      // which section of the hit-list if the michel?
      // (forward == 1) -> the second half
@@ -266,6 +264,7 @@ namespace michel {
 
     _t_dqds_v.clear();
     _chi_v.clear();
+    _dirs_v.clear();
     
     _s_v.clear();
   }

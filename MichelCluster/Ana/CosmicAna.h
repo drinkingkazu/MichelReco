@@ -72,10 +72,10 @@ namespace michel {
 
     bool _has_michel;
     
-
     std::vector<double> _t_q_v;
     std::vector<double> _t_dqds_v;
     std::vector<double> _chi_v;
+    std::vector<double> _dirs_v;
     
     std::vector<double> _s_v;
     
