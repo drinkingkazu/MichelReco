@@ -20,6 +20,7 @@
 #pragma link C++ class michel::ForwardMichelID+;
 #pragma link C++ class michel::RadiusMichelCluster+;
 #pragma link C++ class michel::SuperSonicClusterer+;
+#pragma link C++ class michel::ClusterVectorCalculator+;
 
 //ADD_NEW_CLASS ... do not change this line
 #endif
