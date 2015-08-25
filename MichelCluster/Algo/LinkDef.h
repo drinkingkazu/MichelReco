@@ -21,6 +21,7 @@
 #pragma link C++ class michel::RadiusMichelCluster+;
 #pragma link C++ class michel::SuperSonicClusterer+;
 #pragma link C++ class michel::ClusterVectorCalculator+;
+#pragma link C++ class michel::MatchBoundaries+;
 
 //ADD_NEW_CLASS ... do not change this line
 #endif
