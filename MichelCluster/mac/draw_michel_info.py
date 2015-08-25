@@ -3,6 +3,7 @@ import ROOT
 import matplotlib.pyplot as plt
 from root_numpy import root2array, root2rec, tree2rec, array2root
 import sys
+import signal
 
 if (len(sys.argv) < 2):
     print
@@ -62,6 +63,12 @@ if ((whattoscan == 0) or (whattoscan == 1)):
         scanDict[(run,event,index)] = what
 
 fin = sys.argv[-1]
+
+#catch ctrl+c
+def signal_handler(signal, frame):
+    print "You pressed Ctrl+C. Exiting!"
+    sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
 
 # interactive matplotlib
 plt.ion()
@@ -210,7 +217,9 @@ for n in xrange(len(arr)):
         axarr[1,1].axvspan(ds[0],ds[boundary],color='r',alpha=0.2)
     axarr[1,1].grid()
 
-    plt.show()
+    #plt.show()
+    fig.canvas
+    fig.canvas.draw()
 
     usrinput = raw_input("Hit Enter: next evt  ||  q: exit viewer\n")                                                                        
     if ( usrinput == "q" ):                                                                                                                  
