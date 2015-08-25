@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from root_numpy import root2array, root2rec, tree2rec, array2root
 import sys
 import signal
+import pandas as pd
 
 if (len(sys.argv) < 2):
     print
@@ -82,9 +83,38 @@ f = ROOT.TFile(fin)
 
 t = f.Get('out_tree')
 
+#hit tree
+hit_tree = f.Get('_hit_tree')
+
 arr = tree2rec(t,branches=['_michel_clustered_charge','_michel_Z','_michel_X','_X','_Z','_q_v','_s_v','_chi_v','_t_dqds_v',
                            '_t_q_v','_mean_chi','_lowest_chi','_rms_chi','_boundary','_chi_at_boundary',
                            '_event','_run','_subrun','_clus_idx','_forward'])
+
+# get hit information
+hits = pd.DataFrame(tree2rec(hit_tree,branches=['_run','_subrun','_event','_q_v','_w_v','_t_v']))
+
+# define function that, given an array, returns a sub-array with values within a certain range
+def getSubArray(xarr,xmin,xmax,yarr,ymin,ymax):
+    if (len(xarr) != len(yarr)):
+        return [],[]
+    xret = []
+    yret = []
+    for n in xrange(len(xarr)):
+        x = xarr[n]
+        y = yarr[n]
+        if ( (x > xmin) and (x < xmax) and (y > ymin) and (y < ymax) ):
+            xret.append(x)
+            yret.append(y)
+    return xret,yret
+
+# fill a dictionary that goes from (run,subrun,event) -> data frame with hit info for that event
+hitDict = {}
+for n in xrange(len(hits)):
+    run    = hits['_run'][n]
+    subrun = hits['_subrun'][n]
+    event  = hits['_event'][n]
+    print 'run: %i, subrun: %i, event: %i'%(run,subrun,event)
+    hitDict[(run,subrun,event)] = hits.query('_event == %i and _run == %i and _subrun == %i'%(event,run,subrun))
 
 for n in xrange(len(arr)):
 
@@ -95,6 +125,8 @@ for n in xrange(len(arr)):
     run = arr['_run'][n]
     subrun = arr['_subrun'][n]
     idx = arr['_clus_idx'][n]
+
+
 
     if (whattoscan == 0):
         # if it cannot even find entry, continue
@@ -131,8 +163,6 @@ for n in xrange(len(arr)):
     forward = arr['_forward'][n]
 
     Qtot = arr['_michel_clustered_charge'][n]
-
-
 
     # drawing chi vector vs. distance from beginning of cluster
     chi_v = arr['_chi_v'][n]
@@ -177,10 +207,26 @@ for n in xrange(len(arr)):
     # drawing michel cluster hit position
     axarr[0,0].set_xlabel('x [cm]')
     axarr[0,0].set_ylabel('z [cm]')
-    axarr[0,0].scatter(clus_x,clus_z,c=dq,s=50,edgecolor='none')
-    #axarr[0,0].scatter(michel_x,michel_z,c=michel_q,edgecolor='k',s=60)
-    #axarr[0,0].scatter(clus_x,clus_z,c='k',s=30,edgecolor='none')
-    axarr[0,0].scatter(michel_x,michel_z,c='k',edgecolor='none',s=60)
+ 
+    # draw all hits in even
+    # set bounds based on "clus" bounds
+    xmax = np.amax(np.array(clus_x))
+    xmin = np.amin(np.array(clus_x))
+    zmax = np.amax(np.array(clus_z))
+    zmin = np.amin(np.array(clus_z))
+    dx = xmax-xmin
+    dz = zmax-zmin
+    xmax += dx/2
+    xmin -= dx/2
+    zmax += dz/2
+    zmin -= dz/2
+    df = hitDict[(run,subrun,evt)]
+    zpoints,xpoints = getSubArray(np.array(df['_w_v'])[0],zmin,zmax,np.array(df['_t_v'])[0],xmin,xmax)
+    axarr[0,0].scatter(zpoints,xpoints,c='k',edgecolor='none',alpha=0.2,s=30)
+    # draw full cluster
+    axarr[0,0].scatter(clus_z,clus_x,c=dq,s=50,edgecolor='none')
+    # draw michel cluster
+    axarr[0,0].scatter(michel_z,michel_x,c='k',edgecolor='none',s=60)
     axarr[0,0].set_title('Evt: %i Run: %i Idx: %i'%(evt,run,idx))
     axarr[0,0].grid()
 

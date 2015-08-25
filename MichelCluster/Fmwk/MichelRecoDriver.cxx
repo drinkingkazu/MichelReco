@@ -16,7 +16,13 @@ namespace larlite {
       throw std::exception();
     }
     
-    _tree = new TTree("tree","");
+    _hit_tree = new TTree("_hit_tree","Hit Tree [all hits in event]");
+    _hit_tree->Branch("_q_v","std::vector<double>",&_q_v);
+    _hit_tree->Branch("_w_v","std::vector<double>",&_w_v);
+    _hit_tree->Branch("_t_v","std::vector<double>",&_t_v);
+    _hit_tree->Branch("_run",&_run,"run/I");
+    _hit_tree->Branch("_subrun",&_subrun,"subrun/I");
+    _hit_tree->Branch("_event",&_event,"event/I");
 
     _mgr.Initialize();
 
@@ -32,7 +38,7 @@ namespace larlite {
     // time->cm (accounting for different operating voltages)
     double driftVel = larutil::LArProperties::GetME()->DriftVelocity(_Efield,87); // [cm/us]
     // tick width in time
-   double tickWidth = 0.5; // [us]
+    double tickWidth = 0.5; // [us]
     double t2cm = tickWidth*driftVel;
 
 
@@ -40,14 +46,14 @@ namespace larlite {
     auto ev_cluster = storage->get_data<event_cluster>(_producer);
 
     // get ID information
-    auto run = storage->get_data<event_cluster>(_producer)->run();
-    auto subrun = storage->get_data<event_cluster>(_producer)->subrun();
-    auto event = storage->get_data<event_cluster>(_producer)->event_id();
+    _run = storage->get_data<event_cluster>(_producer)->run();
+    _subrun = storage->get_data<event_cluster>(_producer)->subrun();
+    _event = storage->get_data<event_cluster>(_producer)->event_id();
     
     michel::EventID id;
-    id.run = run;
-    id.subrun = subrun;
-    id.event = event;
+    id.run    = _run;
+    id.subrun = _subrun;
+    id.event  = _event;
 
     if(!ev_cluster || ev_cluster->empty()) return false;
 
@@ -58,17 +64,31 @@ namespace larlite {
     // If ev_hit is null, failed to find data or assocaition (shouldn't happen)
     if(!ev_hit || ev_hit->empty()) return false;
 
+    _q_v.clear();
+    _w_v.clear();
+    _t_v.clear();
+
     // Tracker for used-hit index
     std::vector< ::michel::HitPt > all_hits_v;
     all_hits_v.reserve(ev_hit->size());
     for(size_t hit_index=0; hit_index<ev_hit->size(); ++hit_index) {
       auto const& h = (*ev_hit)[hit_index];
+      // chrage :
+      double q = h.Integral();
+      double w = h.WireID().Wire * w2cm;
+      double t = (h.PeakTime()-3200) * t2cm;
+      _q_v.push_back(q);
+      _w_v.push_back(w);
+      _t_v.push_back(t);
+
       all_hits_v.emplace_back( h.Integral(),
-			       h.WireID().Wire * w2cm,
-			       (h.PeakTime() - 3200) * t2cm,
+			       w,
+			       t,
 			       hit_index,
 			       h.WireID().Plane);
     }
+
+    _hit_tree->Fill();
     
     // Reaching this point means we have something to process. Prepare.
     _mgr.EventReset();
@@ -91,9 +111,9 @@ namespace larlite {
 	if(h.WireID().Plane != 2) continue;
 	
 	michel_cluster.emplace_back( h.Integral(),
-				     h.WireID().Wire * 0.3,
-				     (h.PeakTime() - 3200) * 0.0802814,
-				     hit_index ,
+				     h.WireID().Wire * w2cm,
+				     (h.PeakTime() - 3200) * t2cm,
+				     hit_index,
 				     h.WireID().Plane);
       }
       
@@ -157,6 +177,7 @@ namespace larlite {
 
   bool MichelRecoDriver::finalize() {
     _mgr.Finalize(_fout);
+    if (_hit_tree) _hit_tree->Write();
     return true;
   }
 

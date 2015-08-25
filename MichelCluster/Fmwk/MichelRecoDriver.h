@@ -69,7 +69,14 @@ namespace larlite {
     std::string _producer;
 
     /// Output analysis TTree ptr
-    TTree* _tree;
+    TTree* _hit_tree;
+    /// info for tree
+    std::vector<double> _q_v;
+    std::vector<double> _w_v;
+    std::vector<double> _t_v;
+    int _run;
+    int _subrun;
+    int _event;
 
     /// boolean to select if to save Michel Clusters or not
     bool _save_clusters;
