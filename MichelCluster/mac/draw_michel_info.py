@@ -90,13 +90,19 @@ for n in xrange(len(arr)):
     idx = arr['_clus_idx'][n]
 
     if (whattoscan == 0):
+        # if it cannot even find entry, continue
+        if not (run,evt,idx) in scanDict:
+            continue
         if (scanDict[(run,evt,idx)] != 0):
             continue
     if (whattoscan == 1):
+        # if it cannot even find entry, continue
+        if not (run,evt,idx) in scanDict:
+            continue
         if (scanDict[(run,evt,idx)] != 1):
             continue
 
-
+    # clear the axes...
     axarr[0,0].cla()
     axarr[0,1].cla()
     axarr[1,0].cla()
@@ -139,12 +145,10 @@ for n in xrange(len(arr)):
     if (chi_backward != 0):
         chi_backward /= float(boundary)
 
+    # vector to hold charge for michel
     if (forward):
         chi_muon = chi_backward;
         chi_michel = chi_forward;
-        # get points asociated with michel
-        #for x in xrange(boundary,len(chi_v)):
-        #    michel_x.append(
     else:
         chi_muon = chi_forward;
         chi_michel = chi_backward;
@@ -166,9 +170,10 @@ for n in xrange(len(arr)):
     # drawing michel cluster hit position
     axarr[0,0].set_xlabel('x [cm]')
     axarr[0,0].set_ylabel('z [cm]')
-    #axarr[0,0].scatter(clus_x,clus_z,c=dq,s=50,edgecolor='none')
-    axarr[0,0].scatter(clus_x,clus_z,c='k',s=30,edgecolor='none')
-    axarr[0,0].scatter(michel_x,michel_z,c='r',edgecolor='none',s=50)
+    axarr[0,0].scatter(clus_x,clus_z,c=dq,s=50,edgecolor='none')
+    #axarr[0,0].scatter(michel_x,michel_z,c=michel_q,edgecolor='k',s=60)
+    #axarr[0,0].scatter(clus_x,clus_z,c='k',s=30,edgecolor='none')
+    axarr[0,0].scatter(michel_x,michel_z,c='k',edgecolor='none',s=60)
     axarr[0,0].set_title('Evt: %i Run: %i Idx: %i'%(evt,run,idx))
     axarr[0,0].grid()
 
