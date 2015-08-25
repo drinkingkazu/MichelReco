@@ -4,6 +4,9 @@
 #include "MichelRecoDriver.h"
 #include "DataFormat/cluster.h"
 #include "DataFormat/hit.h"
+#include "LArUtil/GeometryUtilities.h"
+#include "LArUtil/LArProperties.h"
+
 namespace larlite {
 
   bool MichelRecoDriver::initialize() {
@@ -21,6 +24,17 @@ namespace larlite {
   }
   
   bool MichelRecoDriver::analyze(storage_manager* storage) {
+
+    // use instances of LArUtil and GeometryUtilities
+    // for (w,t) -> (cm, cm) conversion
+    // wire->cm
+    double w2cm = larutil::GeometryUtilities::GetME()->WireToCm();
+    // time->cm (accounting for different operating voltages)
+    double driftVel = larutil::LArProperties::GetME()->DriftVelocity(_Efield,87); // [cm/us]
+    // tick width in time
+   double tickWidth = 0.5; // [us]
+    double t2cm = tickWidth*driftVel;
+
 
     // Get data products
     auto ev_cluster = storage->get_data<event_cluster>(_producer);
@@ -50,8 +64,8 @@ namespace larlite {
     for(size_t hit_index=0; hit_index<ev_hit->size(); ++hit_index) {
       auto const& h = (*ev_hit)[hit_index];
       all_hits_v.emplace_back( h.Integral(),
-			       h.WireID().Wire * 0.3,
-			       (h.PeakTime() - 3200) * 0.0802814,
+			       h.WireID().Wire * w2cm,
+			       (h.PeakTime() - 3200) * t2cm,
 			       hit_index,
 			       h.WireID().Plane);
     }
@@ -130,7 +144,7 @@ namespace larlite {
 	for (auto const& michel_hit : michel)
 	  clus_hits.push_back(michel_hit._id);
 	// add this vector to the associations
-	if (clus_hits.size() > 0)
+	if (clus_hits.size() > 3)
 	  clus_hit_ass_v.push_back(clus_hits);
 	
       }// loop over all found michels

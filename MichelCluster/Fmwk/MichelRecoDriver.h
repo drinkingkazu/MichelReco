@@ -29,7 +29,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    MichelRecoDriver(){ _name="MichelRecoDriver"; _fout=0; _save_clusters=false; }
+    MichelRecoDriver(){ _name="MichelRecoDriver"; _fout=0; _save_clusters=false; _Efield=0.5;}
 
     /// Default destructor
     virtual ~MichelRecoDriver(){}
@@ -57,6 +57,9 @@ namespace larlite {
     /// Producer setter
     void SetClusterProducer(const std::string& name) { _producer = name; }
 
+    /// Set electric field strength (kV/cm)
+    void SetEField(double E) { _Efield = E; }
+
   protected:
 
     /// Reco manager
@@ -70,6 +73,9 @@ namespace larlite {
 
     /// boolean to select if to save Michel Clusters or not
     bool _save_clusters;
+
+    /// electric field strength [ kV/cm]
+    double _Efield;
 
 
   };
