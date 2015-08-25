@@ -83,15 +83,27 @@ f = ROOT.TFile(fin)
 
 t = f.Get('out_tree')
 
-#hit tree
-hit_tree = f.Get('_hit_tree')
+
 
 arr = tree2rec(t,branches=['_michel_clustered_charge','_michel_Z','_michel_X','_X','_Z','_q_v','_s_v','_chi_v','_t_dqds_v',
                            '_t_q_v','_mean_chi','_lowest_chi','_rms_chi','_boundary','_chi_at_boundary',
                            '_event','_run','_subrun','_clus_idx','_forward'])
 
-# get hit information
-hits = pd.DataFrame(tree2rec(hit_tree,branches=['_run','_subrun','_event','_q_v','_w_v','_t_v']))
+all_hits = False
+if (f.GetListOfKeys().Contains('_hit_tree')):
+    all_hits = True
+    #hit tree
+    hit_tree = f.Get('_hit_tree')
+    # get hit information
+    hits = pd.DataFrame(tree2rec(hit_tree,branches=['_run','_subrun','_event','_q_v','_w_v','_t_v']))
+    # fill a dictionary that goes from (run,subrun,event) -> data frame with hit info for that event
+    hitDict = {}
+    for n in xrange(len(hits)):
+        run    = hits['_run'][n]
+        subrun = hits['_subrun'][n]
+        event  = hits['_event'][n]
+        hitDict[(run,subrun,event)] = hits.query('_event == %i and _run == %i and _subrun == %i'%(event,run,subrun))
+
 
 # define function that, given an array, returns a sub-array with values within a certain range
 def getSubArray(xarr,xmin,xmax,yarr,ymin,ymax):
@@ -107,14 +119,6 @@ def getSubArray(xarr,xmin,xmax,yarr,ymin,ymax):
             yret.append(y)
     return xret,yret
 
-# fill a dictionary that goes from (run,subrun,event) -> data frame with hit info for that event
-hitDict = {}
-for n in xrange(len(hits)):
-    run    = hits['_run'][n]
-    subrun = hits['_subrun'][n]
-    event  = hits['_event'][n]
-    print 'run: %i, subrun: %i, event: %i'%(run,subrun,event)
-    hitDict[(run,subrun,event)] = hits.query('_event == %i and _run == %i and _subrun == %i'%(event,run,subrun))
 
 for n in xrange(len(arr)):
 
@@ -220,9 +224,10 @@ for n in xrange(len(arr)):
     xmin -= dx/2
     zmax += dz/2
     zmin -= dz/2
-    df = hitDict[(run,subrun,evt)]
-    zpoints,xpoints = getSubArray(np.array(df['_w_v'])[0],zmin,zmax,np.array(df['_t_v'])[0],xmin,xmax)
-    axarr[0,0].scatter(zpoints,xpoints,c='k',edgecolor='none',alpha=0.2,s=30)
+    if (all_hits):
+        df = hitDict[(run,subrun,evt)]
+        zpoints,xpoints = getSubArray(np.array(df['_w_v'])[0],zmin,zmax,np.array(df['_t_v'])[0],xmin,xmax)
+        axarr[0,0].scatter(zpoints,xpoints,c='k',edgecolor='none',alpha=0.2,s=30)
     # draw full cluster
     axarr[0,0].scatter(clus_z,clus_x,c=dq,s=50,edgecolor='none')
     # draw michel cluster
