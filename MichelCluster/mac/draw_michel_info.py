@@ -119,8 +119,12 @@ def getSubArray(xarr,xmin,xmax,yarr,ymin,ymax):
             yret.append(y)
     return xret,yret
 
+# number of event to scan
+n = 0
 
-for n in xrange(len(arr)):
+while ( n < len(arr) ):
+
+    print 'scanning TTree enrty: %i'%n
 
     # first make sure that if we are scanning through signal or background only
     # we are only looping through those events
@@ -272,8 +276,12 @@ for n in xrange(len(arr)):
     fig.canvas
     fig.canvas.draw()
 
-    usrinput = raw_input("Hit Enter: next evt  ||  q: exit viewer\n")                                                                        
+    usrinput = raw_input("Hit Enter: next evt  || int: go to event number ||  q: exit viewer\n")                        
     if ( usrinput == "q" ):                                                                                                                  
         sys.exit(0)
+    elif ( usrinput.isdigit() == True ):
+        n = int(usrinput)
+    else:
+        n += 1
 
 sys.exit(0)
