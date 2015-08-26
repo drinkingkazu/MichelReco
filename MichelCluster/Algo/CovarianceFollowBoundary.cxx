@@ -123,9 +123,12 @@ namespace michel {
       }
       
     }
-    if(!been_in_low_reg && !in_low_reg)
-      return kINVALID_SIZE;
 
+    if(in_low_reg) been_in_low_reg = true;
+    
+    if(!been_in_low_reg)
+      return kINVALID_SIZE;
+    
 
     /// Lets just see if the slope changes sign
     int  curr_sign = -1;
