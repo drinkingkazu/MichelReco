@@ -19,6 +19,7 @@
 #pragma link C++ class michel::ClusterVectorCalculator+;
 #pragma link C++ class michel::MatchBoundaries+;
 #pragma link C++ class michel::CovarianceFollowBoundary+;
+#pragma link C++ class michel::StepAroundCluster+;
 
 // #pragma link C++ class michel::ToyMerger+;
 // #pragma link C++ class michel::ToyBoundary+;

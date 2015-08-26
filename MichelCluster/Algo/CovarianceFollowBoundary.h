@@ -49,8 +49,13 @@ namespace michel {
     /// if the min and max are more than this number of hits
     /// apart -> do not create a michel
     int _maxDistance;
+
+    
+    int sign(double val);
     
   };
+
+  
 }
 
 #endif

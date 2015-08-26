@@ -92,7 +92,7 @@ namespace michel {
 
     /// loop one direction only for now, I don't
     /// yet see the benefit to looping the other direction...
-
+    
     for(unsigned int i = 0; i < covariance.size(); ++i) {
 
       double r = fabs(covariance[i]);
@@ -123,7 +123,32 @@ namespace michel {
       }
       
     }
-    if(!been_in_low_reg)
+    if(!been_in_low_reg && !in_low_reg)
+      return kINVALID_SIZE;
+
+
+    /// Lets just see if the slope changes sign
+    int  curr_sign = -1;
+    int  prev_sign = -1;
+
+    bool changed_sign = false;
+    for(unsigned int i = 0; i < slope.size(); ++i)
+      {
+    	curr_sign = sign(slope[i]);
+
+    	if(i == 0) { prev_sign = curr_sign; continue; }
+	
+    	if(curr_sign == prev_sign) {
+    	  continue;
+    	}
+    	else{
+    	  changed_sign = true;
+    	  break;
+    	}
+      }
+    
+    
+    if(!changed_sign)
       return kINVALID_SIZE;
     
     auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
@@ -149,9 +174,8 @@ namespace michel {
       // if this hit has more charge than any other
       if(c > k) { k = c; idx = w; }
     }
-
-
-        // move on only if avg. covariance for hits near the "start" is less than some value
+    
+    // move on only if avg. covariance for hits near the "start" is less than some value
     // idx is the position of the reconstructed michel start
     double avg_covariance = 0;
     int    counts = 0;
@@ -171,17 +195,24 @@ namespace michel {
     // the max allowed covariance
     avg_covariance /= counts;
 
-    double maxCovarianceAtStart = 0.6;
+    double maxCovarianceAtStart = 0.9;
     
     if (avg_covariance > maxCovarianceAtStart)
       return kINVALID_SIZE;
-
-
     
     std::swap(cluster._chi2_v,covariance);
     std::swap(cluster._dirs_v,slope);
     return cluster._ordered_pts[idx];
   }
+
+
+  int CovarianceFollowBoundary::sign(double val)
+  {
+    if (val > 0) return  1;
+    if (val < 0) return -1;
+    return 0;
+  }
   
+
 }
 #endif
