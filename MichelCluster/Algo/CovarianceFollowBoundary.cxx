@@ -85,8 +85,9 @@ namespace michel {
     
     /// Loop over covariance array in both directions, if you see something...
     /// say something says MTA on the subway, lets do the same here
-
-    double cutoff          = 0.90;
+    /// look for a SINGLE dip in covariance below cutoff
+    
+    double cutoff          = _covariance_dip_cutoff;
     bool   in_low_reg      = false;
     bool   been_in_low_reg = false;
 
@@ -130,7 +131,9 @@ namespace michel {
       return kINVALID_SIZE;
     
 
-    /// Lets just see if the slope changes sign
+    /// Lets just see if the slope changes sign, change in sign means
+    /// something changed directions
+    
     int  curr_sign = -1;
     int  prev_sign = -1;
 
@@ -198,7 +201,7 @@ namespace michel {
     // the max allowed covariance
     avg_covariance /= counts;
 
-    double maxCovarianceAtStart = 0.9;
+    double maxCovarianceAtStart = _maxCovarianceAtStart;
     
     if (avg_covariance > maxCovarianceAtStart)
       return kINVALID_SIZE;
