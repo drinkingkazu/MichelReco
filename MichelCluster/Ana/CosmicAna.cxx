@@ -23,6 +23,8 @@ namespace michel {
     _out_tree->Branch("_lowest_chi"     , &_lowest_chi     , "_lowest_chi/D");
     _out_tree->Branch("_mean_chi_muon",&_mean_chi_muon,"_mean_chi_muon/D");
     _out_tree->Branch("_mean_chi_michel",&_mean_chi_michel,"_mean_chi_michel/D");
+
+    _out_tree->Branch("_slope_v",    "std::vector<double>" , &_slope_v);
     
     _out_tree->Branch("_Z", "std::vector<double>" , &_Z);
     _out_tree->Branch("_X", "std::vector<double>" , &_X);
@@ -85,6 +87,9 @@ namespace michel {
         covariance_in_largest_cluster.push_back( fabs(c) );
         _chi_v.push_back                       ( fabs(c) );
       }
+
+      for (const auto& s : out._dirs_v)
+	_slope_v.push_back(s);
 
       //parse the hits...
      for(const auto& hit : out._hits)  {
@@ -247,6 +252,8 @@ namespace michel {
     
     _Z.clear();
     _X.clear();
+
+    _slope_v.clear();
 
     _forward = -1;
 

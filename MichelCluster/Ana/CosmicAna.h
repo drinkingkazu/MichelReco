@@ -94,6 +94,7 @@ namespace michel {
     int _event;
     int _clus_idx;
     
+    std::vector<double> _slope_v;
     
     double get_lowest(const std::vector<double>& data);
     double get_rms   (const std::vector<double>& data);

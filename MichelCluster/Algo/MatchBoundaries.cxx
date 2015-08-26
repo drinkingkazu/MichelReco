@@ -23,10 +23,12 @@ namespace michel {
     std::vector<double> truncated_mean;
     std::vector<double> truncated_dqds;
     std::vector<double> covariance; 
+    std::vector<double> slope; 
     
     truncated_mean.reserve(cluster._ordered_pts.size());
     truncated_dqds.reserve(cluster._ordered_pts.size());
     covariance.reserve    (cluster._ordered_pts.size());
+    slope.reserve         (cluster._ordered_pts.size());
     
     //hardcoded for now will become configurable
     double _n_window_size = 15;
@@ -47,6 +49,7 @@ namespace michel {
     //Directionality considerations
     int dir_window = 11;
     covariance     = _clusterCalc.calc_covariance(cluster._hits,dir_window);
+    slope          = _clusterCalc.calc_slope     (cluster._hits,dir_window);
     
     // must be odd, currently has no setter,
     // sorry that this method has no info on it, ask vic
@@ -123,6 +126,7 @@ namespace michel {
       return kINVALID_SIZE;
     
     std::swap(cluster._chi2_v,covariance);
+    std::swap(cluster._dirs_v,slope);
 
     return cluster._ordered_pts[idx];
   }
