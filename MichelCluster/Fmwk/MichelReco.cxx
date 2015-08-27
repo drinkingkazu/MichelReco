@@ -82,7 +82,7 @@ namespace michel {
     case kMichelCluster:  _alg_michel_cluster = (BaseAlgMichelCluster*)algo; break;
     default:
       std::cerr << "\033[93m[ERROR]\033[00m "
-		<< "Unidentified algorithm type: " << type << std::endl;
+		<< "Unidentified algorithm type: " << type << " either you spelled it wrong or are missing an algo!" << std::endl;
       throw MichelException();
     }
 
