@@ -20,9 +20,13 @@
 #include "BaseAlgBoundary.h"
 #include "BaseAlgMichelID.h"
 #include "BaseAlgMichelCluster.h"
+#include "BaseAlgMIDFilter.h"
 #include "MichelAnaBase.h"
 #include <TFile.h>
 #include <TStopwatch.h>
+#include <math.h>
+
+
 namespace michel {
   /**
      \class MichelReco
@@ -34,6 +38,7 @@ namespace michel {
                                                                                         \n
      1) Input cluster merging                                                           \n
      2) Muon/Michel bounary finding                                                     \n
+     3) Michel Mis ID Filtering                                                         \n
      3) Michel cluster ID                                                               \n
      4) Michel re-clustering                                                            \n
                                                                                         \n
@@ -120,6 +125,7 @@ namespace michel {
     //
     BaseAlgMerger*        _alg_merge;          ///< Merging algorithm 
     BaseAlgBoundary*      _alg_boundary;       ///< Michel/Muon boundary finder algorithm
+    BaseAlgMIDFilter*     _alg_filter;         ///< Michel MID filtering algorithm
     BaseAlgMichelID*      _alg_michel_id;      ///< Michel identification algorithm
     BaseAlgMichelCluster* _alg_michel_cluster; ///< Michel re-clustering algorithm
     /// Algorithms to be executed

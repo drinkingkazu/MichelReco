@@ -24,6 +24,7 @@
 #pragma link C++ class michel::BaseAlgBoundary+;
 #pragma link C++ class michel::BaseAlgMichelID+;
 #pragma link C++ class michel::BaseAlgMichelCluster+;
+#pragma link C++ class michel::BaseAlgMIDFilter+;
 
 #pragma link C++ class cmtool::CMergeBookKeeper+;
 #pragma link C++ class cmtool::CMTException+;

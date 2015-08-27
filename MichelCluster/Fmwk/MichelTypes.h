@@ -28,6 +28,7 @@ namespace michel {
     kBoundaryFinder,
     kMichelID,
     kMichelCluster,
+    kMIDFilter,
     kAlgoTypeMax
   };
 

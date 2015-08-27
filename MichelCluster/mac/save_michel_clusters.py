@@ -20,8 +20,9 @@ for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(sys.argv[x+1])
 
 my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
+#my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
-my_proc.set_ana_output_file("")
+#my_proc.set_ana_output_file("michel_tree.root")
 
 my_proc.set_output_file("michel_clusters.root")
 
@@ -32,8 +33,10 @@ the_filter = fmwk.MichelFilter()
 
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
-#my_unit.SetClusterProducer("fuzzycluster")
-my_unit.SetClusterProducer("rawclusters")
+my_unit.SetClusterProducer("fuzzycluster")
+#my_unit.SetClusterProducer("rawcluster")
+my_unit.SetEField(0.5)
+
 # set here if you want to save michels as an output cluster
 my_unit.saveMichelClusters(True)
 
@@ -47,16 +50,37 @@ mgr.SetAlgo(michel.kClusterMerger,
             michel.EdgeMerger())
 
 # Attach algorithm for boundary finding
-mgr.SetAlgo(michel.kBoundaryFinder, 
-            michel.TruncatedQBoundary())
+truncBound = michel.TruncatedQBoundary()
+truncBound.SetMaxDistanceTruncatedPeaks(5)
+chiBound   = michel.ChiBoundary()
+matchBound = michel.MatchBoundaries()
+matchBound.SetMaxDistanceTruncatedPeaks(10)
+matchBound.SetMaxCovarianceAtStart(0.8)
+covariance = michel.CovarianceFollowBoundary()
+covariance.SetMaxDistanceTruncatedPeaks(10)
+# actually add algo
+mgr.SetAlgo(michel.kBoundaryFinder,
+            covariance)
+
+# MID finding algorithm
+midalgo = michel.DecideIfStoppingMuon()
+midalgo.SetChiMin(0.9)
+midalgo.SetFracMinHits(0.7)
+midalgo.SetHitRadius(10)
+midalgo.SetMaxDist(3)
+mgr.SetAlgo(michel.kMIDFilter,
+            midalgo)
 
 # Attach algorithm for finding michel cluster
+findMichel = michel.ForwardMichelID()
+findMichel.SetMaxMichelHits(0)
 mgr.SetAlgo(michel.kMichelID, 
-            michel.ForwardMichelID())
+            findMichel)
 
 # Attach algorithm to recluster michel
 mgr.SetAlgo(michel.kMichelCluster, 
-            michel.RadiusMichelCluster())
+            michel.SuperSonicClusterer())
+            #michel.RadiusMichelCluster())
 
 # Attach ana unit
 
@@ -68,13 +92,12 @@ my_proc.add_process(my_unit)
 
 my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
 my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
-my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
+#my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
 my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
-my_proc.set_data_to_write(fmwk.data.kAssociation,'rawclusters')
+#my_proc.set_data_to_write(fmwk.data.kAssociation,'rawclusters')
 #Write aho unit to get out MC vars whatever
 
-# aho_ana=fmwk.AhoAna()
-# my_proc.add_process(aho_ana)
+my_proc.enable_event_alignment(False)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
