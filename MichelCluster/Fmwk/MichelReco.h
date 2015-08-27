@@ -108,7 +108,11 @@ namespace michel {
 
   protected:
     // MichelCluster configuration parameters
-    double _d_cutoff;  ///< MichelCluster's cut-off distance for neighboring cluster
+    ///< MichelCluster's cut-off distance for neighboring cluster
+    ///< MAXIMUM distance. Set this to a huge number for very generous ordering
+    ///< Set this to a very small number for very conservative ordering.
+    double _d_cutoff;  
+    
     size_t _min_nhits; ///< MichelCluster's min # hits to claim a cluster
     /// Verbosity
     msg::MSGLevel_t _verbosity;

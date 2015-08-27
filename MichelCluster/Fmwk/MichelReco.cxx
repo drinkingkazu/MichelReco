@@ -8,8 +8,8 @@ namespace michel {
   //-----------------------------------------------------------------
   MichelReco::MichelReco()
   //-----------------------------------------------------------------
-    : _d_cutoff           ( 3.6 )
-    , _min_nhits          ( 25  )
+    : _d_cutoff           ( 6.0 ) //Used to be 3.6
+    , _min_nhits          ( 4   ) //Used to be 25
     , _verbosity          ( msg::kNORMAL )
 
     , _alg_merge          ( nullptr )
