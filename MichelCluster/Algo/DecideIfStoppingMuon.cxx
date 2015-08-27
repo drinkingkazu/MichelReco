@@ -57,18 +57,35 @@ namespace michel{
     if (boundary < 0)
       return false;
 
+    std::vector<double> chi_muon;
+
     // if the muon is too short -> ignore
     double muon_len = 0;
     if (forward){
+      for (size_t i=0; i < boundary; i++)
+	chi_muon.push_back(fabs(chi_v[i]));
       auto& mu_s = hit_v[0];
       muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
     }
     else{
+      for (size_t i=boundary; i < hit_v.size()-1; i++)
+	chi_muon.push_back(fabs(chi_v[i]));
       auto& mu_s = hit_v[hit_v.size()-1];
       muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
     }
 
     if (muon_len < _min_muon_length*_min_muon_length)
+      return false;
+
+
+    // if < 50% of chi_v entries belonging to muon are above 80% -> remove
+    int num_above_cut = 0;
+    for (auto& c : chi_muon){
+      if (c > 0.8)
+	num_above_cut += 1;
+    }
+    double frac_above = ((double)num_above_cut) / ((double)chi_muon.size());
+    if (frac_above < 0.5)
       return false;
 
     // use the high-chi hits (value close to 1)
