@@ -65,6 +65,11 @@ namespace michel {
      */
     void SetMaxDist(double d) { _max_dist = d; }
 
+    /**
+     *@brief minimum number of "bad" hits needed for the michel to be a MID
+     */
+    void SetMinBadHits(double n) { _min_bad_hits = n; }
+
   private:
 
     // a whole bunch of settable parameters
@@ -84,6 +89,9 @@ namespace michel {
     // maximum perpendicular distance to muon-line for a hit
     // to be considered as being compatible with that line
     double _max_dist;
+
+    // minimum number of bad hits needed for the michel to be a MID
+    int _min_bad_hits;
     
   };
 }

@@ -11,6 +11,7 @@ namespace michel{
     _frac_min_hits = 0.7;
     _hit_radius = 10;
     _max_dist   = 3;
+    _min_bad_hits = 10;
   }
 
   bool DecideIfStoppingMuon::IsMichel(const MichelCluster& michel,
@@ -76,7 +77,7 @@ namespace michel{
     double t_avg = 0;
     if (forward){
       for (size_t i=0; i < boundary; i++){
-	if (chi_v[i] > _chi_min){
+	if (fabs(chi_v[i]) > _chi_min){
 	  slope += slope_v[i];
 	  count += 1;
 	  w_avg += hit_v[i]._w;
@@ -86,7 +87,7 @@ namespace michel{
     }
     else{
       for (size_t i=boundary; i < chi_v.size(); i++){
-	if (chi_v[i] > 0.9){
+	if (fabs(chi_v[i]) > 0.9){
 	  slope += slope_v[i];
 	  count += 1;
 	  w_avg += hit_v[i]._w;
@@ -152,7 +153,7 @@ namespace michel{
       }
     }
 
-    if (nbad > 10)
+    if (nbad > _min_bad_hits)
       return false;
 
     return true;
