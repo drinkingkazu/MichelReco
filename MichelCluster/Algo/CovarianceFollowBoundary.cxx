@@ -87,10 +87,11 @@ namespace michel {
     /// say something says MTA on the subway, lets do the same here
     /// look for a SINGLE dip in covariance below cutoff
     
-    double cutoff          = _covariance_dip_cutoff;
-    bool   in_low_reg      = false;
-    bool   been_in_low_reg = false;
-
+    double cutoff           = _covariance_dip_cutoff;
+    bool   in_low_reg       = false;
+    bool   been_in_low_reg  = false;
+    bool   been_in_high_reg = false;
+      
     /// loop one direction only for now, I don't
     /// yet see the benefit to looping the other direction...
     
@@ -120,12 +121,13 @@ namespace michel {
 	  been_in_low_reg = true;
 	}
 	in_low_reg = false;
+	been_in_high_reg = true;
 	continue;
       }
       
     }
 
-    if(in_low_reg) been_in_low_reg = true;
+    if(in_low_reg && been_in_high_reg) been_in_low_reg = true;
     
     if(!been_in_low_reg)
       return kINVALID_SIZE;
