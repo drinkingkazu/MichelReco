@@ -35,7 +35,6 @@
 
 /// MIDFilter
 #pragma link C++ class michel::EmptyMIDFilter+;
-#pragma link C++ class michel::AlwaysNotMID+;
 #pragma link C++ class michel::DecideIfStoppingMuon+;
 
 /// Various method classes
