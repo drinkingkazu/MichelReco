@@ -75,10 +75,10 @@ namespace michel {
   //-----------------------------------------------------------------
   {
     switch(type) {
-    case kClusterMerger:  _alg_merge          = (BaseAlgMerger*)algo;        break;
-    case kBoundaryFinder: _alg_boundary       = (BaseAlgBoundary*)algo;      break;
-    case kMIDFilter:      _alg_filter         = (BaseAlgMIDFilter*)algo;      break;
-    case kMichelID:       _alg_michel_id      = (BaseAlgMichelID*)algo;      break;
+    case kClusterMerger:  _alg_merge          = (BaseAlgMerger*)       algo; break;
+    case kBoundaryFinder: _alg_boundary       = (BaseAlgBoundary*)     algo; break;
+    case kMIDFilter:      _alg_filter         = (BaseAlgMIDFilter*)    algo; break;
+    case kMichelID:       _alg_michel_id      = (BaseAlgMichelID*)     algo; break;
     case kMichelCluster:  _alg_michel_cluster = (BaseAlgMichelCluster*)algo; break;
     default:
       std::cerr << "\033[93m[ERROR]\033[00m "
@@ -194,11 +194,6 @@ namespace michel {
     _alg_ctr_v  [kBoundaryFinder] += _output_v.size();
 
 
-    if(_verbosity <= msg::kDEBUG)
-
-      std::cout << "<<Process>> running kMIDFilter..." << std::endl;
-
-
 
     if(_verbosity <= msg::kDEBUG)
 
@@ -265,8 +260,12 @@ namespace michel {
     _alg_ctr_v  [kMichelCluster] += _output_v.size();
 
 
+
+    if(_verbosity <= msg::kDEBUG)
+      std::cout << "<<Process>> running kMIDFilter..." << std::endl;
+    
     //
-    // Step 3 ... decide if this is a MID'd michel
+    // Step 6? ... decide if this is a MID'd michel
     //
     if(!_alg_filter) throw MichelException();
 

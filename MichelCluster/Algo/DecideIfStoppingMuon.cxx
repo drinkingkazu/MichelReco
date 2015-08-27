@@ -18,9 +18,9 @@ namespace michel{
   {
 
     // how this algorithm works:
-    // the idea is to take the straight trunk of a the muon-portion
+    // the idea is to take the straight track of a the muon-portion
     // of the cluster and get an average slope for the muon-like line
-    // we ancor this slope to the average (w,t) point from the 
+    // we anchor this slope to the average (w,t) point from the 
     // muon and thus get a line-equation for the muon-line
     // t = s * w + b
     // we then extend this line forward towards the michel direction
@@ -64,7 +64,7 @@ namespace michel{
     // other hits that fall along this slope
     // if so, probably we did not identify
     // correctly the end of the muon -> do not
-    // reconstruct this michel
+    // reconstruct this as michel
     
     // average slope for the straight muon section:
     double slope = 0;
@@ -120,15 +120,16 @@ namespace michel{
     // find anchor for slope (i.e. b in equation for line)
     // by using the "average muon point"
     double b = t_avg - slope * w_avg;
-
-    /*
-    std::cout << std::endl;
-    std::cout << "Start Point: [" << start._w << ", " << start._t << "]" << std::endl;
-    std::cout << "slope: " << slope << std::endl;
-    std::cout << "hits used to calculate slope: " << count << std::endl;
-    std::cout << "line: y = s * x + b   ...  b = " << b << std::endl;
-    */
-
+    
+    if (_verbosity <=  msg::kINFO) {
+      std::cout << "\tDecideIfStoppingMuon Algo" << std::endl;
+      std::cout << "\tStart Point: [" << start._w << ", " << start._t << "]" << std::endl;
+      std::cout << "\tslope: " << slope << std::endl;
+      std::cout << "\thits used to calculate slope: " << count << std::endl;
+      std::cout << "\tline: y = s * x + b   ...  b = " << b << std::endl;
+    }
+    
+    
     // hits identified as from continuation of muon:
 
     int nbad = 0;
