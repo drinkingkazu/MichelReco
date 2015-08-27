@@ -25,7 +25,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    RadiusMichelCluster() : _min_radius(10.0) {}
+    RadiusMichelCluster() : _min_radius(10.0), _max_hit_charge(500.0) {}
     
     /// Default destructor
     ~RadiusMichelCluster(){}
@@ -40,12 +40,18 @@ namespace michel {
     /// Setter for minimum radius
     void SetMinRadius(double r) { _min_radius = r; }
 
+    /// Setter for maximum allowed single hit charge
+    void SetMaxHitCharge(double q) { _max_hit_charge = q; }
     
   private:
     
     /// Minimum radius from michel start point.
     double _min_radius;
-    
+
+    /// Maximum allowable charge for a single hit to be added to a Michel.
+    /// This is set to try to avoid including the last (high-charge) hit from the muon bragg peak.
+    double _max_hit_charge;
+
   };
 }
 
