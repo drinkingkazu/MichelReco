@@ -70,6 +70,11 @@ namespace michel {
      */
     void SetMinBadHits(double n) { _min_bad_hits = n; }
 
+    /**
+     *@brief set the minimum length for the muon
+     */
+    void SetMinMuonLength(double l) { _min_muon_length = l; }
+
   private:
 
     // a whole bunch of settable parameters
@@ -92,6 +97,9 @@ namespace michel {
 
     // minimum number of bad hits needed for the michel to be a MID
     int _min_bad_hits;
+
+    // minimum muon length. If the muon is shorter than this ignore this michel
+    double _min_muon_length;
     
   };
 }

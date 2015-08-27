@@ -12,6 +12,7 @@ namespace michel{
     _hit_radius = 10;
     _max_dist   = 3;
     _min_bad_hits = 10;
+    _min_muon_length = 10;
   }
 
   bool DecideIfStoppingMuon::IsMichel(const MichelCluster& michel,
@@ -54,6 +55,20 @@ namespace michel{
     // the boundary defines where the michel starts in the
     // ordered hit list. If less then 0 then wtf
     if (boundary < 0)
+      return false;
+
+    // if the muon is too short -> ignore
+    double muon_len = 0;
+    if (forward){
+      auto& mu_s = hit_v[0];
+      muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
+    }
+    else{
+      auto& mu_s = hit_v[hit_v.size()-1];
+      muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
+    }
+
+    if (muon_len < _min_muon_length*_min_muon_length)
       return false;
 
     // use the high-chi hits (value close to 1)

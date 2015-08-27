@@ -46,8 +46,7 @@ mgr = my_unit.Algo()
 #mgr.SetVerbosity(michel.msg.kDEBUG)
 
 # Attach algorithm for merging
-mgr.SetAlgo(michel.kClusterMerger, 
-            michel.EdgeMerger())
+mgr.SetAlgo(michel.kClusterMerger, michel.EdgeMerger())
 
 # Attach algorithm for boundary finding
 truncBound = michel.TruncatedQBoundary()
@@ -59,8 +58,7 @@ matchBound.SetMaxCovarianceAtStart(0.8)
 covariance = michel.CovarianceFollowBoundary()
 covariance.SetMaxDistanceTruncatedPeaks(10)
 # actually add algo
-mgr.SetAlgo(michel.kBoundaryFinder,
-            covariance)
+mgr.SetAlgo(michel.kBoundaryFinder, covariance)
 
 # MID finding algorithm
 midalgo = michel.DecideIfStoppingMuon()
@@ -68,18 +66,19 @@ midalgo.SetChiMin(0.9)
 midalgo.SetFracMinHits(0.7)
 midalgo.SetHitRadius(10)
 midalgo.SetMaxDist(3)
-mgr.SetAlgo(michel.kMIDFilter,
-            midalgo)
+midalgo.SetMinBadHits(10)
+midalgo.SetMinMuonLength(10)
+mgr.SetAlgo(michel.kMIDFilter, midalgo)
 
 # Attach algorithm for finding michel cluster
 findMichel = michel.ForwardMichelID()
 findMichel.SetMaxMichelHits(0)
-mgr.SetAlgo(michel.kMichelID, 
-            findMichel)
+mgr.SetAlgo(michel.kMichelID, findMichel)
 
 # Attach algorithm to recluster michel
-mgr.SetAlgo(michel.kMichelCluster, 
-            michel.SuperSonicClusterer())
+supersonic = michel.SuperSonicClusterer()
+stepsonic  = michel.StepSuperSonicCluster()
+mgr.SetAlgo(michel.kMichelCluster, stepsonic)
             #michel.RadiusMichelCluster())
 
 # Attach ana unit
@@ -97,7 +96,7 @@ my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
 #my_proc.set_data_to_write(fmwk.data.kAssociation,'rawclusters')
 #Write aho unit to get out MC vars whatever
 
-my_proc.enable_event_alignment(False)
+#my_proc.enable_event_alignment(False)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
