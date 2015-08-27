@@ -234,31 +234,6 @@ namespace michel {
       }
     }
 
-    //
-    // Step 5 ... Michel re-clustering
-    //
-    _watch.Start();
-    if(_alg_michel_cluster) {
-
-      size_t ctr = 0;
-      for(auto& cluster : _output_v) {
-
-	std::vector<HitPt> available_hits_v;
-	for( auto const& v : _used_hit_marker_v ) if(v) ++ctr;
-	available_hits_v.reserve(ctr);
-	for(size_t hit_index=0; hit_index<_all_hit_v.size(); ++hit_index)
-
-	  if(!_used_hit_marker_v[hit_index]) available_hits_v.push_back(_all_hit_v[hit_index]);
-	
-	_alg_michel_cluster->Cluster(cluster._michel,available_hits_v);
-	
-      }
-      
-    }
-
-    _alg_time_v [kMichelCluster] += _watch.RealTime();
-    _alg_ctr_v  [kMichelCluster] += _output_v.size();
-
 
 
     if(_verbosity <= msg::kDEBUG)
@@ -290,6 +265,35 @@ namespace michel {
     
     _alg_time_v [kMIDFilter] += _watch.RealTime();
     _alg_ctr_v  [kMIDFilter] += _output_v.size();
+
+
+    //
+    // Step 5 ... Michel re-clustering
+    //
+    _watch.Start();
+    if(_alg_michel_cluster) {
+
+      size_t ctr = 0;
+      for(auto& cluster : _output_v) {
+
+	std::vector<HitPt> available_hits_v;
+	for( auto const& v : _used_hit_marker_v ) if(v) ++ctr;
+	available_hits_v.reserve(ctr);
+	for(size_t hit_index=0; hit_index<_all_hit_v.size(); ++hit_index)
+
+	  if(!_used_hit_marker_v[hit_index]) available_hits_v.push_back(_all_hit_v[hit_index]);
+	
+	_alg_michel_cluster->Cluster(cluster._michel,available_hits_v);
+	
+      }
+      
+    }
+
+    _alg_time_v [kMichelCluster] += _watch.RealTime();
+    _alg_ctr_v  [kMichelCluster] += _output_v.size();
+
+
+
     
     //
     // Finally call analyze
