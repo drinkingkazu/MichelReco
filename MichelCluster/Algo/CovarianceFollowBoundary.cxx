@@ -139,31 +139,33 @@ namespace michel {
       return kINVALID_SIZE;
     
 
-    /// Lets just see if the slope changes sign, change in sign means
-    /// something changed directions
+    if(_require_slope_sign_flip) {
+      /// Lets just see if the slope changes sign, change in sign means
+      /// something changed directions
     
-    int  curr_sign = -1;
-    int  prev_sign = -1;
+      int  curr_sign = -1;
+      int  prev_sign = -1;
 
-    bool changed_sign = false;
-    for(unsigned int i = 0; i < slope.size(); ++i)
-      {
-    	curr_sign = sign(slope[i]);
+      bool changed_sign = false;
+      for(unsigned int i = 0; i < slope.size(); ++i)
+	{
+	  curr_sign = sign(slope[i]);
 
-    	if(i == 0) { prev_sign = curr_sign; continue; }
+	  if(i == 0) { prev_sign = curr_sign; continue; }
 	
-    	if(curr_sign == prev_sign) {
-    	  continue;
-    	}
-    	else{
-    	  changed_sign = true;
-    	  break;
-    	}
-      }
+	  if(curr_sign == prev_sign) {
+	    continue;
+	  }
+	  else{
+	    changed_sign = true;
+	    break;
+	  }
+	}
     
     
-    if(!changed_sign)
-      return kINVALID_SIZE;
+      if(!changed_sign)
+	return kINVALID_SIZE;
+    }
     
     auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
     auto left  = candidate_loc;

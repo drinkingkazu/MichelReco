@@ -33,7 +33,8 @@ namespace michel {
 				 _n_window_size(15),
 				 _p_above(0.25),
 				 _window_cutoff(3),
-				 _edgefix(3)
+				 _edgefix(3),
+				 _require_slope_sign_flip(true)
 				 
 				 
     {}
@@ -74,8 +75,10 @@ namespace michel {
 
     /// setter function for mitigating edge effect, this number of points on the
     /// edge set equal to truncatedQ[_edgefix], maybe 0 is best I don't know
-    
     void SetEdgeEffectFix(int e)             { _edgefix = e; }
+    
+    /// setter function to require that slope in MichelCluster flips in sign
+    void SetSlopeSignFlip(bool f)            { _require_slope_sign_flip = f; }
     
   private:
 
@@ -112,6 +115,8 @@ namespace michel {
     /// on both edges
     int _edgefix;
  
+    /// Should I require sign flip on windowed slope of MichelCluster?
+    bool _require_slope_sign_flip;
     
     /// return sign of val (-1/1 and sometimes 0)
     int sign(double val);
