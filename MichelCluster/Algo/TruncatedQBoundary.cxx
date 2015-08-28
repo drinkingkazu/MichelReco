@@ -31,23 +31,29 @@ namespace michel {
     slope.reserve         (cluster._ordered_pts.size());
     
     //hardcoded for now will become configurable
-    double _n_window_size = 15;
-    double _p_above       = 0.25;
-    int    _window_cutoff = 3;
+    // double _n_window_size = 15;
+    // double _p_above       = 0.25;
+    // int    _window_cutoff = 3;
 
     //do truncated mean
     truncated_mean = _clusterCalc.calc_smooth_mean(cluster,
 						   _n_window_size,
 						   _window_cutoff,
 						   _p_above);
+
+    if(truncated_mean.size() < _edgefix) {
+      std::cout << "\n\tUnable to fix edges on truncated mean, edgefix size: " << _edgefix
+		<< "\t and truncated_mean.size(): " << truncated_mean.size() << "\n";
+      throw MichelException();
+    }
     
-    for(int i = 0 ; i < 3; ++i) {
-      truncated_mean.at(i) = truncated_mean[3];
-      truncated_mean.at(truncated_mean.size() - i - 1) = truncated_mean[truncated_mean.size() - 3];
+    for(int i = 0 ; i < _edgefix; ++i) {
+      truncated_mean.at(i) = truncated_mean[_edgefix];
+      truncated_mean.at(truncated_mean.size() - i - 1) = truncated_mean[truncated_mean.size() - _edgefix];
     }
     
     //Directionality considerations
-    int dir_window = 11;
+    int dir_window = _covariance_window;
     covariance     = _clusterCalc.calc_covariance(cluster._hits,dir_window);
     slope          = _clusterCalc.calc_slope     (cluster._hits,dir_window);
     
