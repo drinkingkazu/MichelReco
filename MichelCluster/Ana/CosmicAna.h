@@ -57,7 +57,8 @@ namespace michel {
     TTree* _out_tree;
 
     double _michel_clustered_charge;
-    double _michel_n_hits;
+    int _michel_n_hits;
+    int _muon_n_hits;
     int    _number_of_clusters;
 
     int    _boundary;

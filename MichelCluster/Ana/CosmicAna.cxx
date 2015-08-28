@@ -12,7 +12,8 @@ void CosmicAna::Initialize()
   _out_tree = new TTree("out_tree", "aho_tree");
 
   _out_tree->Branch("_michel_clustered_charge", &_michel_clustered_charge, "_michel_clustered_charge/D");
-  _out_tree->Branch("_michel_n_hits"          , &_michel_n_hits, "_michel_n_hits/D"          );
+  _out_tree->Branch("_michel_n_hits"          , &_michel_n_hits, "_michel_n_hits/I"          );
+  _out_tree->Branch("_muon_n_hits"          , &_muon_n_hits, "_muon_n_hits/I"          );
 
   _out_tree->Branch("_boundary", &_boundary, "_boundary/I");
 
@@ -137,10 +138,12 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
     if (_forward) {
       _mean_chi_muon   = mean_chi_backward;
       _mean_chi_michel = mean_chi_forward;
+      _muon_n_hits = (int)boundary;
     }
     else {
       _mean_chi_muon   = mean_chi_forward;
       _mean_chi_michel = mean_chi_backward;
+      _muon_n_hits = (int)(_chi_v.size()-boundary);
     }
 
 
@@ -244,6 +247,7 @@ void CosmicAna::clear_all() {
 
   _michel_clustered_charge = -1;
   _michel_n_hits           = -1;
+  _muon_n_hits             = -1;
   _number_of_clusters      = -1;
 
   _boundary = -1;
