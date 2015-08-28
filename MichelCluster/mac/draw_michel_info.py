@@ -139,14 +139,18 @@ while ( n < len(arr) ):
     if (whattoscan == 0):
         # if it cannot even find entry, continue
         if not (run,evt,idx) in scanDict:
+            n += 1
             continue
         if (scanDict[(run,evt,idx)] != 0):
+            n += 1
             continue
     if (whattoscan == 1):
         # if it cannot even find entry, continue
         if not (run,evt,idx) in scanDict:
+            n += 1
             continue
         if (scanDict[(run,evt,idx)] != 1):
+            n += 1
             continue
 
     # clear the axes...
@@ -162,9 +166,9 @@ while ( n < len(arr) ):
     michel_x = arr['_michel_X'][n]
     michel_z = arr['_michel_Z'][n]
 
-    dq = arr['_q_v'][n]
-    ds = arr['_s_v'][n]
-    tdq = arr['_t_q_v'][n]
+    dq    = arr['_q_v'][n]
+    ds    = arr['_s_v'][n]
+    tdq   = arr['_t_q_v'][n]
     tdqds = arr['_t_dqds_v'][n]
     
     boundary = arr['_boundary'][n]
