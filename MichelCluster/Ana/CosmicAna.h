@@ -2,7 +2,7 @@
  * \file SingleMuAna.h
  *
  * \ingroup MichelCluster
- * 
+ *
  * \brief Class def header for a class SingleMuAna
  *
  * @author kazuhir0
@@ -23,37 +23,37 @@
 #include <math.h>
 
 namespace michel {
-  /**
-     \class CosmicAna
-     User defined class CosmicAna ... these comments are used to generate
-     doxygen documentation!
-  */
-  class CosmicAna : public MichelAnaBase {
-    
-  public:
-    
+/**
+   \class CosmicAna
+   User defined class CosmicAna ... these comments are used to generate
+   doxygen documentation!
+*/
+class CosmicAna : public MichelAnaBase {
+
+public:
+
     /// Default constructor
-    CosmicAna(){ _verbosity = msg::kNORMAL; }
-    
+    CosmicAna() { _verbosity = msg::kNORMAL; }
+
     /// Default destructor
-    ~CosmicAna(){}
-    
+    ~CosmicAna() {}
+
     /// Initialize
     void Initialize();
-    
+
     /// Analyze
     void Analyze(const MichelClusterArray& input_cluster_v,
-		 const MichelClusterArray& output_cluster_v);
-    
+                 const MichelClusterArray& output_cluster_v);
+
     /// Event Reset
     void EventReset();
-    
+
     /// Finalize
     void Finalize(TFile* fout);
-    
-    
-  protected:
-    
+
+
+protected:
+
     TTree* _out_tree;
 
     double _michel_clustered_charge;
@@ -72,17 +72,17 @@ namespace michel {
     double _mean_chi_muon;
 
     bool _has_michel;
-    
+
     std::vector<double> _t_q_v;
     std::vector<double> _t_dqds_v;
     std::vector<double> _chi_v;
     std::vector<double> _dirs_v;
-    
+
     std::vector<double> _s_v;
-    
+
     std::vector<double> _Z;
     std::vector<double> _X;
-    
+
     std::vector<double> _michel_Z;
     std::vector<double> _michel_X;
 
@@ -94,19 +94,25 @@ namespace michel {
     int _subrun;
     int _event;
     int _clus_idx;
-    
+
     std::vector<double> _slope_v;
-    
+
+    // smallest time for a hit in the michel cluster
+    // this is used to eliminiate MIDs caused by cosmics going thru wire plane
+    // which have charge loop back and look like michels
+    double _lowest_hit_t;
+
+
     double get_lowest(const std::vector<double>& data);
     double get_rms   (const std::vector<double>& data);
     double get_mean  (const std::vector<double>& data);
     void   clear_all();
-    
+
     TH1F* _michel_hit_qs;
-    
-  };
+
+};
 }
 
 #endif
-/** @} */ // end of doxygen group 
+/** @} */ // end of doxygen group
 

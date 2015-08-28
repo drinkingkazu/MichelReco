@@ -46,6 +46,8 @@ void CosmicAna::Initialize()
   _out_tree->Branch("_event", &_event, "_event/I");
   _out_tree->Branch("_clus_idx", &_clus_idx, "_clus_idx/I");
 
+  _out_tree->Branch("_lowest_hit_t", &_lowest_hit_t, "_lowest_hit_t/D");
+
   _michel_hit_qs = new TH1F("michel_hit_qs", "Michel Hit Charges", 500, 0, 10000);
 }
 
@@ -143,7 +145,7 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
     else {
       _mean_chi_muon   = mean_chi_forward;
       _mean_chi_michel = mean_chi_backward;
-      _muon_n_hits = (int)(_chi_v.size()-boundary);
+      _muon_n_hits = (int)(_chi_v.size() - boundary);
     }
 
 
@@ -159,11 +161,15 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
       _has_michel = true;
       auto total_charge = double{0.0};
 
+      _lowest_hit_t = 99999999.;
+
       for (const auto& mhit : out._michel) {
         _michel_Z.push_back(mhit._w);
         _michel_X.push_back(mhit._t);
         total_charge += mhit._q;
         _michel_hit_qs->Fill(mhit._q);
+        if (mhit._t < _lowest_hit_t)
+          _lowest_hit_t = mhit._t;
       }
 
       _michel_clustered_charge = total_charge;
