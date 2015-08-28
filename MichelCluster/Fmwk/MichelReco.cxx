@@ -14,9 +14,11 @@ namespace michel {
 
     , _alg_merge          ( nullptr )
     , _alg_boundary       ( nullptr )
+    , _alg_filter         ( nullptr )
     , _alg_michel_id      ( nullptr )
     , _alg_michel_cluster ( nullptr )
-
+      
+      
     , _alg_v        ( kAlgoTypeMax, nullptr )
     , _alg_time_v   ( kAlgoTypeMax, 0.      )
     , _alg_ctr_v    ( kAlgoTypeMax, 0       )

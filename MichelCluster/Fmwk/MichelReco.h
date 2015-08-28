@@ -102,6 +102,12 @@ namespace michel {
     /// Setter for event info
     void SetEventInfo(EventID id) { _id = id; }
 
+    /// Setter for distance cutoff when making internal track
+    void SetDCutoff(double d)     { _d_cutoff = d; }
+
+    /// Setter for setting minimum number of hits to create MichelCluster
+    void SetMinNHits(int n)       { _min_nhits = n; }
+    
     /// Getter for MichelClusterArray
     const MichelClusterArray& GetResult()
     { return _output_v; }
