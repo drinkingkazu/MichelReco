@@ -27,7 +27,7 @@ namespace michel{
 
   double EdgeMerger::Priority(const MichelCluster& cluster)
   {
-    if(cluster._hits.size() < 2) return -1;
+    if(cluster._hits.size() < 3) return -1;
 
     return (double)(cluster._hits.size());
   }

@@ -44,7 +44,8 @@ namespace michel {
     if(truncated_mean.size() < _edgefix) {
       std::cout << "\n\tUnable to fix edges on truncated mean, edgefix size: " << _edgefix
 		<< "\t and truncated_mean.size(): " << truncated_mean.size() << "\n";
-      throw MichelException();
+      return kINVALID_SIZE;
+      //throw MichelException();
     }
     
     for(int i = 0 ; i < _edgefix; ++i) {

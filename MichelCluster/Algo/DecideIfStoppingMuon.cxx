@@ -74,6 +74,7 @@ namespace michel{
       muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
     }
 
+    // require the muon segment to have a minimum length
     if (muon_len < _min_muon_length*_min_muon_length)
       return false;
 
@@ -119,7 +120,7 @@ namespace michel{
     }
     else{
       for (size_t i=boundary; i < chi_v.size(); i++){
-	if (fabs(chi_v[i]) > 0.9){
+	if (fabs(chi_v[i]) > _chi_min){
 	  slope += slope_v[i];
 	  count += 1;
 	  w_avg += hit_v[i]._w;
@@ -168,7 +169,13 @@ namespace michel{
     int nbad = 0;
     // loop through all hits
     for (auto const& h : hits){
-      if ( h.SqDist(start) < (_hit_radius*_hit_radius)){
+      // distance to michel start
+      double dMichel = h.SqDist(start);
+      if ( dMichel < (_hit_radius*_hit_radius)){
+	// if the distance to the michel is less then the distance to the center of the muon
+	// then ok. Otherwise don't count the point because it is "behind" the michel
+	double dMuon = (h._w-w_avg)*(h._w-w_avg)+(h._t-t_avg)*(h._t-t_avg);
+	if (dMuon < dMichel) continue;
 	// is this point in this cluster?
 	bool use = true;
 	for (auto const& hclus : michel._hits){

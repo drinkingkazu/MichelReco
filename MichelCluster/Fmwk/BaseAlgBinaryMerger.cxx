@@ -81,8 +81,11 @@ namespace michel {
 	    for(auto const& h : cluster._hits)
 	      hits.push_back(h);
 	  }
-	  MichelCluster merged(std::move(hits), min_nhits,d_cutoff);
-	  tmp_result_v.emplace_back(merged);
+	  //MichelCluster merged(std::move(hits), min_nhits,d_cutoff);
+	  if (hits.size() >= 3){
+	    MichelCluster merged(std::move(hits), 3, d_cutoff);
+	    tmp_result_v.emplace_back(merged);
+	  }
 	}
 	result_v = tmp_result_v;
       }
