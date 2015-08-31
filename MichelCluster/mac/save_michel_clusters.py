@@ -35,7 +35,7 @@ the_filter = fmwk.MichelFilter()
 my_unit = fmwk.MichelRecoDriver()
 my_unit.SetClusterProducer("fuzzycluster")
 #my_unit.SetClusterProducer("rawcluster")
-my_unit.SetEField(0.5)
+my_unit.SetEField(0.22)
 
 # set here if you want to save michels as an output cluster
 my_unit.saveMichelClusters(True)
@@ -87,11 +87,11 @@ mgr.SetAlgo(michel.kMichelCluster, supersonic)
 mgr.AddAna(michel.CosmicAna())
 
 # add process to get moving
-my_proc.add_process(the_filter)
+#my_proc.add_process(the_filter)
 my_proc.add_process(my_unit)
 
-#my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
-my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
+my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
+#my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
 my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
 #my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
 my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
