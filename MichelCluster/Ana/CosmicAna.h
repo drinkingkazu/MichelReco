@@ -94,6 +94,12 @@ protected:
     int _subrun;
     int _event;
     int _clus_idx;
+    
+    double _michel_start_Z, _michel_start_X;
+
+    // mean Q along muon truncating the averaging
+    double _mean_q_muon;
+    
 
     std::vector<double> _slope_v;
 
@@ -104,8 +110,12 @@ protected:
 
 
     double get_lowest(const std::vector<double>& data);
-    double get_rms   (const std::vector<double>& data);
+    double get_rms   (const std::vector<double>& data,
+		      const double& avg);
     double get_mean  (const std::vector<double>& data);
+    double get_mean_between_bounds(const std::vector<double>& data,
+				   const double& minVal,
+				   const double& maxVal);
     void   clear_all();
 
     TH1F* _michel_hit_qs;

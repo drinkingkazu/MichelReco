@@ -19,6 +19,91 @@ namespace michel{
 				      const std::vector<HitPt>& hits)
   {
 
+
+
+    // get the slope vector for the cluster
+    auto const& slope_v = michel._dirs_v;
+    // get the chi vector
+    auto const& chi_v = michel._chi2_v;
+    // get the hit vector
+    auto const& hit_v = michel._hits;
+    // get the boundary point
+    auto const& boundary = (int)michel._boundary;
+    // is the michel forward (from boundary to end) or back
+    auto const& forward = michel._forward;
+    // michel's start point
+    auto const& start = michel._hits[boundary];
+
+    // ***************************************************
+    // the boundary defines where the michel starts in the
+    // ordered hit list. If less then 0 then wtf
+    if (boundary < 0)
+      return false;
+
+    // First start with some initial cuts
+    // these are (stringent) sanity checks
+    // to remove generally very bad michels
+
+    // chi values for entire muon track
+    std::vector<double> chi_muon;
+
+    // count of michel hits with chi above some value
+    int high_chi_michel = 0;
+    // total number of michel hits
+    int num_michel_hits = 0;
+
+    // if the muon is too short -> ignore
+    double muon_len = 0;
+    if (forward){
+      num_michel_hits = hit_v.size()-boundary;
+      for (size_t i=boundary; i < hit_v.size()-1; i++)
+	if (fabs(chi_v[i]) > 0.95) high_chi_michel += 1;
+      for (size_t i=0; i < boundary; i++)
+	chi_muon.push_back(fabs(chi_v[i]));
+      auto& mu_s = hit_v[0];
+      muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
+    }
+    else{
+      num_michel_hits = boundary;
+      for (size_t i=0; i < boundary; i++)
+	if (fabs(chi_v[i]) > 0.95) high_chi_michel += 1;
+      for (size_t i=boundary; i < hit_v.size()-1; i++)
+	chi_muon.push_back(fabs(chi_v[i]));
+      auto& mu_s = hit_v[hit_v.size()-1];
+      muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
+    }
+
+    // *************************************************
+    // require the muon segment to have a minimum length
+    if (muon_len < _min_muon_length*_min_muon_length)
+      return false;
+
+    /*
+    // *********************************************************************************
+    // if the number of michel hits with chi > 0.9 is larger than 5 -> remove this event
+    if (high_chi_michel > 5){
+      std::cout << "michel has too many high chi hits..." << std::endl;
+      return false;
+    }
+
+    // **************************************
+    // if number of michel hits < 3 -> reject
+    if (num_michel_hits < 5){
+      std::cout << "michel has too few hits..." << std::endl;
+      return false;
+    }
+    */
+
+    // ******************************************************************
+    // if < 50% of chi_v entries belonging to muon are above 80% -> remove
+    int num_above_cut = 0;
+    for (auto& c : chi_muon)
+      if (c > 0.8) num_above_cut += 1;
+    double frac_above = ((double)num_above_cut) / ((double)chi_muon.size());
+    if (frac_above < 0.5)
+      return false;
+
+
     // how this algorithm works:
     // the idea is to take the straight track of a the muon-portion
     // of the cluster and get an average slope for the muon-like line
@@ -39,55 +124,7 @@ namespace michel{
     // 1) deltas tagged as michels
     // 2) muons continuing after a section of broken wires
 
-    // get the slope vector for the cluster
-    auto const& slope_v = michel._dirs_v;
-    // get the chi vector
-    auto const& chi_v = michel._chi2_v;
-    // get the hit vector
-    auto const& hit_v = michel._hits;
-    // get the boundary point
-    auto const& boundary = (int)michel._boundary;
-    // is the michel forward (from boundary to end) or back
-    auto const& forward = michel._forward;
-    // michel's start point
-    auto const& start = michel._hits[boundary];
 
-    // the boundary defines where the michel starts in the
-    // ordered hit list. If less then 0 then wtf
-    if (boundary < 0)
-      return false;
-
-    std::vector<double> chi_muon;
-
-    // if the muon is too short -> ignore
-    double muon_len = 0;
-    if (forward){
-      for (size_t i=0; i < boundary; i++)
-	chi_muon.push_back(fabs(chi_v[i]));
-      auto& mu_s = hit_v[0];
-      muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
-    }
-    else{
-      for (size_t i=boundary; i < hit_v.size()-1; i++)
-	chi_muon.push_back(fabs(chi_v[i]));
-      auto& mu_s = hit_v[hit_v.size()-1];
-      muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
-    }
-
-    // require the muon segment to have a minimum length
-    if (muon_len < _min_muon_length*_min_muon_length)
-      return false;
-
-
-    // if < 50% of chi_v entries belonging to muon are above 80% -> remove
-    int num_above_cut = 0;
-    for (auto& c : chi_muon){
-      if (c > 0.8)
-	num_above_cut += 1;
-    }
-    double frac_above = ((double)num_above_cut) / ((double)chi_muon.size());
-    if (frac_above < 0.5)
-      return false;
 
     // use the high-chi hits (value close to 1)
     // from the muon-section of the cluster
@@ -131,9 +168,9 @@ namespace michel{
     
     // require that we have used at least 70% of the hits in the cluster
     double frac_used = (double)count / (double)hit_v.size();
-    //std::cout << "Frac. of hits used to get slope: " << frac_used << std::endl;
+    // std::cout << "Frac. of hits used to get slope: " << frac_used << std::endl;
     if (frac_used < _frac_min_hits)
-      return true;
+      return false;
 
     slope /= count;
     w_avg /= count;
@@ -169,6 +206,8 @@ namespace michel{
     int nbad = 0;
     // loop through all hits
     for (auto const& h : hits){
+      // if hit plane is not 2 -> skip
+      if (h._pl != 2) continue;
       // distance to michel start
       double dMichel = h.SqDist(start);
       if ( dMichel < (_hit_radius*_hit_radius)){

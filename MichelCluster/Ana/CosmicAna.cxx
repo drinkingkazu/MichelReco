@@ -23,6 +23,7 @@ void CosmicAna::Initialize()
   _out_tree->Branch("_rms_chi"        , &_rms_chi        , "_rms_chi/D");
   _out_tree->Branch("_lowest_chi"     , &_lowest_chi     , "_lowest_chi/D");
   _out_tree->Branch("_mean_chi_muon", &_mean_chi_muon, "_mean_chi_muon/D");
+  _out_tree->Branch("_mean_q_muon", &_mean_q_muon, "_mean_q_muon/D");
   _out_tree->Branch("_mean_chi_michel", &_mean_chi_michel, "_mean_chi_michel/D");
 
   _out_tree->Branch("_slope_v",    "std::vector<double>" , &_slope_v);
@@ -32,6 +33,9 @@ void CosmicAna::Initialize()
 
   _out_tree->Branch("_michel_Z", "std::vector<double>" , &_michel_Z);
   _out_tree->Branch("_michel_X", "std::vector<double>" , &_michel_X);
+
+  _out_tree->Branch("_michel_start_Z",&_michel_start_Z,"michel_start_Z/D");
+  _out_tree->Branch("_michel_start_X",&_michel_start_X,"michel_start_X/D");
 
   _out_tree->Branch("_q_v",    "std::vector<double>" , &_q_v);
   _out_tree->Branch("_t_q_v",    "std::vector<double>" , &_t_q_v);
@@ -119,35 +123,70 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
       _boundary         =  boundary                                   ;
       _chi_at_boundary  =  covariance_in_largest_cluster.at(boundary) ;
       _mean_chi         =  get_mean   (covariance_in_largest_cluster) ;
-      _rms_chi          =  get_rms    (covariance_in_largest_cluster) ;
+      _rms_chi          =  get_rms    (covariance_in_largest_cluster,_mean_chi) ;
       _lowest_chi       =  get_lowest (covariance_in_largest_cluster) ;
     }
 
     // get chi for muon and michel segments
     // get chi for "forward" and "backward" sections
+    // same for Q charge
     double mean_chi_forward  = 0;
     double mean_chi_backward = 0;
+    double mean_q_forward  = 0;
+    double mean_q_backward = 0;
+    double rms_chi_forward  = 0;
+    double rms_chi_backward = 0;
+    double rms_q_forward  = 0;
+    double rms_q_backward = 0;
+
+    // vector of chi and Q values for forward/backward portions
+    std::vector<double> forwardQ;
+    std::vector<double> backwardQ;
+    std::vector<double> forwardChi;
+    std::vector<double> backwardChi;
+
+
 
     for (size_t n = 0; n < _chi_v.size(); n++) {
       if (n < _boundary)
-        mean_chi_backward += _chi_v[n];
-      else
-        mean_chi_forward  += _chi_v[n];
+	backwardChi.push_back(_chi_v[n]);
+	else
+	forwardChi.push_back(_chi_v[n]);
     }
-    if (mean_chi_backward != 0) mean_chi_backward /= _boundary;
-    if (mean_chi_forward  != 0) mean_chi_forward  /= (_chi_v.size() - _boundary);
+
+    mean_chi_backward = get_mean(backwardChi);
+    rms_chi_backward  = get_rms(backwardChi,mean_chi_backward);
+    mean_chi_forward  = get_mean(forwardChi);
+    rms_chi_forward   = get_rms(forwardChi,mean_chi_forward);
+
+    for (size_t n = 0; n < _q_v.size(); n++) {
+      if (n < _boundary)
+	backwardQ.push_back(_q_v[n]);
+      else
+	forwardQ.push_back(_q_v[n]);
+    }
+
+    mean_q_backward = get_mean(backwardQ);
+    rms_q_backward  = get_rms(backwardQ,mean_q_backward);
+    mean_q_forward  = get_mean(forwardQ);
+    rms_q_forward   = get_rms(forwardQ,mean_q_forward);
+
+
     // assign to muon and michel according to value of "_forward"
     if (_forward) {
       _mean_chi_muon   = mean_chi_backward;
       _mean_chi_michel = mean_chi_forward;
       _muon_n_hits = (int)boundary;
+      // get average "truncated" Q for muon segment
+      _mean_q_muon = get_mean_between_bounds(backwardQ,0,mean_q_backward+rms_q_backward);
     }
     else {
       _mean_chi_muon   = mean_chi_forward;
       _mean_chi_michel = mean_chi_backward;
       _muon_n_hits = (int)(_chi_v.size() - boundary);
+      // get average "truncated" Q for muon segment
+      _mean_q_muon = get_mean_between_bounds(forwardQ,0,mean_q_forward+rms_q_forward);
     }
-
 
     _event    = _id.event;
     _run      = _id.run;
@@ -184,113 +223,134 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
       _has_michel              = false;
     }
 
+    _michel_start_Z = _Z[boundary];
+    _michel_start_X = _X[boundary];
+
     _out_tree->Fill();
   }
-
+  
 }
-
-/// Event Reset
-void CosmicAna::EventReset()
-{
-
-}
-
-/// Finalize
-void CosmicAna::Finalize(TFile* fout)
-{
-  _out_tree->Write();
-  _michel_hit_qs->Write();
-  //fout->Write();
-}
-
-
-
-double CosmicAna::get_mean(const std::vector<double>& data) {
-
-  if (data.size() == 0) { std::cout << "You have me nill to mean\n"; throw MichelException(); }
-
-  double result = 0.0;
-
-  for (const auto& d : data)
-    result += d;
-
-
-  return (result / ((double)data.size()));
-
-
-}
-double CosmicAna::get_rms(const std::vector<double>& data) {
-
-  if (data.size() == 0) { std::cout << "You have me nill to stdev\n"; throw MichelException(); }
-
-  double result = 0.0;
-  auto    avg   = get_mean(data);
-  for (const auto& d : data)
-    result += (d - avg) * (d - avg);
-
-  return sqrt(result / ((double)data.size()));
-
-
-}
-double CosmicAna::get_lowest(const std::vector<double>& data) {
-
-  //get lowest dqds
-  auto the_min = double{999999.0};
-  size_t idx = 1;
-
-  for (size_t i = 0; i < data.size(); ++i) {
-    if (data[i] < the_min) {
-      the_min = data[i]; idx = i;
-    }
+  
+  /// Event Reset
+  void CosmicAna::EventReset()
+  {
+    
+  }
+  
+  /// Finalize
+  void CosmicAna::Finalize(TFile* fout)
+  {
+    std::cout << "Number of Michels found: " << _out_tree->GetEntries() << std::endl;
+    _out_tree->Write();
+    _michel_hit_qs->Write();
+    //fout->Write();
+  }
+  
+  
+  
+  double CosmicAna::get_mean(const std::vector<double>& data) {
+    
+    if (data.size() == 0) { return 0; }
+    
+    double result = 0.0;
+    
+    for (const auto& d : data)
+      result += d;
+    
+    
+    return (result / ((double)data.size()));
   }
 
-  return the_min;
+
+  double CosmicAna::get_rms(const std::vector<double>& data, const double& avg) {
+
+    if (data.size() == 0) { return 0; }
+
+    double result = 0.0;
+    for (const auto& d : data)
+      result += (d - avg) * (d - avg);
+    
+    return sqrt(result / ((double)data.size()));
+  }
 
 
-}
+  double CosmicAna::get_mean_between_bounds(const std::vector<double>& data, const double& minVal, const double& maxVal) {
+    
+    if (data.size() == 0) { return 0; }
+    
+    double result = 0.0;
+    int count = 0;
 
-void CosmicAna::clear_all() {
+    for (const auto& d : data){
+      if ( (d > minVal) && (d < maxVal) ){
+	result += d;
+	count += 1;
+      }
+    }
 
-  _michel_clustered_charge = -1;
-  _michel_n_hits           = -1;
-  _muon_n_hits             = -1;
-  _number_of_clusters      = -1;
+    return (result / ((double)count));
+  }
 
-  _boundary = -1;
 
-  _chi_at_boundary = -1;
-  _mean_chi        = -1;
-  _rms_chi         = -1;
-  _lowest_chi      = -1;
-  _mean_chi_muon   = -1;
-  _mean_chi_michel = -1;
+  double CosmicAna::get_lowest(const std::vector<double>& data) {
+    
+    //get lowest dqds
+    auto the_min = double{999999.0};
+    size_t idx = 1;
+    
+    for (size_t i = 0; i < data.size(); ++i) {
+      if (data[i] < the_min) {
+	the_min = data[i]; idx = i;
+      }
+    }
 
-  _Z.clear();
-  _X.clear();
+    return the_min;
+  }
+  
+  void CosmicAna::clear_all() {
+    
+    _michel_clustered_charge = -1;
+    _michel_n_hits           = -1;
+    _muon_n_hits             = -1;
+    _number_of_clusters      = -1;
+    
+    _boundary = -1;
+    
+    _chi_at_boundary = -1;
+    _mean_chi        = -1;
+    _rms_chi         = -1;
+    _lowest_chi      = -1;
+    _mean_chi_muon   = -1;
+    _mean_chi_michel = -1;
 
-  _slope_v.clear();
-
-  _forward = -1;
-
-  /// reset event info
-  _run = -1;
-  _subrun = -1;
-  _event = -1;
-  _clus_idx = -1;
-
-  _michel_Z.clear();
-  _michel_X.clear();
-
-  _q_v.clear();
-  _t_q_v.clear();
-
-  _t_dqds_v.clear();
-  _chi_v.clear();
-  _dirs_v.clear();
-
-  _s_v.clear();
-}
-
+    _mean_q_muon = -1;
+    
+    _Z.clear();
+    _X.clear();
+    
+    _slope_v.clear();
+    
+    _forward = -1;
+    
+    /// reset event info
+    _run = -1;
+    _subrun = -1;
+    _event = -1;
+    _clus_idx = -1;
+    
+    _michel_Z.clear();
+    _michel_X.clear();
+    
+    _q_v.clear();
+    _t_q_v.clear();
+    
+    _t_dqds_v.clear();
+    _chi_v.clear();
+    _dirs_v.clear();
+    
+    _s_v.clear();
+  }
+  
 }
 #endif
 
