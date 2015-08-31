@@ -62,10 +62,10 @@ mgr.SetAlgo(michel.kBoundaryFinder, covariance)
 
 # MID finding algorithm
 midalgo = michel.DecideIfStoppingMuon()
-midalgo.SetChiMin(0.9)
-midalgo.SetFracMinHits(0.7)
-midalgo.SetHitRadius(10)
-midalgo.SetMaxDist(3)
+midalgo.SetChiMin(0.8)
+midalgo.SetFracMinHits(0.6)
+midalgo.SetHitRadius(30)
+midalgo.SetMaxDist(2.5)
 midalgo.SetMinBadHits(10)
 midalgo.SetMinMuonLength(10)
 mgr.SetAlgo(michel.kMIDFilter, midalgo)
@@ -78,7 +78,8 @@ mgr.SetAlgo(michel.kMichelID, findMichel)
 # Attach algorithm to recluster michel
 supersonic = michel.SuperSonicClusterer()
 stepsonic  = michel.StepSuperSonicCluster()
-mgr.SetAlgo(michel.kMichelCluster, stepsonic)
+empty      = michel.EmptyMichelCluster()
+mgr.SetAlgo(michel.kMichelCluster, supersonic)
             #michel.RadiusMichelCluster())
 
 # Attach ana unit
@@ -86,10 +87,11 @@ mgr.SetAlgo(michel.kMichelCluster, stepsonic)
 mgr.AddAna(michel.CosmicAna())
 
 # add process to get moving
-#my_proc.add_process(the_filter)
+my_proc.add_process(the_filter)
 my_proc.add_process(my_unit)
 
-my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
+#my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
+my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
 my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
 #my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
 my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
