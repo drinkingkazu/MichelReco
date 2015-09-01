@@ -80,7 +80,7 @@ mgr.SetAlgo(michel.kMichelID, findMichel)
 supersonic = michel.SuperSonicClusterer()
 stepsonic  = michel.StepSuperSonicCluster()
 empty      = michel.EmptyMichelCluster()
-mgr.SetAlgo(michel.kMichelCluster, supersonic)
+mgr.SetAlgo(michel.kMichelCluster, stepsonic)
             #michel.RadiusMichelCluster())
 
 # Attach ana unit
