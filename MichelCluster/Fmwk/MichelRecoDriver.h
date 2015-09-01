@@ -29,7 +29,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    MichelRecoDriver(){ _name="MichelRecoDriver"; _fout=0; _save_clusters=false; _Efield=0.5;}
+    MichelRecoDriver();
 
     /// Default destructor
     virtual ~MichelRecoDriver(){}
@@ -60,6 +60,9 @@ namespace larlite {
     /// Set electric field strength (kV/cm)
     void SetEField(double E) { _Efield = E; }
 
+    /// set if to use MC info or not
+    void SetUseMC(bool on) { _use_mc = on; }
+
   protected:
 
     /// Reco manager
@@ -67,6 +70,9 @@ namespace larlite {
 
     /// Input cluster producer name string
     std::string _producer;
+
+    // boolean. Use MC info?
+    bool _use_mc;
 
     /// Output analysis TTree ptr
     TTree* _hit_tree;
@@ -77,6 +83,11 @@ namespace larlite {
     int _run;
     int _subrun;
     int _event;
+
+    // mc tree
+    TTree* _mc_tree;
+    double _mc_energy;
+    double _reco_energy;
 
     /// boolean to select if to save Michel Clusters or not
     bool _save_clusters;

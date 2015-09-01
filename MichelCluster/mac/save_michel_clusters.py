@@ -34,8 +34,9 @@ the_filter = fmwk.MichelFilter()
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
 my_unit.SetClusterProducer("fuzzycluster")
+my_unit.SetUseMC(True)
 #my_unit.SetClusterProducer("rawcluster")
-my_unit.SetEField(0.22)
+my_unit.SetEField(0.5)
 
 # set here if you want to save michels as an output cluster
 my_unit.saveMichelClusters(True)
@@ -62,10 +63,10 @@ mgr.SetAlgo(michel.kBoundaryFinder, covariance)
 
 # MID finding algorithm
 midalgo = michel.DecideIfStoppingMuon()
-midalgo.SetChiMin(0.8)
-midalgo.SetFracMinHits(0.6)
+midalgo.SetChiMin(0.9)
+midalgo.SetFracMinHits(0.7)
 midalgo.SetHitRadius(30)
-midalgo.SetMaxDist(2.5)
+midalgo.SetMaxDist(3.0)
 midalgo.SetMinBadHits(10)
 midalgo.SetMinMuonLength(10)
 mgr.SetAlgo(michel.kMIDFilter, midalgo)

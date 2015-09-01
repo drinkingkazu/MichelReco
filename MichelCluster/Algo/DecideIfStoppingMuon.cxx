@@ -19,8 +19,6 @@ namespace michel{
 				      const std::vector<HitPt>& hits)
   {
 
-
-
     // get the slope vector for the cluster
     auto const& slope_v = michel._dirs_v;
     // get the chi vector
@@ -213,8 +211,8 @@ namespace michel{
       if ( dMichel < (_hit_radius*_hit_radius)){
 	// if the distance to the michel is less then the distance to the center of the muon
 	// then ok. Otherwise don't count the point because it is "behind" the michel
-	double dMuon = (h._w-w_avg)*(h._w-w_avg)+(h._t-t_avg)*(h._t-t_avg);
-	if (dMuon < dMichel) continue;
+	//double dMuon = (h._w-w_avg)*(h._w-w_avg)+(h._t-t_avg)*(h._t-t_avg);
+	//if (dMuon < dMichel) continue;
 	// is this point in this cluster?
 	bool use = true;
 	for (auto const& hclus : michel._hits){
@@ -235,8 +233,6 @@ namespace michel{
       return false;
 
     return true;
-    
-
   }
 
 }

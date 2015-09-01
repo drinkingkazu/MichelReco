@@ -4,10 +4,22 @@
 #include "MichelRecoDriver.h"
 #include "DataFormat/cluster.h"
 #include "DataFormat/hit.h"
+#include "DataFormat/mcshower.h"
 #include "LArUtil/GeometryUtilities.h"
 #include "LArUtil/LArProperties.h"
 
 namespace larlite {
+
+  MichelRecoDriver::MichelRecoDriver()
+    : _hit_tree(nullptr)
+    , _mc_tree(nullptr)
+  {
+    _name="MichelRecoDriver";
+    _fout=0;
+    _save_clusters=false;
+    _Efield=0.5;
+    _use_mc = false;
+  }
 
   bool MichelRecoDriver::initialize() {
 
@@ -23,6 +35,10 @@ namespace larlite {
     _hit_tree->Branch("_run",&_run,"run/I");
     _hit_tree->Branch("_subrun",&_subrun,"subrun/I");
     _hit_tree->Branch("_event",&_event,"event/I");
+
+    _mc_tree = new TTree("_mc_tree","MC comparison TTree");
+    _mc_tree->Branch("_mc_energy",&_mc_energy,"mc_energy/D");
+    _mc_tree->Branch("_reco_energy",&_reco_energy,"reco_energy/D");
 
     _mgr.Initialize();
 
@@ -77,6 +93,7 @@ namespace larlite {
       double q = h.Integral();
       double w = h.WireID().Wire * w2cm;
       double t = (h.PeakTime()-3200) * t2cm;
+
       _q_v.push_back(q);
       _w_v.push_back(w);
       _t_v.push_back(t);
@@ -172,12 +189,43 @@ namespace larlite {
       cluster_ass_v->set_association(michel_cluster->id(),product_id(data::kHit,ev_hit->name()),clus_hit_ass_v);
     }// if we should save cluster
 
+    // if we want to compare with mcshowers
+    if (_use_mc){
+
+      // get mcshowers
+      auto ev_mcshower = storage->get_data<event_mcshower>("mcreco");
+
+      _mc_energy = -1;
+
+      for(auto const& mcs : *ev_mcshower){
+	if( (mcs.MotherPdgCode() == 13                &&
+	     mcs.Process() == "muMinusCaptureAtRest") &&
+	    (mcs.DetProfile().E()/mcs.Start().E()  > 0.5
+	     || mcs.DetProfile().E() >= 15) )
+	  _mc_energy = mcs.DetProfile().E();
+      }
+      
+      _reco_energy = 0;
+      auto const& michels = _mgr.GetResult();
+      // get cluster's energy
+      if (michels.size() != 0){
+	auto const& mich = michels[0]._michel;
+	for (auto const& h : mich)
+	  _reco_energy += h._q;
+      }
+      else
+	_reco_energy = -1;
+      
+      _mc_tree->Fill();
+    }
+
     return true;
   }
 
   bool MichelRecoDriver::finalize() {
     _mgr.Finalize(_fout);
     if (_hit_tree) _hit_tree->Write();
+    if (_mc_tree) _mc_tree->Write();
     return true;
   }
 
