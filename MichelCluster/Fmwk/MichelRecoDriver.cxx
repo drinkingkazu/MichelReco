@@ -36,11 +36,16 @@ namespace larlite {
     _hit_tree->Branch("_q_v","std::vector<double>",&_q_v);
     _hit_tree->Branch("_w_v","std::vector<double>",&_w_v);
     _hit_tree->Branch("_t_v","std::vector<double>",&_t_v);
+    _hit_tree->Branch("_p_v","std::vector<double>",&_p_v);
     _hit_tree->Branch("_run",&_run,"run/I");
     _hit_tree->Branch("_subrun",&_subrun,"subrun/I");
     _hit_tree->Branch("_event",&_event,"event/I");
 
     _mc_tree = new TTree("_mc_tree","MC comparison TTree");
+    _mc_tree->Branch("_run",&_run,"run/I");
+    _mc_tree->Branch("_subrun",&_subrun,"subrun/I");
+    _mc_tree->Branch("_event",&_event,"event/I");
+    
     _mc_tree->Branch("_mc_energy",&_mc_energy,"mc_energy/D");
     _mc_tree->Branch("_reco_energy",&_reco_energy,"reco_energy/D");
     _mc_tree->Branch("_michel_hit_frac","std::vector<double>",&_michel_hit_frac);
@@ -88,7 +93,8 @@ namespace larlite {
     _q_v.clear();
     _w_v.clear();
     _t_v.clear();
-
+    _p_v.clear();
+    
     // Tracker for used-hit index
     std::vector< ::michel::HitPt > all_hits_v;
     all_hits_v.reserve(ev_hit->size());
@@ -98,11 +104,13 @@ namespace larlite {
       double q = h.Integral();
       double w = h.WireID().Wire * w2cm;
       double t = (h.PeakTime()-3200) * t2cm;
-
+      int    p = h.WireID().Plane;
+      
       _q_v.push_back(q);
       _w_v.push_back(w);
       _t_v.push_back(t);
-
+      _p_v.push_back(p);
+      
       all_hits_v.emplace_back( h.Integral(),
 			       w,
 			       t,
@@ -312,12 +320,12 @@ namespace larlite {
 	//********************************
 	// How do we really know one of our hits is michel, well it has higher fraction of
 	// number of electrons from michel than "not"
-	_michel_hit_frac.clear();
 	std::swap(_michel_hit_frac,hit_frac_michel);
 	
-	_mc_tree->Fill();
       }
       
+      _mc_tree->Fill();
+      _michel_hit_frac.clear();
       
 
       
@@ -329,8 +337,8 @@ namespace larlite {
 
   bool MichelRecoDriver::finalize() {
     _mgr.Finalize(_fout);
-    if (_hit_tree) _hit_tree->Write();
-    if (_mc_tree) _mc_tree->Write();
+    if (_hit_tree)            _hit_tree->Write();
+    if (_mc_tree && _use_mc)  _mc_tree ->Write();
     return true;
   }
 

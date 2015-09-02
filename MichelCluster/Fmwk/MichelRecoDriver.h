@@ -86,6 +86,8 @@ namespace larlite {
     std::vector<double> _q_v;
     std::vector<double> _w_v;
     std::vector<double> _t_v;
+    std::vector<double> _p_v;
+    
     int _run;
     int _subrun;
     int _event;
