@@ -25,7 +25,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    RadiusMichelCluster() : _min_radius(10.0), _max_hit_charge(500.0) {}
+  RadiusMichelCluster() : _min_radius(10.0), _max_hit_charge(500.0) {_name="RadiusMichelCluster";}
     
     /// Default destructor
     ~RadiusMichelCluster(){}

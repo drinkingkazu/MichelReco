@@ -32,7 +32,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    TSpectrumBoundary(){}
+    TSpectrumBoundary(){_name="TSpectrumBoundary";}
     
     /// Default destructor
     ~TSpectrumBoundary(){}

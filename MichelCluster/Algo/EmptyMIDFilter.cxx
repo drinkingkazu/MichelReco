@@ -5,7 +5,7 @@
 
 namespace michel {
 
-  EmptyMIDFilter::EmptyMIDFilter(){};
+  EmptyMIDFilter::EmptyMIDFilter(){_name="EmptyMIDFilter";}
   
   void EmptyMIDFilter::ProcessCluster(MichelCluster& cluster,
 				      const std::vector<HitPt>& hits)

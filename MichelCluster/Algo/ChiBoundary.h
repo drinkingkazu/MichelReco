@@ -26,7 +26,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    ChiBoundary(){}
+    ChiBoundary(){_name="ChiBoundary";}
     
     /// Default destructor
     ~ChiBoundary(){}

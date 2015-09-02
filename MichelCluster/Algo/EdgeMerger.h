@@ -24,7 +24,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    EdgeMerger() : _edge_dist(6.0) {}
+  EdgeMerger() : _edge_dist(6.0) {_name="EdgeMerger";}
     
     /// Default destructor
     ~EdgeMerger(){}

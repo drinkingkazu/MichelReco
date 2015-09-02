@@ -25,7 +25,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    EmptyBoundary() {}
+    EmptyBoundary() {_name="EmptyBoundary";}
     
     /// Default destructor
     ~EmptyBoundary() {}

@@ -25,7 +25,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    ForwardMichelID(){_maxHits=0;}
+    ForwardMichelID(){_maxHits=0;_name="ForwardMichelID";}
     
     /// Default destructor
     ~ForwardMichelID(){}

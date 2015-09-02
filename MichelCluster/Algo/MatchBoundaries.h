@@ -26,14 +26,15 @@ namespace michel {
   public:
     
     /// Default constructor
-    MatchBoundaries() : _maxDistance(20),
-			_maxCovarianceAtStart(0.9),
-			_covariance_window(11),
-			_n_window_size(15),
-			_p_above(0.25),
-			_window_cutoff(3),
-			_edgefix(3)
-    {}
+    MatchBoundaries() 
+      : _maxDistance(20),
+      _maxCovarianceAtStart(0.9),
+      _covariance_window(11),
+      _n_window_size(15),
+      _p_above(0.25),
+      _window_cutoff(3),
+      _edgefix(3)
+	{_name="matchBoundaries";}
     
     /// Default destructor
     ~MatchBoundaries(){}

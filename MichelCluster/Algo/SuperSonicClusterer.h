@@ -25,7 +25,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    SuperSonicClusterer(){}
+    SuperSonicClusterer(){_name="SuperSonicClusterer";}
     
     /// Default destructor
     ~SuperSonicClusterer(){}

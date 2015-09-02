@@ -25,7 +25,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    StepAroundCluster() : _max_step(3.6) {}
+  StepAroundCluster() : _max_step(3.6) {_name="StepAroundCluster.h";}
     
     /// Default destructor
     ~StepAroundCluster(){}

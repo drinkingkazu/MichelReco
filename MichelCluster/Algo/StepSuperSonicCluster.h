@@ -28,7 +28,7 @@ namespace michel {
     StepSuperSonicCluster() : _max_step(3.6) {}
     
     /// Default destructor
-    ~StepSuperSonicCluster(){}
+    ~StepSuperSonicCluster(){_name="StepSuperSonicCluster";}
 
     /// Event re-setter
     void EventReset();

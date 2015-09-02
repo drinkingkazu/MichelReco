@@ -98,19 +98,9 @@ namespace michel {
       ana->Initialize();
     }
 
-    for(size_t i=0; i<_alg_v.size(); ++i) {
-
+    for(size_t i=0; i<_alg_v.size(); ++i) 
       if(_alg_v[i]) _alg_v[i]->SetVerbosity(_verbosity);
       
-      if(i == kClusterMerger) continue;
-
-      if(_alg_v[i]) continue;
-
-      std::cerr << "\033[93m[ERROR]\033[00m "
-		<< "Algorithm type : " << i
-		<< " not provided! " << std::endl;
-      throw MichelException();
-    }
   }
   
   //-----------------------------------------------------------------

@@ -25,7 +25,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    MaxQBoundary(){}
+    MaxQBoundary(){_name="MaxQBoundary";}
     
     /// Default destructor
     ~MaxQBoundary(){}

@@ -26,18 +26,17 @@ namespace michel {
   public:
     
     /// Default constructor
-    CovarianceFollowBoundary() : _maxDistance(20),
-				 _covariance_dip_cutoff(0.9),
-				 _maxCovarianceAtStart(0.9),
-				 _covariance_window(11),
-				 _n_window_size(15),
-				 _p_above(0.25),
-				 _window_cutoff(3),
-				 _edgefix(3),
-				 _require_slope_sign_flip(true)
-				 
-				 
-    {}
+    CovarianceFollowBoundary()
+      : _maxDistance(20),
+      _covariance_dip_cutoff(0.9),
+      _maxCovarianceAtStart(0.9),
+      _covariance_window(11),
+      _n_window_size(15),
+      _p_above(0.25),
+      _window_cutoff(3),
+      _edgefix(3),
+      _require_slope_sign_flip(true)
+	{_name="CovarianceFollowBoundary";}
     
     /// Default destructor
     ~CovarianceFollowBoundary(){}

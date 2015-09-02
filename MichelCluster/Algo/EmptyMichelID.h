@@ -25,7 +25,7 @@ class EmptyMichelID : public BaseMichelAlgo {
 public:
 
   /// Default constructor
-  EmptyMichelID() {}
+  EmptyMichelID() {_name="EmptyMichelID";}
 
   /// Default destructor
   ~EmptyMichelID() {}
