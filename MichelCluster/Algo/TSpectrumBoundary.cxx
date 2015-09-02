@@ -63,8 +63,8 @@ namespace michel {
     for(auto& dqds : truncated_dqds)
       flipped_truncated_dqds.push_back(-1.0 * dqds);
     
-    auto candidate_loc     = get_tspectrum_max(cluster._s_v,truncated_mean);
-    auto dqdscandidate_loc = get_tspectrum_max(cluster._s_v,flipped_truncated_dqds);
+    int candidate_loc     = get_tspectrum_max(cluster._s_v,truncated_mean);
+    int dqdscandidate_loc = get_tspectrum_max(cluster._s_v,flipped_truncated_dqds);
     
     //We will used TSpectrum to get a list of peaks, problem is we have to put truncatedQ/dqds into TH1,
     //then make new TSpectrum, then run peakfinding then find the max "peaks" in each...
