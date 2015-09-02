@@ -43,6 +43,7 @@ namespace larlite {
     _mc_tree = new TTree("_mc_tree","MC comparison TTree");
     _mc_tree->Branch("_mc_energy",&_mc_energy,"mc_energy/D");
     _mc_tree->Branch("_reco_energy",&_reco_energy,"reco_energy/D");
+    _mc_tree->Branch("_michel_hit_frac","std::vector<double>",&_michel_hit_frac);
 
     _mgr.Initialize();
 
@@ -276,20 +277,17 @@ namespace larlite {
 	}
 
 	if(g4_trackid_v.size() == 0) { std::cout << "No tracks found breh \n"; throw std::exception(); } 
-
-	
-	
-	
 	
         try { _BTAlg.BuildMap(g4_trackid_v, *ev_simch, *ev_hit, hit_ass_set); }
 	catch(...) { std::cout << "\n ~~..~~ Exception at build map ~~..~~ \n"; }
 	
 	auto btalgo = _BTAlg.BTAlg();
 	
-	std::vector<double> hit_frac_michel; hit_frac_michel.resize(ev_hit->size());
+	std::vector<double> hit_frac_michel;
+	hit_frac_michel.reserve(ev_hit->size());
 	
 	for(const auto& h : *ev_hit) {
-
+	  
 	  ::btutil::WireRange_t wire_hit(h.Channel(),h.StartTick(),h.EndTick());
 
 	  //offending malloc
@@ -297,34 +295,26 @@ namespace larlite {
 
 	  double michel_part = parts.at(0);
 	  double other_part  = parts.at(1);
+	  double hit_frac    = michel_part / ( michel_part + other_part );
 	  
-	  // std::cout << "michel_part: " << michel_part << "\n";
-	  // std::cout << "other_part: "  << other_part << "\n";
-	  
-	  // double hit_frac    = michel_part / ( michel_part + other_part );
-
-	  // hit_frac_michel.push_back(hit_frac);
+	  hit_frac_michel.push_back(hit_frac);
 	}
-	// std::cout << btalgo.NumParts() << "\n";
 	
-	// //for(const auto& h : hit_frac_michel) { std::cout << " h: " << h << " "; } std::cout << std::endl;	
+	//for(const auto& h : hit_frac_michel) { std::cout << " h: " << h << " "; } std::cout << std::endl;	
+
+	if(hit_frac_michel.size() != ev_hit->size()) {
+	  std::cout << "I ran backtracker but for some reason, hit_frac_michel didn't come out same size as "
+		    << "ev_hit!!!!!\n";
+	  throw std::exception();
+	}
 	
-	// if(hit_frac_michel.size() != ev_hit->size()) {
-
-	//   std::cout << "I ran backtracker but for some reason, hit_frac_michel didn't come out same size as "
-	// 	    << "ev_hit!!!!!\n";
-	  
-	//   throw std::exception();
-
-	// }
-
-
 	
 	//********************************
 	// How do we really know one of our hits is michel, well it has higher fraction of
 	// number of electrons from michel than "not"
+	_michel_hit_frac.clear();
+	std::swap(_michel_hit_frac,hit_frac_michel);
 	
-												       
 	_mc_tree->Fill();
       }
       

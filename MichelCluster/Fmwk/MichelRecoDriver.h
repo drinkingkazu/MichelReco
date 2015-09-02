@@ -94,7 +94,8 @@ namespace larlite {
     TTree* _mc_tree;
     double _mc_energy;
     double _reco_energy;
-
+    std::vector<double> _michel_hit_frac;
+    
     /// boolean to select if to save Michel Clusters or not
     bool _save_clusters;
 
