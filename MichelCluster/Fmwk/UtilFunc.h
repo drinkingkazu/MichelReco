@@ -2,6 +2,8 @@
 #define MICHELRECO_UTILFUNC_H
 
 #include <vector>
+#include <cstddef>
+
 namespace michel {
 
   template <class T>
