@@ -1,9 +1,9 @@
 /**
- * \file DecideIfStoppingMuon.h
+ * \file CutOnMuonLinearity.h
  *
  * \ingroup MichelCluster
  * 
- * \brief Class def header for a class DecideIfStoppingMuon
+ * \brief Class def header for a class CutOnMuonLinearity
  *
  * @author david caratelli
  */
@@ -11,27 +11,27 @@
 /** \addtogroup MichelCluster
 
     @{*/
-#ifndef DECIDEIFSTOPPINGMUON_H
-#define DECIDEIFSTOPPINGMUON_H
+#ifndef CUTONMUONLINEARITY_H
+#define CUTONMUONLINEARITY_H
 
 #include "Fmwk/BaseMichelAlgo.h"
 #include "math.h"
 
 namespace michel {
   /**
-     \class DecideIfStoppingMuon
-     User defined class DecideIfStoppingMuon ... these comments are used to generate
+     \class CutOnMuonLinearity
+     User defined class CutOnMuonLinearity ... these comments are used to generate
      doxygen documentation!
   */
-  class DecideIfStoppingMuon : public BaseMichelAlgo {
+  class CutOnMuonLinearity : public BaseMichelAlgo {
     
   public:
     
     /// Default constructor
-    DecideIfStoppingMuon();
+    CutOnMuonLinearity();
     
     /// Default destructor
-    ~DecideIfStoppingMuon(){};
+    ~CutOnMuonLinearity(){};
 
     /// Event re-setter
     void EventReset(){};
@@ -55,22 +55,6 @@ namespace michel {
      */
     void SetFracMinHits(double f) { _frac_min_hits = f; }
 
-    /**
-     *@brief set max radius within which to check if hits are alligned with muon or not (radius center is michel start)
-     */
-    void SetHitRadius(double r) { _hit_radius = r; }
-
-    /**
-     *@brief set max perpendicular distance from muon-line for a hit to be considered as well aligned with it
-     */
-    void SetMaxDist(double d) { _max_dist = d; }
-
-    /**
-     *@brief minimum number of "bad" hits needed for the michel to be a MID
-     */
-    void SetMinBadHits(double n) { _min_bad_hits = n; }
-
-
   private:
 
     // a whole bunch of settable parameters
@@ -80,21 +64,10 @@ namespace michel {
     double _chi_min;
 
     // minimum fraction of all hits in the cluster
-    // that needs to be used in order to have a good slope
+    // that need to have a chi above a certain value
+    // i.e. a measure of the muon's overall linearity
     double _frac_min_hits;
 
-    // radius centered at the michel start point where to search
-    // for hits that can possibly be tagged as aligned with the muon
-    double _hit_radius;
-
-    // maximum perpendicular distance to muon-line for a hit
-    // to be considered as being compatible with that line
-    double _max_dist;
-
-    // minimum number of bad hits needed for the michel to be a MID
-    int _min_bad_hits;
-
-    
   };
 }
 
