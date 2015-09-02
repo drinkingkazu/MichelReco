@@ -17,6 +17,7 @@
 #include <iostream>
 #include "MichelCluster.h"
 #include "BaseAlgMerger.h"
+#include "BaseMichelAlgo.h"
 #include "MichelAnaBase.h"
 #include <TFile.h>
 #include <TStopwatch.h>
@@ -53,6 +54,10 @@ namespace michel {
     //
     // Configuration functions
     //
+
+    /// Add Merging ALgo
+    void AddMergingAlgo(BaseAlgMerger *algo);
+
     /// Reco algorithm setter
     void AddAlgo(BaseMichelAlgo *algo);
 

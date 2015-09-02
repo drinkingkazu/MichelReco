@@ -21,6 +21,7 @@
 #include <TTree.h>
 
 namespace larlite {
+
   /**
      \class MichelRecoDriver
    */
