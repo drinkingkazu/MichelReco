@@ -74,8 +74,8 @@ namespace michel {
     
     //With this new information, calculate the boundary point between possible muon end and michel start
     
-    auto candidate_loc     = _clusterCalc.find_max(truncated_mean);
-    auto dqdscandidate_loc = _clusterCalc.find_min(truncated_dqds); 
+    int candidate_loc     = _clusterCalc.find_max(truncated_mean);
+    int dqdscandidate_loc = _clusterCalc.find_min(truncated_dqds); 
 
     std::swap(cluster._t_mean_v,truncated_mean);
     std::swap(cluster._t_dqds_v,truncated_dqds);
