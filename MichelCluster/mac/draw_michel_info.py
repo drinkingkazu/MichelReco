@@ -25,7 +25,7 @@ attempts = 0
 # set to -1 by default
 whattoscan = -1
 # text file where to search for signal/background handscan result
-handscanresults = 'mac/michelcluster_cchit_fromfuzzycluster_handscanning_results.txt'
+handscanresults = 'mac/michel_handscanning_results_v3_stepsonic.txt'
 while (whattoscan == -1):
     ret = raw_input('Enter command...')
     if (ret == 's'):
@@ -222,16 +222,16 @@ while ( n < len(arr) ):
  
     # draw all hits in even
     # set bounds based on "clus" bounds
-    xmax = np.amax(np.array(clus_x))
-    xmin = np.amin(np.array(clus_x))
-    zmax = np.amax(np.array(clus_z))
-    zmin = np.amin(np.array(clus_z))
+    xmax = np.amax(np.array(michel_x))
+    xmin = np.amin(np.array(michel_x))
+    zmax = np.amax(np.array(michel_z))
+    zmin = np.amin(np.array(michel_z))
     dx = xmax-xmin
     dz = zmax-zmin
-    xmax += dx/2
-    xmin -= dx/2
-    zmax += dz/2
-    zmin -= dz/2
+    xmax += 15
+    xmin -= 15
+    zmax += 15
+    zmin -= 15
     if (all_hits):
         df = hitDict[(run,subrun,evt)]
         zpoints,xpoints = getSubArray(np.array(df['_w_v'])[0],zmin,zmax,np.array(df['_t_v'])[0],xmin,xmax)
@@ -241,6 +241,8 @@ while ( n < len(arr) ):
     # draw michel cluster
     axarr[0,0].scatter(michel_z,michel_x,c='k',edgecolor='none',s=60)
     axarr[0,0].set_title('Evt: %i Run: %i Idx: %i'%(evt,run,idx))
+    axarr[0,0].set_xlim([zmin,zmax])
+    axarr[0,0].set_ylim([xmin,xmax])
     axarr[0,0].grid()
 
 
@@ -262,6 +264,7 @@ while ( n < len(arr) ):
     axarr[1,1].set_xlabel('S [cm]')
     axarr[1,1].set_ylabel('Truncated Q',color='b')
     axarr[1,1].plot(ds,tdq,'bo--')
+    axarr[1,1].set_ylim(axarr[1,1].get_ylim())
     for ti in axarr[1,1].get_yticklabels():
         ti.set_color('b')
 

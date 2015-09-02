@@ -94,9 +94,11 @@ namespace larlite {
       double w = h.WireID().Wire * w2cm;
       double t = (h.PeakTime()-3200) * t2cm;
 
-      _q_v.push_back(q);
-      _w_v.push_back(w);
-      _t_v.push_back(t);
+      if (h.WireID().Plane == 2){
+	_q_v.push_back(q);
+	_w_v.push_back(w);
+	_t_v.push_back(t);
+      }
 
       all_hits_v.emplace_back( h.Integral(),
 			       w,
