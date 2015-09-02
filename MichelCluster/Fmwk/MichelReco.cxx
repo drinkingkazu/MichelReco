@@ -79,7 +79,6 @@ namespace michel {
   //-----------------------------------------------------------------
   {
     _alg_v.push_back(algo);
-    std::cout << _alg_v.back()->Name() << std::endl;
     _alg_time_v.push_back(0.);
     _alg_ctr_v.push_back(0);
   }
@@ -100,12 +99,8 @@ namespace michel {
       ana->Initialize();
     }
 
-    for(size_t i=0; i<_alg_v.size(); ++i) {
+    for(size_t i=0; i<_alg_v.size(); ++i) 
       if(_alg_v[i]) _alg_v[i]->SetVerbosity(_verbosity);
-      std::cout<<_alg_v[i]<<std::endl;
-      
-      std::cout << _alg_v[i]->Name() << std::endl;
-    }
       
   }
   
