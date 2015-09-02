@@ -123,6 +123,11 @@ namespace michel {
     // boolean to store whether this cluster has been found to have a michel or not
     bool _has_michel;
 
+    //
+    // Speak for a diff
+    //
+    std::string Diff(const MichelCluster& rhs) const;
+
   protected:
     
     //

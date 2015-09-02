@@ -4,8 +4,61 @@
 #include "MichelConstants.h"
 #include "MichelCluster.h"
 #include "MichelException.h"
+#include "UtilFunc.h"
 #include <cmath>
+#include <sstream>
 namespace michel {
+
+  std::string MichelCluster::Diff(const MichelCluster& rhs) const
+  {
+    std::string msg;
+    if(_start != rhs._start)
+      msg += "  HitPt _start changed\n";
+
+    if(_end != rhs._end)
+      msg += "  HitPt _end changed\n";
+
+    if(_forward != rhs._forward)
+      msg += "  bool _forward changed\n";
+
+    if(_boundary != rhs._boundary)
+      msg += "  HitIdx_t _boundary changed\n";
+
+    if(_min_nhits != rhs._min_nhits)
+      msg += "  size_t _min_nhits changed\n";
+
+    if(_d_cutoff != rhs._d_cutoff)
+      msg += "  double _d_cutoff changed\n";
+
+    if(_has_michel != rhs._has_michel)
+      msg += "  bool _has_michel changed\n";
+
+    if(!IsSame(_hits,rhs._hits))
+      msg += "    std::vector<HitPt> _hits changed\n";
+
+    if(!IsSame(_ds_v,rhs._ds_v))
+      msg += "    std::vector<double> _ds_v changed\n";
+
+    if(!IsSame(_s_v,rhs._s_v))
+      msg += "    std::vector<double> _s_v changed\n";
+
+    if(!IsSame(_chi2_v,rhs._chi2_v))
+      msg += "    std::vector<double> _chi2_v changed\n";
+    
+    if(!IsSame(_t_mean_v,rhs._t_mean_v))
+      msg += "    std::vector<double> _t_mean_v changed\n";
+
+    if(!IsSame(_t_dqds_v,rhs._t_dqds_v))
+      msg += "    std::vector<double> _t_dqds_v changed\n";
+
+    if(!IsSame(_dirs_v,rhs._dirs_v))
+      msg += "    std::vector<double> _dirs_v changed\n";
+    
+    msg += _michel.Diff(rhs._michel);
+
+    return msg;
+
+  }
 
   MichelCluster::MichelCluster(size_t min_nhits, double d_cutoff)
     : _min_nhits ( min_nhits )

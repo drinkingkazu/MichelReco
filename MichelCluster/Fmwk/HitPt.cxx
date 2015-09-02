@@ -7,11 +7,11 @@
 
 namespace michel {
 
-  HitPt::HitPt(const double q,
-	       const double w,
-	       const double t,
-	       const size_t id,
-	       const int    pl)
+  HitPt::HitPt(const double  q,
+	       const double  w,
+	       const double  t,
+	       const HitID_t id,
+	       const int     pl)
     : _id ( id )
     , _pl ( pl )
     , _q  ( q  )

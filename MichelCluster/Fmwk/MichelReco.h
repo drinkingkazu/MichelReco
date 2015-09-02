@@ -121,6 +121,8 @@ namespace michel {
     double _d_cutoff;  
     
     size_t _min_nhits; ///< MichelCluster's min # hits to claim a cluster
+    /// Debug mode
+    bool _debug;
     /// Verbosity
     msg::MSGLevel_t _verbosity;
     /// Input clusters

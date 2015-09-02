@@ -41,6 +41,8 @@ namespace michel {
     double _energy;
     double _length;
     HitPt  _start;
+
+    std::string Diff(const Michel& rhs) const;
     
     void Dump() const;
   };

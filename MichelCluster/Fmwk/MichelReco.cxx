@@ -10,6 +10,7 @@ namespace michel {
   //-----------------------------------------------------------------
     : _d_cutoff           ( 6.0 ) //Used to be 3.6
     , _min_nhits          ( 4   ) //Used to be 25
+    , _debug              ( false )
     , _verbosity          ( msg::kNORMAL )
 
     , _alg_merge          ( nullptr )
@@ -161,25 +162,47 @@ namespace michel {
       }
     }
     
-    if(_verbosity <= msg::kDEBUG)
+    std::vector<MichelCluster> processed_cluster_v;
+    processed_cluster_v.reserve(_output_v.size());
 
     for(auto& cluster : _output_v ){
       // start going through algorithms and executing
       // them consecutively
-      for (size_t n=0; n < _alg_v.size(); n++){
-	auto const& name = _alg_v[n]->Name();
-	if(_verbosity <= msg::kDEBUG) { std::cout << "<<Process>> running algo : " << name << std::endl; }
+      bool keep = true;
+      for (size_t n=0; n < _alg_v.size() && keep; n++){
+	if(_verbosity <= msg::kDEBUG) {
+	  std::cout << "<<Process>> running algo : " << _alg_v[n]->Name() << std::endl; }
 	_watch.Start();
-	_alg_v[n]->ProcessCluster(cluster,_all_hit_v);
+	if(!_debug)
+	  keep = _alg_v[n]->ProcessCluster(cluster,_all_hit_v);
+	else{
+	  MichelCluster before(cluster);
+	  keep = _alg_v[n]->ProcessCluster(cluster,_all_hit_v);
+	  auto const diff_msg = before.Diff(cluster);
+	  if(!diff_msg.empty()) {
+	    std::cout << "<<Process>>"
+		      << "\033[93m Detected a change in MichelCluster!\033[00m"
+		      << " by algorithm "
+		      << "\033[95m " << _alg_v[n]->Name() << " \033[00m" << std::endl
+		      << diff_msg
+		      << std::endl;
+	  }
+	}
 	_alg_time_v[n] += _watch.RealTime();
 	_alg_ctr_v[n] += 1;
-	// if the cluster is now a default instance of MichelCluster
-	// then don't bother to move on to the next algorithms
-	if (cluster._has_michel == false)
-	  break;
+	if(!keep && _verbosity <= msg::kDEBUG) {
+	  std::cout << "<<" << __FUNCTION__ << ">> dropping MichelCluster due to algorithm: "
+		    << 	_alg_v[n]->Name() << std::endl;
+	}
       }// looping through algorithms
+      
+      // If keep is true, move it
+      if(keep) {
+	processed_cluster_v.push_back(MichelCluster());
+	std::swap(cluster,processed_cluster_v.back());
+      }
     }// for all clusters
-
+    std::swap(processed_cluster_v,_output_v);
 
     //
     // Finally call analyze
