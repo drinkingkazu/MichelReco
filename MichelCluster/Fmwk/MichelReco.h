@@ -108,6 +108,9 @@ namespace michel {
 
     /// Setter for setting minimum number of hits to create MichelCluster
     void SetMinNHits(int n)       { _min_nhits = n; }
+
+    /// Setter for a debug mode
+    void SetDebug(bool doit=true) { _debug = doit; }
     
     /// Getter for MichelClusterArray
     const MichelClusterArray& GetResult()
