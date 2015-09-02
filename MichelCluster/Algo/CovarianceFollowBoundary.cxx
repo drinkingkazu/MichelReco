@@ -11,7 +11,7 @@ namespace michel {
   void CovarianceFollowBoundary::EventReset()
   {}
   
-  void CovarianceFollowBoundary::ProcessCluster(MichelCluster& cluster,
+  bool CovarianceFollowBoundary::ProcessCluster(MichelCluster& cluster,
 						const std::vector<HitPt>& hits)
   { 
 
@@ -45,8 +45,7 @@ namespace michel {
     if(truncated_mean.size() < _edgefix) {
       std::cout << "\n\tUnable to fix edges on truncated mean, edgefix size: " << _edgefix
 		<< "\t and truncated_mean.size(): " << truncated_mean.size() << "\n";
-      cluster = MichelCluster();
-      return;
+      return false;
     }
     
     for(int i = 0 ; i < _edgefix; ++i) {
@@ -80,20 +79,14 @@ namespace michel {
     std::swap(cluster._t_mean_v,truncated_mean);
     std::swap(cluster._t_dqds_v,truncated_dqds);
     
-    if((candidate_loc     >= cluster._hits.size())){
-      cluster = MichelCluster();
-      return;
-    }
+    if((candidate_loc     >= cluster._hits.size()))
+      return false;
     
-    if((dqdscandidate_loc >= cluster._hits.size())){
-      cluster = MichelCluster();
-      return;
-    }
+    if((dqdscandidate_loc >= cluster._hits.size()))
+      return false;
     
-    if(abs(dqdscandidate_loc - candidate_loc) > _maxDistance){
-      cluster = MichelCluster();
-      return;
-    }
+    if(abs(dqdscandidate_loc - candidate_loc) > _maxDistance)
+      return false;
     
     /// Loop over covariance array in both directions, if you see something...
     /// say something says MTA on the subway, lets do the same here
@@ -111,10 +104,8 @@ namespace michel {
 
       double r = fabs(covariance[i]);
 
-      if(been_in_low_reg && in_low_reg) {
-	cluster = MichelCluster();
-	return;
-      }
+      if(been_in_low_reg && in_low_reg)
+	return false;
       
       //starting beginning of low region
       if(r < cutoff) {
@@ -142,10 +133,8 @@ namespace michel {
 
     if(in_low_reg && been_in_high_reg) been_in_low_reg = true;
     
-    if(!been_in_low_reg){
-      cluster = MichelCluster();
-      return;
-    }
+    if(!been_in_low_reg)
+      return false;
     
 
     if(_require_slope_sign_flip) {
@@ -172,10 +161,8 @@ namespace michel {
 	}
     
     
-      if(!changed_sign){
-	cluster = MichelCluster();
-	return;
-      }
+      if(!changed_sign)
+	return false;
 
     }
     
@@ -217,26 +204,23 @@ namespace michel {
     }
 
     // make sure we have at least 1 point!
-    if (avg_covariance == 0){
-      cluster = MichelCluster();
-      return;
-    }
+    if (avg_covariance == 0)
+      return false;
+
     // if so, check that the average covariance is below
     // the max allowed covariance
     avg_covariance /= counts;
 
     double maxCovarianceAtStart = _maxCovarianceAtStart;
     
-    if (avg_covariance > maxCovarianceAtStart){
-      cluster = MichelCluster();
-      return;
-    }
+    if (avg_covariance > maxCovarianceAtStart)
+      return false;
     
     std::swap(cluster._chi2_v,covariance);
     std::swap(cluster._dirs_v,slope);
     cluster._boundary = cluster._ordered_pts[idx];
 
-    return;
+    return true;
   }
 
 

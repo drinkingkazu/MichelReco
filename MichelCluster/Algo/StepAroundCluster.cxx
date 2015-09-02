@@ -9,13 +9,13 @@ namespace michel {
   void StepAroundCluster::EventReset()
   {}
   
-  void StepAroundCluster::ProcessCluster(MichelCluster& cluster,
+  bool StepAroundCluster::ProcessCluster(MichelCluster& cluster,
 					 const std::vector<HitPt>& hits){
 
     auto& michel = cluster._michel;
     
     /// This michel was bogus when it came in, don't cluster further
-    if (michel.size() == 0) return;
+    if (michel.size() == 0) return false;
     
     auto michel_end  = michel[michel.size() - 1];
     auto max_step_sq = _max_step * _max_step;
@@ -62,7 +62,8 @@ namespace michel {
     
     for(const auto& michel_hit : michel)
       michel._charge += michel_hit._q;
-    
+
+    return true;
   }
   
   

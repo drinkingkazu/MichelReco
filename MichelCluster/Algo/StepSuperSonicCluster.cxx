@@ -9,13 +9,13 @@ namespace michel {
   void StepSuperSonicCluster::EventReset()
   {}
   
-  void StepSuperSonicCluster::ProcessCluster(MichelCluster& cluster,
+  bool StepSuperSonicCluster::ProcessCluster(MichelCluster& cluster,
 					     const std::vector<HitPt>& hits){
 
     auto& michel = cluster._michel;
     
     /// This michel was bogus when it came in, don't cluster further
-    if (michel.size() == 0) return;
+    if (michel.size() == 0) return false;
     
     auto michel_end  = michel[michel.size() - 1];
     auto max_step_sq = _max_step * _max_step;
@@ -56,6 +56,8 @@ namespace michel {
       }
       
       if(done) break;
+
+      return true;
     }
 
     /// Add on David C algo, after we step around and make something, we then super sonic based

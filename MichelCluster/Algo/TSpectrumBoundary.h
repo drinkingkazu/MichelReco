@@ -41,7 +41,7 @@ namespace michel {
     void EventReset();
     
     /// A function to identify a michel's boundary point
-    void ProcessCluster(MichelCluster& cluster,
+    bool ProcessCluster(MichelCluster& cluster,
 			const std::vector<HitPt>& hits);
 
     

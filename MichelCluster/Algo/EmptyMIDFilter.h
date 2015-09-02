@@ -41,7 +41,7 @@ public:
      * @input std::vector<HitPt> hits : all hits in the event
      * @return boolean : is this truly a michel or not
      */
-    void ProcessCluster(MichelCluster& cluster,
+    bool ProcessCluster(MichelCluster& cluster,
 			const std::vector<HitPt>& hits);
 
 };

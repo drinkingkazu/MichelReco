@@ -47,13 +47,13 @@ namespace michel {
        event. The algorithm should do something to improve the
        MichelCluster or decide that this in fact is not a Michel.
      */
-    virtual void ProcessCluster(MichelCluster& cluster,
+    virtual bool ProcessCluster(MichelCluster& cluster,
 				const std::vector<HitPt>& hits) = 0;
 
     /**
      * @brief Return name of algorithm
      */
-    std::string Name() { return _name; }
+    const std::string Name() const { return _name.c_str(); }
 
   protected:
 

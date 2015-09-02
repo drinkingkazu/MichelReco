@@ -14,9 +14,7 @@ namespace michel {
 
     , _alg_merge          ( nullptr )
       
-    , _alg_v        ( kAlgoTypeMax, nullptr )
-    , _alg_time_v   ( kAlgoTypeMax, 0.      )
-    , _alg_ctr_v    ( kAlgoTypeMax, 0       )
+    , _alg_v        ()
   {}
   
   //-----------------------------------------------------------------
@@ -78,6 +76,7 @@ namespace michel {
   //-----------------------------------------------------------------
   {
     _alg_v.push_back(algo);
+    std::cout << _alg_v.back()->Name() << std::endl;
     _alg_time_v.push_back(0.);
     _alg_ctr_v.push_back(0);
   }
@@ -98,8 +97,12 @@ namespace michel {
       ana->Initialize();
     }
 
-    for(size_t i=0; i<_alg_v.size(); ++i) 
+    for(size_t i=0; i<_alg_v.size(); ++i) {
       if(_alg_v[i]) _alg_v[i]->SetVerbosity(_verbosity);
+      std::cout<<_alg_v[i]<<std::endl;
+      
+      std::cout << _alg_v[i]->Name() << std::endl;
+    }
       
   }
   
@@ -125,7 +128,7 @@ namespace michel {
 
     if(_verbosity <= msg::kDEBUG)
 
-      std::cout << "<<Process>> running kClusterMerge..." << std::endl;
+      std::cout << "<<Process>> running algo : " << _alg_merge->Name() << std::endl;
     
     //
     // Step 1 ... merge clusters
@@ -160,13 +163,12 @@ namespace michel {
     
     if(_verbosity <= msg::kDEBUG)
 
-      std::cout << "<<Process>> running kBoundayFinder..." << std::endl;
-
     for(auto& cluster : _output_v ){
       // start going through algorithms and executing
       // them consecutively
       for (size_t n=0; n < _alg_v.size(); n++){
-	if(_verbosity <= msg::kDEBUG) { std::cout << "<<Process>> running algo : " << _alg_v[n]->Name() << std::endl; }
+	auto const& name = _alg_v[n]->Name();
+	if(_verbosity <= msg::kDEBUG) { std::cout << "<<Process>> running algo : " << name << std::endl; }
 	_watch.Start();
 	_alg_v[n]->ProcessCluster(cluster,_all_hit_v);
 	_alg_time_v[n] += _watch.RealTime();

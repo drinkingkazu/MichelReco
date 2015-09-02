@@ -34,7 +34,7 @@ namespace michel {
     void EventReset();
 
     /// Toy Michel identifier
-    void ProcessCluster(MichelCluster& cluster,
+    bool ProcessCluster(MichelCluster& cluster,
 			const std::vector<HitPt>& hits);
 
     /// Setter for max number of hits allowed

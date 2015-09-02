@@ -34,7 +34,7 @@ namespace michel {
     void EventReset();
 
     /// Re-cluster michel electrons w/ un-used hits
-    void ProcessCluster(MichelCluster& cluster,
+    bool ProcessCluster(MichelCluster& cluster,
 			const std::vector<HitPt>& hits);
       
     /// Setter for minimum radius

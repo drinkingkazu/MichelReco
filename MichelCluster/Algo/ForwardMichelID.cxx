@@ -9,11 +9,11 @@ namespace michel {
   void ForwardMichelID::EventReset()
   {}
   
-  void ForwardMichelID::ProcessCluster(MichelCluster& cluster,
+  bool ForwardMichelID::ProcessCluster(MichelCluster& cluster,
 				       const std::vector<HitPt>& hits)
   {
     
-    if(cluster._boundary == kINVALID_SIZE) { cluster = MichelCluster(); return; }
+    if(cluster._boundary == kINVALID_SIZE) { return false; }
     //no check on cluster size here...
     
     //Hardcoded for now :)
@@ -52,7 +52,7 @@ namespace michel {
     }
     
     //we could not determine forward so we return default contructor. This is a "bad" michel.   
-    else { cluster = MichelCluster(); return; }
+    else { return false; }
     
     auto electron = cluster._michel;
     std::vector<size_t> ordered_pts_idx;
@@ -73,10 +73,8 @@ namespace michel {
     }
 
     // if the michel has more than _maxHits points -> do not return a michel...it is probably garbage
-    if ( (electron.size() > _maxHits) and (_maxHits != 0) ){
-      cluster = MichelCluster();
-      return;
-    }
+    if ( (electron.size() > _maxHits) and (_maxHits != 0) )
+      return false;
 
     //Do same thing for muon (in future)
     auto length = determine_length(cluster,ordered_pts_idx); //true radius with no minimum
@@ -87,7 +85,7 @@ namespace michel {
     //loop over the ordered points, add hits to the electron that are NOT in orderedpts
     //BUT append new hits found in the vicinity of the vertex
     //this now goes into "reclustering"
-    return;
+    return true;
   }
 
   bool ForwardMichelID::determine_forward(const MichelCluster& cluster,

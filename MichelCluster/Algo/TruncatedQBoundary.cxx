@@ -11,7 +11,7 @@ namespace michel {
   void TruncatedQBoundary::EventReset()
   {}
   
-  void TruncatedQBoundary::ProcessCluster(MichelCluster& cluster,
+  bool TruncatedQBoundary::ProcessCluster(MichelCluster& cluster,
 					  const std::vector<HitPt>& hits)
   { 
 
@@ -45,9 +45,7 @@ namespace michel {
     if(truncated_mean.size() < _edgefix) {
       std::cout << "\n\tUnable to fix edges on truncated mean, edgefix size: " << _edgefix
 		<< "\t and truncated_mean.size(): " << truncated_mean.size() << "\n";
-      cluster = MichelCluster();
-      return;
-      //throw MichelException();
+      return false;
     }
     
     for(int i = 0 ; i < _edgefix; ++i) {
@@ -81,20 +79,14 @@ namespace michel {
     std::swap(cluster._t_mean_v,truncated_mean);
     std::swap(cluster._t_dqds_v,truncated_dqds);
     
-    if((candidate_loc     >= cluster._hits.size())){
-      cluster = MichelCluster();
-      return;
-    }
+    if((candidate_loc     >= cluster._hits.size()))
+      return false;
     
-    if((dqdscandidate_loc >= cluster._hits.size())){
-      cluster = MichelCluster();
-      return;
-    }
+    if((dqdscandidate_loc >= cluster._hits.size()))
+      return false;
     
-    if(abs(dqdscandidate_loc - candidate_loc) > _maxDistance){
-      cluster = MichelCluster();
-      return;
-    }
+    if(abs(dqdscandidate_loc - candidate_loc) > _maxDistance)
+      return false;
 
     auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
     auto left  = candidate_loc;
@@ -125,7 +117,7 @@ namespace michel {
 
     cluster._boundary = cluster._ordered_pts[idx];
 
-    return;
+    return true;
   }
   
 }

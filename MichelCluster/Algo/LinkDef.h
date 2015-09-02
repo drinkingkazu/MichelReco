@@ -12,7 +12,6 @@
 
 
 /// ClusterMerger
-#pragma link C++ class michel::EmptyMichelID+;
 #pragma link C++ class michel::EdgeMerger+;
 
 /// BoundaryFinder
@@ -23,7 +22,6 @@
 #pragma link C++ class michel::CovarianceFollowBoundary+;
 
 /// MichelID
-#pragma link C++ class michel::EmptyMichelID+;
 #pragma link C++ class michel::ForwardMichelID+;
 
 /// MichelCluster

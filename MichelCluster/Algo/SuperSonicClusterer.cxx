@@ -8,7 +8,7 @@ namespace michel {
   void SuperSonicClusterer::EventReset()
   {}
   
-  void SuperSonicClusterer::ProcessCluster(MichelCluster& cluster,
+  bool SuperSonicClusterer::ProcessCluster(MichelCluster& cluster,
 					   const std::vector<HitPt>& hits){
 
     auto& michel = cluster._michel;
@@ -24,7 +24,7 @@ namespace michel {
 
     
     //This michel was bogus when it came in, don't cluster further
-    if (michel.size() == 0) return;
+    if (michel.size() == 0) return false;
 
 
     // first get the maximum distance:
@@ -84,7 +84,9 @@ namespace michel {
     michel._charge = 0;
     for(const auto& michel_hit : michel)
       michel._charge += michel_hit._q;
-    
+   
+
+    return true;
   }
 
 

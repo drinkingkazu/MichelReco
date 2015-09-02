@@ -9,7 +9,7 @@ namespace michel {
   void TSpectrumBoundary::EventReset()
   {}
   
-  void TSpectrumBoundary::ProcessCluster(MichelCluster& cluster,
+  bool TSpectrumBoundary::ProcessCluster(MichelCluster& cluster,
 					 const std::vector<HitPt>& hits)
   { 
     
@@ -71,16 +71,12 @@ namespace michel {
     std::swap(cluster._t_mean_v,truncated_mean);
     std::swap(cluster._t_dqds_v,truncated_dqds);
     
-    if(candidate_loc == kINVALID_SIZE || dqdscandidate_loc == kINVALID_SIZE){
-      cluster = MichelCluster();
-      return;
-    }
+    if(candidate_loc == kINVALID_SIZE || dqdscandidate_loc == kINVALID_SIZE)
+      return false;
     
     //20 is hardcoded
-    if(abs(dqdscandidate_loc - candidate_loc) > 20){
-      cluster = MichelCluster();
-      return;
-    }
+    if(abs(dqdscandidate_loc - candidate_loc) > 20)
+      return false;
     
     auto window_size = 20;
     auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
@@ -121,7 +117,7 @@ namespace michel {
     
     
     cluster._boundary = cluster._ordered_pts[idx];
-    return;
+    return true;
   }
   
   
