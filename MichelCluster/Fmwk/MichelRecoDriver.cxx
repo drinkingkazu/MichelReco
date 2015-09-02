@@ -189,37 +189,106 @@ namespace larlite {
       cluster_ass_v->set_association(michel_cluster->id(),product_id(data::kHit,ev_hit->name()),clus_hit_ass_v);
     }// if we should save cluster
 
-    // if we want to compare with mcshowers
+    // if we want to compare with mcshowers, we also add feature to backtrack
     if (_use_mc){
 
-      // get mcshowers
       auto ev_mcshower = storage->get_data<event_mcshower>("mcreco");
 
+      
+      bool made_michel = true;
+
+      _reco_energy = 0;
       _mc_energy = -1;
 
-      for(auto const& mcs : *ev_mcshower){
-	if( (mcs.MotherPdgCode() == 13                &&
-	     mcs.Process() == "muMinusCaptureAtRest") &&
-	    (mcs.DetProfile().E()/mcs.Start().E()  > 0.5
-	     || mcs.DetProfile().E() >= 15) )
-	  _mc_energy = mcs.DetProfile().E();
-      }
+      //********************************
+      // Did we make Michel or no, if so get Q, if not move on
       
-      _reco_energy = 0;
       auto const& michels = _mgr.GetResult();
       // get cluster's energy
-      if (michels.size() != 0){
+      if (michels.size() != 0) {
 	auto const& mich = michels[0]._michel;
 	for (auto const& h : mich)
 	  _reco_energy += h._q;
       }
       else
-	_reco_energy = -1;
-      
-      _mc_tree->Fill();
-    }
+	made_michel = false;
 
-    return true;
+      //********************************
+      // Is there a Michel or no, if yes i should search simchannel
+      // if not don't fill the tree
+      
+      if(made_michel) {
+
+	//********************************
+	// Get the MeV scale energy for this shower
+
+	for(auto const& mcs : *ev_mcshower){
+	  if( (mcs.MotherPdgCode() == 13                &&
+	       mcs.Process() == "muMinusCaptureAtRest") &&
+	      (mcs.DetProfile().E()/mcs.Start().E()  > 0.5
+	       || mcs.DetProfile().E() >= 15) )
+	    _mc_energy = mcs.DetProfile().E();
+	}
+	
+	//********************************
+	// You will probably complain about this but I need to use backtracker
+	// how well we can self contain the class in current repo is another story
+	
+	auto mc_energy_min = 0;  // MeV 
+	auto mc_energy_max = 65; // MeV 
+      
+	std::vector<std::vector<unsigned int> > g4_trackid_v;
+	std::vector<unsigned int>               mc_index_v;
+	g4_trackid_v.reserve(ev_mcshower->size());
+	mc_index_v  .reserve(ev_mcshower->size());
+	
+	for(size_t mc_index=0; mc_index < ev_mcshower->size(); ++mc_index) {
+	  auto const& mcs = (*ev_mcshower)[mc_index];
+
+	  if( (mcs.MotherPdgCode() == 13                &&
+	       mcs.Process() == "muMinusCaptureAtRest") &&
+	      (mcs.DetProfile().E()/mcs.Start().E()  > 0.5
+	       || mcs.DetProfile().E() >= 15) ) { // same criteria as a few lines above, 1/event I hope
+	    
+	    double energy = mcs.DetProfile().E();
+	    
+	    std::vector<unsigned int> id_v;
+	    id_v.reserve(mcs.DaughterTrackID().size());
+	    
+	    if( mc_energy_min < energy && energy < mc_energy_max ) {
+	      for(auto const& id : mcs.DaughterTrackID()) {
+		if(id == mcs.TrackID()) continue;
+		id_v.push_back(id);
+	      }
+	      id_v.push_back(mcs.TrackID());
+	      g4_trackid_v.push_back(id_v);
+	      mc_index_v.push_back(mc_index);
+	    }
+	    
+	  }
+	}
+	
+	// event_hit* ev_hit = nullptr;
+	// auto const& ass_hit_v = storage->find_one_ass(evt_clusters->id(),ev_hit,evt_clusters->name());
+	
+	// try { fBTAlg.BuildMap(g4_trackid_v, *evt_simch, *ev_hit, ass_hit_v); }
+	// catch(larutil::LArUtilException) { std::cout << "\n ~~..~~ exception at build map ~~..~~ \n"; }
+	
+	// auto aho              = fBTAlg.BTAlg();
+	// auto reco_michel_hits = get_summed_mcshower_other(aho,c._michel._hits,1);
+	
+	
+	
+	_mc_tree->Fill();
+      }
+      
+      
+
+      
+    }
+  
+
+  return true;
   }
 
   bool MichelRecoDriver::finalize() {
