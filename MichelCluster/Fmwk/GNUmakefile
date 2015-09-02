@@ -12,7 +12,8 @@ OBJECTS = $(SOURCES:.cxx=.o)
 
 # include options for this package
 INCFLAGS  = -I.                       #Include itself
-INCFLAGS += $(shell larlite-config --includes)
+INCFLAGS += $(shell larlite-config  --includes)
+INCFLAGS += $(shell recotool-config --includes)
 
 # platform-specific options
 OSNAME          = $(shell uname -s)
@@ -23,7 +24,10 @@ OSNAMEMODE      = $(OSNAME)
 include $(LARLITE_BASEDIR)/Makefile/Makefile.${OSNAME}
 
 # call the common GNUmakefile
-LDFLAGS += $(shell larlite-config --libs)
+LDFLAGS += $(shell larlite-config  --libs)
+LDFLAGS += -L$(LARLITE_LIBDIR) -lRecoTool_MCComp
+
+#LDFLAGS += -L$(LARLITE_LIBDIR) -lRecoTool_MCComp
 include $(LARLITE_BASEDIR)/Makefile/GNUmakefile.CORE
 
 

@@ -2,11 +2,17 @@
 #define LARLITE_MICHELRECODRIVER_CXX
 
 #include "MichelRecoDriver.h"
+
 #include "DataFormat/cluster.h"
 #include "DataFormat/hit.h"
 #include "DataFormat/mcshower.h"
+#include "DataFormat/simch.h"
+
 #include "LArUtil/GeometryUtilities.h"
 #include "LArUtil/LArProperties.h"
+
+//Backtracker
+#include "MCComp/MCMatchAlg.h"
 
 namespace larlite {
 
@@ -192,9 +198,12 @@ namespace larlite {
     // if we want to compare with mcshowers, we also add feature to backtrack
     if (_use_mc){
 
-      auto ev_mcshower = storage->get_data<event_mcshower>("mcreco");
+      auto ev_mcshower = storage->get_data<event_mcshower>( "mcreco"  );
+      auto ev_simch    = storage->get_data<event_simch>   ( "largeant");      
 
-      
+      if(ev_mcshower->size() == 0) { std::cout << "No mcshower found " << "\n"; throw std::exception(); }
+      if(ev_simch->size()    == 0) { std::cout << "No simch    found " << "\n"; throw std::exception(); }
+ 
       bool made_michel = true;
 
       _reco_energy = 0;
@@ -268,17 +277,43 @@ namespace larlite {
 	  }
 	}
 	
-	// event_hit* ev_hit = nullptr;
-	// auto const& ass_hit_v = storage->find_one_ass(evt_clusters->id(),ev_hit,evt_clusters->name());
+	event_hit* ev_hit = nullptr;
+	auto const& ass_hit_v = storage->find_one_ass(ev_cluster->id(),ev_hit,ev_cluster->name());
+
+	::btutil::MCMatchAlg fBTAlg;
+	auto btalgo = fBTAlg.BTAlg();
+
 	
-	// try { fBTAlg.BuildMap(g4_trackid_v, *evt_simch, *ev_hit, ass_hit_v); }
-	// catch(larutil::LArUtilException) { std::cout << "\n ~~..~~ exception at build map ~~..~~ \n"; }
+        try { fBTAlg.BuildMap(g4_trackid_v, *ev_simch, *ev_hit, ass_hit_v); }
+	catch(...) { std::cout << "\n ~~..~~ Exception at build map ~~..~~ \n"; }
+
+
+	std::vector<double> hit_frac_michel; hit_frac_michel.resize(ev_hit->size());
 	
-	// auto aho              = fBTAlg.BTAlg();
-	// auto reco_michel_hits = get_summed_mcshower_other(aho,c._michel._hits,1);
+	for(const auto& h : *ev_hit) {
+	  ::btutil::WireRange_t wire_hit(h.Channel(),h.StartTick(),h.EndTick());
+	  double michel_part = btalgo.MCQ(wire_hit)[0];
+	  double other_part  = btalgo.MCQ(wire_hit)[0];
+	  double hit_frac    = michel_part / ( michel_part + other_part );
+
+	  hit_frac_michel.push_back(hit_frac);
+	}
 	
+	if(hit_frac_michel.size() != ev_hit->size()) {
+
+	  std::cout << "I ran backtracker but for some reason, hit_frac_michel didn't come out same size as "
+		    << "ev_hit!!!!!\n";
+	  throw std::exception();
+
+	}
+
+	for(const auto& h : hit_frac_michel) { std::cout << " h: " << h << " "; } std::cout << std::endl;
 	
+	//********************************
+	// How do we really know one of our hits is michel, well it has higher fraction of
+	// number of electrons from michel than "not"
 	
+												       
 	_mc_tree->Fill();
       }
       
