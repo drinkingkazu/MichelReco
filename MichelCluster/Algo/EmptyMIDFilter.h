@@ -14,7 +14,7 @@
 #ifndef EMPTYMIDFILTER_H
 #define EMPTYMIDFILTER_H
 
-#include "Fmwk/BaseAlgMIDFilter.h"
+#include "Fmwk/BaseMichelAlgo.h"
 
 namespace michel {
 /**
@@ -22,7 +22,7 @@ namespace michel {
    User defined class EmptyMIDFilter ... these comments are used to generate
    doxygen documentation!
 */
-class EmptyMIDFilter : public BaseAlgMIDFilter {
+class EmptyMIDFilter : public BaseMichelAlgo {
 
 public:
 
@@ -37,12 +37,12 @@ public:
 
     /**
      * @brief Use MichelCluster and surrounding hits to decide if this is really a michel
-     * @input MichelCluster michel : the currently reconstructed michel object
+     * @input MichelCluster cluster : the currently reconstructed michel cluster object
      * @input std::vector<HitPt> hits : all hits in the event
      * @return boolean : is this truly a michel or not
      */
-    bool IsMichel(const MichelCluster& michel,
-                  const std::vector<HitPt>& hits);
+    void ProcessCluster(MichelCluster& cluster,
+			const std::vector<HitPt>& hits);
 
 };
 }

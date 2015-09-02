@@ -16,6 +16,7 @@
 
 #include "BaseMichelAlgo.h"
 #include "MichelCluster.h"
+
 namespace michel {
   /**
      \class BaseAlgMerger

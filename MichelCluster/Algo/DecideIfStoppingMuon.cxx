@@ -7,6 +7,7 @@ namespace michel{
 
   DecideIfStoppingMuon::DecideIfStoppingMuon()
   {
+    _name    = "DecideIfStoppingMuon";
     _chi_min = 0.9;
     _frac_min_hits = 0.7;
     _hit_radius = 10;
@@ -15,28 +16,30 @@ namespace michel{
     _min_muon_length = 10;
   }
 
-  bool DecideIfStoppingMuon::IsMichel(const MichelCluster& michel,
-				      const std::vector<HitPt>& hits)
+  void DecideIfStoppingMuon::ProcessCluster(MichelCluster& cluster,
+					    const std::vector<HitPt>& hits)
   {
 
     // get the slope vector for the cluster
-    auto const& slope_v = michel._dirs_v;
+    auto const& slope_v = cluster._dirs_v;
     // get the chi vector
-    auto const& chi_v = michel._chi2_v;
+    auto const& chi_v = cluster._chi2_v;
     // get the hit vector
-    auto const& hit_v = michel._hits;
+    auto const& hit_v = cluster._hits;
     // get the boundary point
-    auto const& boundary = (int)michel._boundary;
+    auto const& boundary = (int)cluster._boundary;
     // is the michel forward (from boundary to end) or back
-    auto const& forward = michel._forward;
+    auto const& forward = cluster._forward;
     // michel's start point
-    auto const& start = michel._hits[boundary];
+    auto const& start = cluster._hits[boundary];
 
     // ***************************************************
     // the boundary defines where the michel starts in the
     // ordered hit list. If less then 0 then wtf
-    if (boundary < 0)
-      return false;
+    if (boundary < 0){
+      cluster = MichelCluster();
+      return;
+    }
 
     // First start with some initial cuts
     // these are (stringent) sanity checks
@@ -73,8 +76,10 @@ namespace michel{
 
     // *************************************************
     // require the muon segment to have a minimum length
-    if (muon_len < _min_muon_length*_min_muon_length)
-      return false;
+    if (muon_len < _min_muon_length*_min_muon_length){
+      cluster = MichelCluster();
+      return;
+    }
 
     /*
     // *********************************************************************************
@@ -98,8 +103,10 @@ namespace michel{
     for (auto& c : chi_muon)
       if (c > 0.8) num_above_cut += 1;
     double frac_above = ((double)num_above_cut) / ((double)chi_muon.size());
-    if (frac_above < 0.5)
-      return false;
+    if (frac_above < 0.5){
+      cluster = MichelCluster();
+      return;
+    }
 
 
     // how this algorithm works:
@@ -167,8 +174,10 @@ namespace michel{
     // require that we have used at least 70% of the hits in the cluster
     double frac_used = (double)count / (double)hit_v.size();
     // std::cout << "Frac. of hits used to get slope: " << frac_used << std::endl;
-    if (frac_used < _frac_min_hits)
-      return false;
+    if (frac_used < _frac_min_hits){
+      cluster = MichelCluster();
+      return;
+    }
 
     slope /= count;
     w_avg /= count;
@@ -215,7 +224,7 @@ namespace michel{
 	//if (dMuon < dMichel) continue;
 	// is this point in this cluster?
 	bool use = true;
-	for (auto const& hclus : michel._hits){
+	for (auto const& hclus : cluster._hits){
 	  if (h._id == hclus._id){
 	    use = false;
 	    break;
@@ -229,10 +238,12 @@ namespace michel{
       }
     }
 
-    if (nbad > _min_bad_hits)
-      return false;
+    if (nbad > _min_bad_hits){
+      cluster = MichelCluster();
+      return;
+    }
 
-    return true;
+    return;
   }
 
 }

@@ -13,11 +13,6 @@ namespace michel {
     , _verbosity          ( msg::kNORMAL )
 
     , _alg_merge          ( nullptr )
-    , _alg_boundary       ( nullptr )
-    , _alg_filter         ( nullptr )
-    , _alg_michel_id      ( nullptr )
-    , _alg_michel_cluster ( nullptr )
-      
       
     , _alg_v        ( kAlgoTypeMax, nullptr )
     , _alg_time_v   ( kAlgoTypeMax, 0.      )
@@ -72,23 +67,12 @@ namespace michel {
   }
   
   //-----------------------------------------------------------------
-  void MichelReco::SetAlgo(const AlgoType_t type,
-			   BaseMichelAlgo* algo)
+  void MichelReco::AddAlgo(BaseMichelAlgo* algo)
   //-----------------------------------------------------------------
   {
-    switch(type) {
-    case kClusterMerger:  _alg_merge          = (BaseAlgMerger*)       algo; break;
-    case kBoundaryFinder: _alg_boundary       = (BaseAlgBoundary*)     algo; break;
-    case kMIDFilter:      _alg_filter         = (BaseAlgMIDFilter*)    algo; break;
-    case kMichelID:       _alg_michel_id      = (BaseAlgMichelID*)     algo; break;
-    case kMichelCluster:  _alg_michel_cluster = (BaseAlgMichelCluster*)algo; break;
-    default:
-      std::cerr << "\033[93m[ERROR]\033[00m "
-		<< "Unidentified algorithm type: " << type << " either you spelled it wrong or are missing an algo!" << std::endl;
-      throw MichelException();
-    }
-
-    _alg_v[type] = algo;
+    _alg_v.push_back(algo);
+    _alg_time_v.push_back(0.);
+    _alg_ctr_v.push_back(0);
   }
   
   //-----------------------------------------------------------------
@@ -181,122 +165,23 @@ namespace michel {
 
       std::cout << "<<Process>> running kBoundayFinder..." << std::endl;
 
-    //
-    // Step 2 ... find muon/michel boundary
-    //
-    if(!_alg_boundary) throw MichelException();
-
-    _watch.Start();
-    for(auto& cluster : _output_v )
-
-      // Find start point for michel
-      cluster._boundary = _alg_boundary->Boundary(cluster);
-
-    _alg_time_v [kBoundaryFinder] += _watch.RealTime();
-    _alg_ctr_v  [kBoundaryFinder] += _output_v.size();
-
-
-
-    if(_verbosity <= msg::kDEBUG)
-
-      std::cout << "<<Process>> running kMichelID..." << std::endl;
-
-    //
-    // Step 4 ... Identify michel/muon
-    //
-    if(!_alg_michel_id) throw MichelException();
-
-    _watch.Start();
-    for(auto& cluster : _output_v)
-      
-      cluster._michel = _alg_michel_id->Identify(cluster,cluster._forward);
-
-    _alg_time_v [kMichelID] += _watch.RealTime();
-    _alg_ctr_v  [kMichelID] += _output_v.size();
-
-    if(_verbosity <= msg::kDEBUG)
-
-      std::cout << "<<Process>> running kMichelCluster..." << std::endl;
-    
-    // vic - if we didn't find a michel
-    // Update "used hits" list
-    for(auto const& cluster : _output_v) {
-      
-      for(auto const& hit_pt : cluster._hits) {
-
-	if(hit_pt._id >= _used_hit_marker_v.size()) {
-
-	  std::cout << "\033[93m[ERROR]\033[00m "
-		    << "Found a hit index out of range! "
-		    << hit_pt._id << " out of " << _used_hit_marker_v.size()
-		    << std::endl;
-	  throw MichelException();
-	}
-	_used_hit_marker_v[hit_pt._id] = true;
-      }
-    }
+    for(auto& cluster : _output_v ){
+      // start going through algorithms and executing
+      // them consecutively
+      for (size_t n=0; n < _alg_v.size(); n++){
+	if(_verbosity <= msg::kDEBUG) { std::cout << "<<Process>> running algo : " << _alg_v[n]->Name() << std::endl; }
+	_watch.Start();
+	_alg_v[n]->ProcessCluster(cluster,_all_hit_v);
+	_alg_time_v[n] += _watch.RealTime();
+	_alg_ctr_v[n] += 1;
+	// if the cluster is now a default instance of MichelCluster
+	// then don't bother to move on to the next algorithms
+	if (cluster._has_michel == false)
+	  break;
+      }// looping through algorithms
+    }// for all clusters
 
 
-
-    if(_verbosity <= msg::kDEBUG)
-      std::cout << "<<Process>> running kMIDFilter..." << std::endl;
-    
-    //
-    // Step 6? ... decide if this is a MID'd michel
-    //
-    if(!_alg_filter) throw MichelException();
-
-    // make a copy of output vector
-    auto out_v = _output_v;
-    _output_v.clear();
-
-    _watch.Start();
-    for(size_t i=0; i < out_v.size(); i++){
-
-      // if boundary not find -> continue
-      if ((int)out_v[i]._boundary < 0)
-	continue;
-      
-      // Find start point for michel
-      bool ismichel = _alg_filter->IsMichel(out_v[i],_all_hit_v);
-
-      if (ismichel == true)
-	_output_v.push_back(out_v[i]);
-
-    }
-    
-    _alg_time_v [kMIDFilter] += _watch.RealTime();
-    _alg_ctr_v  [kMIDFilter] += _output_v.size();
-
-
-    //
-    // Step 5 ... Michel re-clustering
-    //
-    _watch.Start();
-    if(_alg_michel_cluster) {
-
-      size_t ctr = 0;
-      for(auto& cluster : _output_v) {
-
-	std::vector<HitPt> available_hits_v;
-	for( auto const& v : _used_hit_marker_v ) if(v) ++ctr;
-	available_hits_v.reserve(ctr);
-	for(size_t hit_index=0; hit_index<_all_hit_v.size(); ++hit_index)
-
-	  if(!_used_hit_marker_v[hit_index]) available_hits_v.push_back(_all_hit_v[hit_index]);
-	
-	_alg_michel_cluster->Cluster(cluster._michel,available_hits_v);
-	
-      }
-      
-    }
-
-    _alg_time_v [kMichelCluster] += _watch.RealTime();
-    _alg_ctr_v  [kMichelCluster] += _output_v.size();
-
-
-
-    
     //
     // Finally call analyze
     //
@@ -325,25 +210,21 @@ namespace michel {
   void MichelReco::Finalize(TFile *fout)
   //-----------------------------------------------------------------
   {
+
     for(auto& ana : _ana_v) ana->Finalize(fout);
 
-    double merge_time     = ( _alg_ctr_v[ kClusterMerger  ] ? _alg_time_v[ kClusterMerger  ] / ((double)(_alg_ctr_v[ kClusterMerger  ])) : 0 );
-    double boundary_time  = ( _alg_ctr_v[ kBoundaryFinder ] ? _alg_time_v[ kBoundaryFinder ] / ((double)(_alg_ctr_v[ kBoundaryFinder ])) : 0 );
-    double mid_time       = ( _alg_ctr_v[ kMIDFilter      ] ? _alg_time_v[ kMIDFilter      ] / ((double)(_alg_ctr_v[ kMIDFilter      ])) : 0 );
-    double id_time        = ( _alg_ctr_v[ kMichelID       ] ? _alg_time_v[ kMichelID       ] / ((double)(_alg_ctr_v[ kMichelID       ])) : 0 );
-    double recluster_time = ( _alg_ctr_v[ kMichelCluster  ] ? _alg_time_v[ kMichelCluster  ] / ((double)(_alg_ctr_v[ kMichelCluster  ])) : 0 );
-
+    // loop through algos and evaluate time-performance
     std::cout << std::endl
-	      << "=================== Time Report =====================" << std::endl
-	      << "  Merging        Algo Time: " << merge_time*1.e6     << " [us/cluster]" << std::endl
-	      << "  Boundary       Algo Time: " << boundary_time*1.e6  << " [us/cluster]" << std::endl
-	      << "  MID Filter     Algo Time: " << mid_time*1.e6       << " [us/cluster]" << std::endl
-	      << "  Michel ID      Algo Time: " << id_time*1.e6        << " [us/cluster]" << std::endl
-	      << "  Michel Cluster Algo Time: " << recluster_time*1.e6 << " [us/cluster]" << std::endl
-	      << "=====================================================" << std::endl
+	      << "=================== Time Report =====================" << std::endl;
+    for(size_t n=0; n < _alg_v.size(); n++){
+      double alg_time = _alg_time_v[n]/((double)_alg_ctr_v[n]);
+      std::cout <<  _alg_v[n]->Name() << " Algo Time: " << alg_time*1.e6     << " [us/cluster]" << std::endl;
+    }
+      
+    std::cout << "=====================================================" << std::endl
 	      << std::endl;
   }
-
+  
 
 }
 #endif

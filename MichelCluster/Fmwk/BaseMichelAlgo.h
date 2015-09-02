@@ -5,7 +5,7 @@
  * 
  * \brief Class def header for a class BaseMichelAlgo
  *
- * @author kazuhiro
+ * @author kazuhiro + david caratelli
  */
 
 /** \addtogroup MichelCluster
@@ -15,6 +15,8 @@
 #define BASEMICHELALGO_H
 
 #include "MichelTypes.h"
+#include "MichelCluster.h"
+
 namespace michel {
   /**
      \class BaseMichelAlgo
@@ -25,7 +27,7 @@ namespace michel {
     
     /// Default constructor
     BaseMichelAlgo()
-    { _verbosity = msg::kNORMAL; }
+      { _verbosity = msg::kNORMAL; _name = "BaseMichelAlgo"; }
     
     /// Default destructor
     virtual ~BaseMichelAlgo(){}
@@ -37,10 +39,29 @@ namespace michel {
     /// Event-wise reset function
     virtual void EventReset() = 0;
 
+    /**
+       @brief Algorithm function to edit MichelCluster object
+       @details This function is the main tool for all algorithms
+       in this framework. It takes an input (editable) MichelCluster
+       and a const reference to a hit-list containing all hits in the
+       event. The algorithm should do something to improve the
+       MichelCluster or decide that this in fact is not a Michel.
+     */
+    virtual void ProcessCluster(MichelCluster& cluster,
+				const std::vector<HitPt>& hits) = 0;
+
+    /**
+     * @brief Return name of algorithm
+     */
+    std::string Name() { return _name; }
+
   protected:
 
     /// Verbosity level
     msg::MSGLevel_t _verbosity;
+
+    /// Name for algorithm
+    std::string _name;
     
   };
 }

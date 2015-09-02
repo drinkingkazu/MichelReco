@@ -20,7 +20,6 @@
 #include "BaseAlgBoundary.h"
 #include "BaseAlgMichelID.h"
 #include "BaseAlgMichelCluster.h"
-#include "BaseAlgMIDFilter.h"
 #include "MichelAnaBase.h"
 #include <TFile.h>
 #include <TStopwatch.h>
@@ -58,7 +57,7 @@ namespace michel {
     // Configuration functions
     //
     /// Reco algorithm setter
-    void SetAlgo(const AlgoType_t type, BaseMichelAlgo *algo);
+    void AddAlgo(BaseMichelAlgo *algo);
 
     /// Ana algorithm adder
     void AddAna(MichelAnaBase* ana);
@@ -134,10 +133,6 @@ namespace michel {
     // Algorithms
     //
     BaseAlgMerger*        _alg_merge;          ///< Merging algorithm 
-    BaseAlgBoundary*      _alg_boundary;       ///< Michel/Muon boundary finder algorithm
-    BaseAlgMIDFilter*     _alg_filter;         ///< Michel MID filtering algorithm
-    BaseAlgMichelID*      _alg_michel_id;      ///< Michel identification algorithm
-    BaseAlgMichelCluster* _alg_michel_cluster; ///< Michel re-clustering algorithm
     /// Algorithms to be executed
     std::vector< michel::BaseMichelAlgo* > _alg_v;
     /// Analysis to be executed

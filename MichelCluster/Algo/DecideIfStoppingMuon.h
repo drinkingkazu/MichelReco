@@ -14,7 +14,7 @@
 #ifndef DECIDEIFSTOPPINGMUON_H
 #define DECIDEIFSTOPPINGMUON_H
 
-#include "Fmwk/BaseAlgMIDFilter.h"
+#include "Fmwk/BaseMichelAlgo.h"
 #include "math.h"
 
 namespace michel {
@@ -23,7 +23,7 @@ namespace michel {
      User defined class DecideIfStoppingMuon ... these comments are used to generate
      doxygen documentation!
   */
-  class DecideIfStoppingMuon : public BaseAlgMIDFilter {
+  class DecideIfStoppingMuon : public BaseMichelAlgo {
     
   public:
     
@@ -42,8 +42,8 @@ namespace michel {
      * @input std::vector<HitPt> hits : all hits in the event
      * @return boolean : is this truly a michel or not
      */
-    bool IsMichel(const MichelCluster& michel,
-		  const std::vector<HitPt>& hits);
+    void ProcessCluster(MichelCluster& michel,
+			const std::vector<HitPt>& hits);
 
     /**
      *@brief set minimum chi allowed for a hit to be considered in the straight part of muon

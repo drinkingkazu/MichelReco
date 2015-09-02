@@ -120,6 +120,9 @@ namespace michel {
     size_t _min_nhits;          ///< Minimum # of hits
     double _d_cutoff;           ///< Distance cut off value
 
+    // boolean to store whether this cluster has been found to have a michel or not
+    bool _has_michel;
+
   protected:
     
     //

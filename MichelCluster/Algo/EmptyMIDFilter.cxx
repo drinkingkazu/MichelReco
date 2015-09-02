@@ -5,17 +5,14 @@
 
 namespace michel {
 
-EmptyMIDFilter::EmptyMIDFilter()
-{
-
-}
-
-bool EmptyMIDFilter::IsMichel(const MichelCluster& michel,
-                              const std::vector<HitPt>& hits)
-{
-    return true;
-}
-
+  EmptyMIDFilter::EmptyMIDFilter(){};
+  
+  void EmptyMIDFilter::ProcessCluster(MichelCluster& cluster,
+				      const std::vector<HitPt>& hits)
+  {
+    return;
+  }
+  
 }
 
 #endif
