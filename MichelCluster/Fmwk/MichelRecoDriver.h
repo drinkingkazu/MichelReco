@@ -20,6 +20,12 @@
 #include "MichelTypes.h"
 #include <TTree.h>
 
+
+//Backtracker
+#include "MCComp/MCMatchAlg.h"
+
+
+
 namespace larlite {
   /**
      \class MichelRecoDriver
@@ -94,6 +100,9 @@ namespace larlite {
 
     /// electric field strength [ kV/cm]
     double _Efield;
+
+  private:
+    ::btutil::MCMatchAlg _BTAlg;
 
 
   };

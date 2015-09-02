@@ -11,8 +11,6 @@
 #include "LArUtil/GeometryUtilities.h"
 #include "LArUtil/LArProperties.h"
 
-//Backtracker
-#include "MCComp/MCMatchAlg.h"
 
 namespace larlite {
 
@@ -276,38 +274,51 @@ namespace larlite {
 	    
 	  }
 	}
-	
-	event_hit* ev_hit = nullptr;
-	auto const& ass_hit_v = storage->find_one_ass(ev_cluster->id(),ev_hit,ev_cluster->name());
 
-	::btutil::MCMatchAlg fBTAlg;
-	auto btalgo = fBTAlg.BTAlg();
+	if(g4_trackid_v.size() == 0) { std::cout << "No tracks found breh \n"; throw std::exception(); } 
 
 	
-        try { fBTAlg.BuildMap(g4_trackid_v, *ev_simch, *ev_hit, ass_hit_v); }
+	
+	
+	
+        try { _BTAlg.BuildMap(g4_trackid_v, *ev_simch, *ev_hit, hit_ass_set); }
 	catch(...) { std::cout << "\n ~~..~~ Exception at build map ~~..~~ \n"; }
-
-
+	
+	auto btalgo = _BTAlg.BTAlg();
+	
 	std::vector<double> hit_frac_michel; hit_frac_michel.resize(ev_hit->size());
 	
 	for(const auto& h : *ev_hit) {
+
 	  ::btutil::WireRange_t wire_hit(h.Channel(),h.StartTick(),h.EndTick());
-	  double michel_part = btalgo.MCQ(wire_hit)[0];
-	  double other_part  = btalgo.MCQ(wire_hit)[0];
-	  double hit_frac    = michel_part / ( michel_part + other_part );
 
-	  hit_frac_michel.push_back(hit_frac);
+	  //offending malloc
+	  auto parts = btalgo.MCQ(wire_hit);
+
+	  double michel_part = parts.at(0);
+	  double other_part  = parts.at(1);
+	  
+	  // std::cout << "michel_part: " << michel_part << "\n";
+	  // std::cout << "other_part: "  << other_part << "\n";
+	  
+	  // double hit_frac    = michel_part / ( michel_part + other_part );
+
+	  // hit_frac_michel.push_back(hit_frac);
 	}
+	// std::cout << btalgo.NumParts() << "\n";
 	
-	if(hit_frac_michel.size() != ev_hit->size()) {
+	// //for(const auto& h : hit_frac_michel) { std::cout << " h: " << h << " "; } std::cout << std::endl;	
+	
+	// if(hit_frac_michel.size() != ev_hit->size()) {
 
-	  std::cout << "I ran backtracker but for some reason, hit_frac_michel didn't come out same size as "
-		    << "ev_hit!!!!!\n";
-	  throw std::exception();
+	//   std::cout << "I ran backtracker but for some reason, hit_frac_michel didn't come out same size as "
+	// 	    << "ev_hit!!!!!\n";
+	  
+	//   throw std::exception();
 
-	}
+	// }
 
-	for(const auto& h : hit_frac_michel) { std::cout << " h: " << h << " "; } std::cout << std::endl;
+
 	
 	//********************************
 	// How do we really know one of our hits is michel, well it has higher fraction of
