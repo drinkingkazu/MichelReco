@@ -61,11 +61,12 @@ namespace michel {
   }
 
   MichelCluster::MichelCluster(size_t min_nhits, double d_cutoff)
-    : _min_nhits ( min_nhits )
-    , _d_cutoff  ( d_cutoff  )
+    : _min_nhits ( min_nhits     )
+    , _d_cutoff  ( d_cutoff      )
+    , _id        ( kINVALID_SIZE ) 
   { 
     _verbosity = msg::kNORMAL;
-}
+  }
 
   MichelCluster::MichelCluster(const std::vector<HitPt>& hits,
 			       size_t min_nhits,
@@ -290,6 +291,8 @@ namespace michel {
 
     MichelCluster res(std::move(hits), _min_nhits, _d_cutoff);
     res.ProcessHits();
+
+    res._id = this->_id;
     return res;
   }
 

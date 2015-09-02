@@ -28,6 +28,7 @@ namespace michel {
     cluster.SetHits(hit_v);
     if(cluster._hits.size() < _min_nhits) return;
     _input_v.emplace_back(cluster);
+    _input_v.back()._id = (_input_v.size() - 1);
   }
 
   //---------------------------------------------------------
@@ -39,6 +40,7 @@ namespace michel {
     cluster.SetVerbosity(_verbosity);
     if(cluster._hits.size() < _min_nhits) return;
     _input_v.emplace_back(cluster);
+    _input_v.back()._id = (_input_v.size() -1);
   }
 
   //---------------------------------------------------------------------------
@@ -171,7 +173,10 @@ namespace michel {
       bool keep = true;
       for (size_t n=0; n < _alg_v.size() && keep; n++){
 	if(_verbosity <= msg::kDEBUG) {
-	  std::cout << "<<Process>> running algo : " << _alg_v[n]->Name() << std::endl; }
+	  std::cout << "<<Process>> running algo : " << _alg_v[n]->Name()
+		    << "(" << n << ")"
+		    << " on MichelCluster ID: " << cluster._id << std::endl;
+	}
 	_watch.Start();
 	if(!_debug)
 	  keep = _alg_v[n]->ProcessCluster(cluster,_all_hit_v);
@@ -181,9 +186,9 @@ namespace michel {
 	  auto const diff_msg = before.Diff(cluster);
 	  if(!diff_msg.empty()) {
 	    std::cout << "<<Process>>"
-		      << "\033[93m Detected a change in MichelCluster!\033[00m"
+		      << "\033[93m Detected a change in MichelCluster (ID="<<cluster._id<<")!\033[00m"
 		      << " by algorithm "
-		      << "\033[95m " << _alg_v[n]->Name() << " \033[00m" << std::endl
+		      << "\033[95m " << _alg_v[n]->Name() << " (" << n << ") \033[00m" << std::endl
 		      << diff_msg
 		      << std::endl;
 	  }

@@ -30,7 +30,8 @@ namespace michel {
   */
   
   class MichelCluster {
-    
+    friend class MichelReco;
+    friend class MichelCluster;
   public:
     /// Default constructor
     MichelCluster(size_t min_nhits = 0,
@@ -56,6 +57,9 @@ namespace michel {
     
     /// Default destructor
     virtual ~MichelCluster(){}
+
+    /// ID getter
+    ClusterID_t ID() const { return _id; }
 
     /// Hit list setter
     void SetHits(const std::vector<michel::HitPt>& hits);
@@ -86,7 +90,7 @@ namespace michel {
 
     //
     // Data attributes
-    //
+    //    
     // Basic hit-based parameters
     std::vector<HitPt> _hits; ///< List of hits
     HitPt _start;             ///< Start point
@@ -129,7 +133,10 @@ namespace michel {
     std::string Diff(const MichelCluster& rhs) const;
 
   protected:
-    
+
+    /// ID for a michel
+    ClusterID_t _id;
+
     //
     // Private attribute functions
     //

@@ -11,6 +11,9 @@ namespace michel {
   /// Type def for hit ID
   typedef size_t HitID_t;
 
+  /// Type def for cluster ID
+  typedef size_t ClusterID_t;
+
   namespace msg {
     /// Verbosity message level
     enum MSGLevel_t {
