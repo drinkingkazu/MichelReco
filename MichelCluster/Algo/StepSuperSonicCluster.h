@@ -25,10 +25,10 @@ namespace michel {
   public:
     
     /// Default constructor
-    StepSuperSonicCluster() : _max_step(3.6) {}
+  StepSuperSonicCluster() : _max_step(3.6) {_name="StepSuperSonicCluster";}
     
     /// Default destructor
-    ~StepSuperSonicCluster(){_name="StepSuperSonicCluster";}
+    ~StepSuperSonicCluster(){}
 
     /// Event re-setter
     void EventReset();
