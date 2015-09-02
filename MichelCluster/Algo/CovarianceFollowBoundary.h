@@ -14,14 +14,14 @@
 #ifndef MICHELCLUSTER_COVARAIANCEFOLLOWBOUNDARY_H
 #define MICHELCLUSTER_COVARAIANCEFOLLOWBOUNDARY_H
 
-#include "Fmwk/BaseAlgBoundary.h"
+#include "Fmwk/BaseMichelAlgo.h"
 #include <algorithm>
 
 namespace michel {
   /**
      \class CovarianceFollowBoundary
   */
-  class CovarianceFollowBoundary : public BaseAlgBoundary {
+  class CovarianceFollowBoundary : public BaseMichelAlgo {
     
   public:
     
@@ -46,7 +46,8 @@ namespace michel {
     void EventReset();
     
     /// A function to identify a michel's boundary point
-    HitIdx_t Boundary(MichelCluster& cluster);
+    void ProcessCluster(MichelCluster& cluster,
+			const std::vector<HitPt>& hits);
 
     /// setter function for max distance between min in dQds
     /// and max in dQ

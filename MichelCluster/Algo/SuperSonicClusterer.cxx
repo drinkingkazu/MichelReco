@@ -8,9 +8,10 @@ namespace michel {
   void SuperSonicClusterer::EventReset()
   {}
   
-  void SuperSonicClusterer::Cluster(Michel& michel,
-				    const std::vector<HitPt>& hits){
-    
+  void SuperSonicClusterer::ProcessCluster(MichelCluster& cluster,
+					   const std::vector<HitPt>& hits){
+
+    auto& michel = cluster._michel;
 
     // How does this algorithm work:
     // for each hit along the michel,

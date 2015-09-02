@@ -14,13 +14,13 @@
 #ifndef SUPERSONICCLUSTERER_H
 #define SUPERSONICCLUSTERER_H
 
-#include "Fmwk/BaseAlgMichelCluster.h"
+#include "Fmwk/BaseMichelAlgo.h"
 
 namespace michel {
   /**
      \class SuperSonicClusterer
   */
-  class SuperSonicClusterer : public BaseAlgMichelCluster {
+  class SuperSonicClusterer : public BaseMichelAlgo {
     
   public:
     
@@ -34,8 +34,8 @@ namespace michel {
     void EventReset();
 
     /// Re-cluster michel electrons w/ un-used hits
-    void Cluster(Michel& cluster,
-		 const std::vector<HitPt>& hits);
+    void ProcessCluster(MichelCluster& cluster,
+			const std::vector<HitPt>& hits);
     
   };
 }

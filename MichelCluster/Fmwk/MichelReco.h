@@ -17,9 +17,6 @@
 #include <iostream>
 #include "MichelCluster.h"
 #include "BaseAlgMerger.h"
-#include "BaseAlgBoundary.h"
-#include "BaseAlgMichelID.h"
-#include "BaseAlgMichelCluster.h"
 #include "MichelAnaBase.h"
 #include <TFile.h>
 #include <TStopwatch.h>

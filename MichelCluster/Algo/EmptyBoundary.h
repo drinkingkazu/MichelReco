@@ -14,29 +14,29 @@
 #ifndef MICHELCLUSTER_EMPTYBOUNDARY_H
 #define MICHELCLUSTER_EMPTYBOUNDARY_H
 
-#include "Fmwk/BaseAlgBoundary.h"
+#include "Fmwk/BaseMichelAlgo.h"
 
 namespace michel {
 /**
    \class EmptyBoundary
 */
-class EmptyBoundary : public BaseAlgBoundary {
-
-public:
-
-  /// Default constructor
-  EmptyBoundary() {}
-
-  /// Default destructor
-  ~EmptyBoundary() {}
-
-  /// Event resetter
-  void EventReset();
-
-  /// A function to identify a michel's boundary point
-  HitIdx_t Boundary( MichelCluster& cluster);
-
-};
+  class EmptyBoundary : public BaseMichelAlgo {
+    
+  public:
+    
+    /// Default constructor
+    EmptyBoundary() {}
+    
+    /// Default destructor
+    ~EmptyBoundary() {}
+    
+    /// Event resetter
+    void EventReset();
+    
+    /// A function to identify a michel's boundary point
+    void ProcessCluster( MichelCluster& cluster,
+			 const std::vector<HitPt>& hits);
+  };
 }
 
 #endif

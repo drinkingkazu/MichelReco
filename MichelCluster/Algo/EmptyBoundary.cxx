@@ -5,14 +5,13 @@
 
 namespace michel {
 
-void EmptyBoundary::EventReset()
-{}
-
-HitIdx_t EmptyBoundary::Boundary(MichelCluster& cluster) {
-
-  return 0;
-
-}
-
+  void EmptyBoundary::EventReset(){}
+  
+  void EmptyBoundary::ProcessCluster(MichelCluster& cluster,
+				     const std::vector<HitPt>& hits)
+  {
+    return;
+  }
+  
 }
 #endif

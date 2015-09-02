@@ -8,7 +8,8 @@ namespace michel {
   void MaxQBoundary::EventReset()
   {}
     
-  HitIdx_t MaxQBoundary::Boundary(MichelCluster& cluster)
+  void MaxQBoundary::ProcessCluster(MichelCluster& cluster,
+					  const std::vector<HitPt>& hits)
   { 
     
     std::vector<double> charges;
@@ -19,7 +20,8 @@ namespace michel {
     
     auto idx = find_max(charges);
 
-    return cluster._ordered_pts[idx]; 
+    cluster._boundary = cluster._ordered_pts[idx]; 
+    return;
   }
   
   

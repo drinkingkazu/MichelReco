@@ -14,14 +14,14 @@
 #ifndef MICHELCLUSTER_CHIBOUNDARY_H
 #define MICHELCLUSTER_CHIBOUNDARY_H
 
-#include "Fmwk/BaseAlgBoundary.h"
+#include "Fmwk/BaseMichelAlgo.h"
 #include <math.h>
 
 namespace michel {
   /**
      \class ChiBoundary
   */
-  class ChiBoundary : public BaseAlgBoundary {
+  class ChiBoundary : public BaseMichelAlgo {
     
   public:
     
@@ -35,7 +35,8 @@ namespace michel {
     void EventReset();
     
     /// A function to identify a michel's boundary point
-    HitIdx_t Boundary( MichelCluster& cluster);
+    void ProcessCluster( MichelCluster& cluster,
+			const std::vector<HitPt>& hits);
 
     //other functions
     std::vector<double> do_chi(const MichelCluster& cluster, int window_size);

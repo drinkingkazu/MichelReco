@@ -9,8 +9,10 @@ namespace michel {
   void StepSuperSonicCluster::EventReset()
   {}
   
-  void StepSuperSonicCluster::Cluster(Michel& michel,
-				      const std::vector<HitPt>& hits){
+  void StepSuperSonicCluster::ProcessCluster(MichelCluster& cluster,
+					     const std::vector<HitPt>& hits){
+
+    auto& michel = cluster._michel;
     
     /// This michel was bogus when it came in, don't cluster further
     if (michel.size() == 0) return;

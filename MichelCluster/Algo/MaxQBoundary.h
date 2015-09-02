@@ -14,12 +14,13 @@
 #ifndef MICHELCLUSTER_MAXQBOUNDARY_H
 #define MICHELCLUSTER_MAXQBOUNDARY_H
 
-#include "Fmwk/BaseAlgBoundary.h"
+#include "Fmwk/BaseMichelAlgo.h"
+
 namespace michel {
   /**
      \class MaxQBoundary
   */
-  class MaxQBoundary : public BaseAlgBoundary {
+  class MaxQBoundary : public BaseMichelAlgo {
     
   public:
     
@@ -33,7 +34,8 @@ namespace michel {
     void EventReset();
     
     /// A function to identify a michel's boundary point
-    HitIdx_t Boundary(MichelCluster& cluster);
+    void ProcessCluster(MichelCluster& cluster,
+			const std::vector<HitPt>& hits);
 
   private:
     size_t find_max(const std::vector<double>& data);

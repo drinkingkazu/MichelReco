@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-#include "Fmwk/BaseAlgBoundary.h"
+#include "Fmwk/BaseMichelAlgo.h"
 
 #include "TSpectrum.h"
 #include "TH1D.h"
@@ -27,7 +27,7 @@ namespace michel {
   /**
      \class TSpectrumBoundary
   */
-  class TSpectrumBoundary : public BaseAlgBoundary {
+  class TSpectrumBoundary : public BaseMichelAlgo {
     
   public:
     
@@ -41,7 +41,8 @@ namespace michel {
     void EventReset();
     
     /// A function to identify a michel's boundary point
-    HitIdx_t Boundary(MichelCluster& cluster);
+    void ProcessCluster(MichelCluster& cluster,
+			const std::vector<HitPt>& hits);
 
     
   private:

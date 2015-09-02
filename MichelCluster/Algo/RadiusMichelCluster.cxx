@@ -8,8 +8,10 @@ namespace michel {
 void RadiusMichelCluster::EventReset()
 {}
 
-void RadiusMichelCluster::Cluster(Michel& michel,
-                                  const std::vector<HitPt>& hits) {
+void RadiusMichelCluster::ProcessCluster(MichelCluster& cluster,
+					 const std::vector<HitPt>& hits) {
+
+  auto& michel = cluster._michel;
 
   /// This michel was bogus when it came in, don't cluster further
   if (michel.size() == 0) return;

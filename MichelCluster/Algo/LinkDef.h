@@ -12,10 +12,10 @@
 
 
 /// ClusterMerger
+#pragma link C++ class michel::EmptyMichelID+;
 #pragma link C++ class michel::EdgeMerger+;
 
 /// BoundaryFinder
-#pragma link C++ class michel::EmptyBoundary+;
 #pragma link C++ class michel::ChiBoundary+;
 #pragma link C++ class michel::TruncatedQBoundary+;
 #pragma link C++ class michel::TSpectrumBoundary+;
@@ -27,7 +27,6 @@
 #pragma link C++ class michel::ForwardMichelID+;
 
 /// MichelCluster
-#pragma link C++ class michel::EmptyMichelCluster+;
 #pragma link C++ class michel::RadiusMichelCluster+;
 #pragma link C++ class michel::SuperSonicClusterer+;
 #pragma link C++ class michel::StepAroundCluster+;

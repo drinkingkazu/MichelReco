@@ -14,13 +14,13 @@
 #ifndef STEPAROUNDCLUSTER_H
 #define STEPAROUNDCLUSTER_H
 
-#include "Fmwk/BaseAlgMichelCluster.h"
+#include "Fmwk/BaseMichelAlgo.h"
 
 namespace michel {
   /**
      \class StepAroundCluster
   */
-  class StepAroundCluster : public BaseAlgMichelCluster {
+  class StepAroundCluster : public BaseMichelAlgo {
     
   public:
     
@@ -34,8 +34,8 @@ namespace michel {
     void EventReset();
 
     /// Re-cluster michel electrons w/ un-used hits
-    void Cluster(Michel& cluster,
-		 const std::vector<HitPt>& hits);
+    void ProcessCluster(MichelCluster& cluster,
+			const std::vector<HitPt>& hits);
       
     /// Setter for minimum radius
     void SetMaxStep(double s) { _max_step = s; }

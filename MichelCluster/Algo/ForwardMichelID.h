@@ -14,12 +14,13 @@
 #ifndef MICHELCLUSTER_FORWARDMICHELID_H
 #define MICHELCLUSTER_FORWARDMICHELID_H
 
-#include "Fmwk/BaseAlgMichelID.h"
+#include "Fmwk/BaseMichelAlgo.h"
+
 namespace michel {
   /**
      \class ForwardMichelID
   */
-  class ForwardMichelID : public BaseAlgMichelID {
+  class ForwardMichelID : public BaseMichelAlgo {
     
   public:
     
@@ -33,7 +34,8 @@ namespace michel {
     void EventReset();
 
     /// Toy Michel identifier
-    Michel Identify(const MichelCluster& cluster, bool& forward);
+    void ProcessCluster(MichelCluster& cluster,
+			const std::vector<HitPt>& hits);
 
     /// Setter for max number of hits allowed
     void SetMaxMichelHits(size_t n) { _maxHits = n; std::cout << "max hits: " << _maxHits << std::endl; }

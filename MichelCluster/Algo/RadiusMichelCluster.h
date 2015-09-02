@@ -14,13 +14,13 @@
 #ifndef RADIUSMICHELCLUSTER_H
 #define RADIUSMICHELCLUSTER_H
 
-#include "Fmwk/BaseAlgMichelCluster.h"
+#include "Fmwk/BaseMichelAlgo.h"
 
 namespace michel {
   /**
      \class RadiusMichelCluster
   */
-  class RadiusMichelCluster : public BaseAlgMichelCluster {
+  class RadiusMichelCluster : public BaseMichelAlgo {
     
   public:
     
@@ -34,8 +34,8 @@ namespace michel {
     void EventReset();
 
     /// Re-cluster michel electrons w/ un-used hits
-    void Cluster(Michel& cluster,
-		 const std::vector<HitPt>& hits);
+    void ProcessCluster(MichelCluster& cluster,
+			const std::vector<HitPt>& hits);
     
     /// Setter for minimum radius
     void SetMinRadius(double r) { _min_radius = r; }

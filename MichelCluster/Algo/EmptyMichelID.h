@@ -14,12 +14,13 @@
 #ifndef MICHELCLUSTER_EMPTYMICHELID_H
 #define MICHELCLUSTER_EMPTYMICHELID_H
 
-#include "Fmwk/BaseAlgMichelID.h"
+#include "Fmwk/BaseMichelAlgo.h"
+
 namespace michel {
 /**
    \class EmptyMichelID
 */
-class EmptyMichelID : public BaseAlgMichelID {
+class EmptyMichelID : public BaseMichelAlgo {
 
 public:
 
@@ -33,7 +34,8 @@ public:
   void EventReset() {};
 
   /// Toy Michel identifier
-  Michel Identify(const MichelCluster& cluster, bool& forward);
+  void ProcessCluster(MichelCluster& cluster,
+		      const std::vector<HitPt>& hits);
 
 };
 }

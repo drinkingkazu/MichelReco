@@ -21,9 +21,6 @@
 #pragma link C++ class michel::BaseMichelAlgo+;
 #pragma link C++ class michel::BaseAlgMerger+;
 #pragma link C++ class michel::BaseAlgBinaryMerger+;
-#pragma link C++ class michel::BaseAlgBoundary+;
-#pragma link C++ class michel::BaseAlgMichelID+;
-#pragma link C++ class michel::BaseAlgMichelCluster+;
 
 #pragma link C++ class cmtool::CMergeBookKeeper+;
 #pragma link C++ class cmtool::CMTException+;

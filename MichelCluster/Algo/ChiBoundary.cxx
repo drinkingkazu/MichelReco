@@ -11,7 +11,8 @@ namespace michel {
   void ChiBoundary::EventReset()
   {}
     
-  HitIdx_t ChiBoundary::Boundary(MichelCluster& cluster) {
+  void ChiBoundary::ProcessCluster(MichelCluster& cluster,
+				   const std::vector<HitPt>& hits) {
 
     //stolen from run_michel
     float  _chi2_rise = 5;
@@ -37,7 +38,8 @@ namespace michel {
       max_chi = the_chi_max_peaks.at(0); //replace with max
     }
 
-    return cluster._ordered_pts[max_chi];
+    cluster._boundary = cluster._ordered_pts[max_chi];
+    return;
   }
   
   

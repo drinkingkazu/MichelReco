@@ -9,10 +9,11 @@ namespace michel {
   void ForwardMichelID::EventReset()
   {}
   
-  Michel ForwardMichelID::Identify(const MichelCluster& cluster, bool& forward)
+  void ForwardMichelID::ProcessCluster(MichelCluster& cluster,
+				       const std::vector<HitPt>& hits)
   {
     
-    if(cluster._boundary == kINVALID_SIZE) { return Michel(); }
+    if(cluster._boundary == kINVALID_SIZE) { cluster = MichelCluster(); return; }
     //no check on cluster size here...
     
     //Hardcoded for now :)
@@ -30,8 +31,8 @@ namespace michel {
     }
     
     //Determines which point is the michel start    
-    if(determine_forward(cluster,n_cutoff,c_cutoff,w_cutoff,forward)) {
-      if(forward) {
+    if(determine_forward(cluster,n_cutoff,c_cutoff,w_cutoff,cluster._forward)) {
+      if(cluster._forward) {
 	if(idx >= cluster._ordered_pts.size() - 1) {
 	  the_michel_start = idx;
 	}
@@ -51,13 +52,13 @@ namespace michel {
     }
     
     //we could not determine forward so we return default contructor. This is a "bad" michel.   
-    else { return Michel(); }
+    else { cluster = MichelCluster(); return; }
     
-    Michel electron;
+    auto electron = cluster._michel;
     std::vector<size_t> ordered_pts_idx;
 
     for( size_t i = 0 ; i < cluster._ordered_pts.size(); ++i) {
-      if(forward)  {
+      if(cluster._forward)  {
 	if(i >= the_michel_start) {
 	  electron.push_back(cluster._hits[cluster._ordered_pts[i]]);
 	  ordered_pts_idx.push_back(i);
@@ -72,8 +73,10 @@ namespace michel {
     }
 
     // if the michel has more than _maxHits points -> do not return a michel...it is probably garbage
-    if ( (electron.size() > _maxHits) and (_maxHits != 0) )
-      return Michel();
+    if ( (electron.size() > _maxHits) and (_maxHits != 0) ){
+      cluster = MichelCluster();
+      return;
+    }
 
     //Do same thing for muon (in future)
     auto length = determine_length(cluster,ordered_pts_idx); //true radius with no minimum
@@ -84,7 +87,7 @@ namespace michel {
     //loop over the ordered points, add hits to the electron that are NOT in orderedpts
     //BUT append new hits found in the vicinity of the vertex
     //this now goes into "reclustering"
-    return electron;
+    return;
   }
 
   bool ForwardMichelID::determine_forward(const MichelCluster& cluster,

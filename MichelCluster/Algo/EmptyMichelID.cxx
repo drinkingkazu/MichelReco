@@ -6,12 +6,13 @@
 
 namespace michel {
 
-Michel EmptyMichelID::Identify(const MichelCluster& cluster, bool& forward)
+void EmptyMichelID::ProcessCluster(MichelCluster& cluster,
+				   const std::vector<HitPt>& hits)
 {
-	Michel electron;
+	auto electron = cluster._michel;
 	for ( size_t i = 0 ; i < cluster._hits.size(); ++i) 
 		electron.push_back(cluster._hits[i]);
-	return electron;
+	return;
 }
 
 }
