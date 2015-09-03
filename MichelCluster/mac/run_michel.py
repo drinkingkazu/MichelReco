@@ -27,14 +27,14 @@ my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 my_proc.set_output_file("michel_clusters.root")
 
 #Cheat and send in signal
-my_proc.enable_filter(True)
-the_filter = fmwk.MichelFilter()
+#my_proc.enable_filter(True)
+#the_filter = fmwk.MichelFilter()
 #the_filter = fmwk.RemoveMichel()
 
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
 my_unit.SetClusterProducer("fuzzycluster")
-my_unit.SetUseMC(True)
+#my_unit.SetUseMC(True)
 #my_unit.SetClusterProducer("rawcluster")
 my_unit.SetEField(0.5)
 

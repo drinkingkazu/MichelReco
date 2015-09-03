@@ -116,6 +116,7 @@ namespace larlite {
 	_q_v.push_back(q);
 	_w_v.push_back(w);
 	_t_v.push_back(t);
+	_p_v.push_back(p);
       }
 
       all_hits_v.emplace_back( h.Integral(),
@@ -312,25 +313,21 @@ namespace larlite {
 	hit_frac_michel.reserve(ev_hit->size());
 	
 	for(const auto& h : *ev_hit) {
+
+	  if(h.WireID().Plane != 2)
+	    continue;
 	  
 	  ::btutil::WireRange_t wire_hit(h.Channel(),h.StartTick(),h.EndTick());
-
+	  
 	  //offending malloc if _BTAlg is not class member...
 	  auto parts = btalgo.MCQ(wire_hit);
-
+	  
 	  double michel_part = parts.at(0);
 	  double other_part  = parts.at(1);
 	  double hit_frac    = michel_part / ( michel_part + other_part );
 	  
 	  hit_frac_michel.push_back(hit_frac);
-	}
-
-	if(hit_frac_michel.size() != ev_hit->size()) {
-	  std::cout << "I ran backtracker but for some reason, hit_frac_michel didn't come out same size as "
-		    << "ev_hit take a second look at logic here in _use_mc conditional block\n";
-	  throw std::exception();
-	}
-	
+	}	
 	
 	//********************************
 	// How do we really know one of our hits is michel, well it has higher fraction of

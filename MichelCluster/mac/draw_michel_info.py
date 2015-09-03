@@ -1,5 +1,7 @@
 import numpy as np
 import ROOT
+import matplotlib
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from root_numpy import root2array, root2rec, tree2rec, array2root
 import sys
@@ -87,8 +89,11 @@ f = ROOT.TFile(fin)
 t   = f.Get( 'out_tree' )
 
 
-arr = tree2rec(t,branches=['_michel_clustered_charge','_michel_Z','_michel_X','_X','_Z','_q_v','_s_v','_chi_v','_t_dqds_v',
-                           '_t_q_v','_mean_chi','_lowest_chi','_rms_chi','_boundary','_chi_at_boundary',
+arr = tree2rec(t,branches=['_michel_clustered_charge',
+                           '_michel_Z','_michel_X','_X',
+                           '_Z','_q_v','_s_v','_chi_v','_t_dqds_v',
+                           '_t_q_v','_mean_chi','_lowest_chi',
+                           '_rms_chi','_boundary','_chi_at_boundary',
                            '_event','_run','_subrun','_clus_idx','_forward'])
 
 ismc = False;
@@ -113,7 +118,7 @@ if (f.GetListOfKeys().Contains('_hit_tree')):
     if ismc :
         hit_mc_tree = f.Get( '_mc_tree'  )
         mchit_info  = pd.DataFrame(tree2rec(hit_mc_tree,branches=['_run','_subrun','_event','_michel_hit_frac']))
-        hits = pd.concat([hits,mchit_info._michel_hit_frac],axis=1)
+        hits        = pd.concat([hits,mchit_info._michel_hit_frac],axis=1)
 
     # fill a dictionary that goes from (run,subrun,event) -> data frame with hit info for that event
         
@@ -153,10 +158,10 @@ while ( n < len(arr) ):
     # first make sure that if we are scanning through signal or background only
     # we are only looping through those events
 
-    evt = arr['_event'][n]
-    run = arr['_run'][n]
+    evt    = arr['_event'][n]
+    run    = arr['_run'][n]
     subrun = arr['_subrun'][n]
-    idx = arr['_clus_idx'][n]
+    idx    = arr['_clus_idx'][n]
 
 
 
@@ -246,46 +251,56 @@ while ( n < len(arr) ):
  
     # draw all hits in even
     # set bounds based on "clus" bounds
-    xmax = np.amax(np.array(michel_x))
-    xmin = np.amin(np.array(michel_x))
-    zmax = np.amax(np.array(michel_z))
-    zmin = np.amin(np.array(michel_z))
+    if ismc:
+        xmax = np.amax(np.array(clus_x))
+        xmin = np.amin(np.array(clus_x))
+        zmax = np.amax(np.array(clus_z))
+        zmin = np.amin(np.array(clus_z))
+    else:
+        xmax = np.amax(np.array(michel_x))
+        xmin = np.amin(np.array(michel_x))
+        zmax = np.amax(np.array(michel_z))
+        zmin = np.amin(np.array(michel_z))
+    
     dx = xmax-xmin
     dz = zmax-zmin
-<<<<<<< HEAD
-    xmax += 15
-    xmin -= 15
-    zmax += 15
-    zmin -= 15
-=======
-    xmax += dx/2
-    xmin -= dx/2
-    zmax += dz/2
-    zmin -= dz/2
+
+    if ismc:
+        xmax += dx/2
+        xmin -= dx/2
+        zmax += dz/2
+        zmin -= dz/2
+    else:
+        xmax += 15
+        xmin -= 15
+        zmax += 15
+        zmin -= 15
     print evt
     print subrun
     print run
     
->>>>>>> 714522cc47739d6991f63d1b7186f0239b204967
     if (all_hits):
-        df = hitDict[(run,subrun,evt)]
-        ######xxx
-        #zpoints,xpoints,idx = getSubArray(np.array(df['_w_v'])[0],zmin,zmax,np.array(df['_t_v'])[0],xmin,xmax)
-        idx = getSubArray(np.array(df['_w_v'])[0],zmin,zmax,np.array(df['_t_v'])[0],xmin,xmax,df['_p_v'].values[0])
-        zpoints = df['_w_v'].values[0][idx]
-        xpoints = df['_t_v'].values[0][idx]
+        df   = hitDict[(run,subrun,evt)]
+        idxx = getSubArray(np.array(df['_w_v'])[0],
+                          zmin,zmax,
+                          np.array(df['_t_v'])[0],
+                          xmin,xmax,
+                          df['_p_v'].values[0])
+        
+        zpoints = df['_w_v'].values[0][idxx]
+        xpoints = df['_t_v'].values[0][idxx]
 
         weights = 30
 
-        c = 'k'
+        cc = 'k'
         
         if ismc:
-            weights = 200*df['_michel_hit_frac'].values[0][idx]
-            c='purple'
+            weights = 200*df['_michel_hit_frac'].values[0][idxx]
+            cc='purple'
         
         axarr[0,0].scatter(zpoints,
                            xpoints,
-                           c='purple',
+                           c=cc,
                            edgecolor='none',
                            alpha=0.75,
                            s=weights)
@@ -297,13 +312,10 @@ while ( n < len(arr) ):
     axarr[0,0].scatter(clus_z,clus_x,c=dq,s=50,edgecolor='none')
     # draw michel cluster
     axarr[0,0].scatter(michel_z,michel_x,c='k',edgecolor='none',s=60)
-<<<<<<< HEAD
-    axarr[0,0].set_title('Evt: %i Run: %i Idx: %i'%(evt,run,idx))
+
+    axarr[0,0].set_title("Evt: %i Run: %i Idx: %i" % (evt,run,idx) )
     axarr[0,0].set_xlim([zmin,zmax])
     axarr[0,0].set_ylim([xmin,xmax])
-=======
-    #axarr[0,0].set_title('Evt: %i Run: %i Idx: %i' % (evt,run,idx))
->>>>>>> 714522cc47739d6991f63d1b7186f0239b204967
     axarr[0,0].grid()
 
 
