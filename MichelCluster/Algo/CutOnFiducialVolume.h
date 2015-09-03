@@ -54,11 +54,13 @@ public:
     { _excluded_time_ranges.push_back(myrange); }
 
     /// Setter to exclude many wire ranges at once
-    void SetExcludedWireRanges(std::vector<std::pair<double, double>> myranges);
-
-    /// Setter to exclude many time ranges at once
-    void SetExcludedTimeRanges(std::vector<std::pair<double, double>> myranges);
-
+    void SetExcludedWireRanges(std::vector<double> myranges_min,
+			       std::vector<double> myranges_max);
+      
+      /// Setter to exclude many time ranges at once
+      void SetExcludedTimeRanges(std::vector<double> myranges_min,
+				 std::vector<double> myranges_max);
+      
     /// Setter to show debug couts
     void SetDebug(bool flag) { _debug = flag; }
 

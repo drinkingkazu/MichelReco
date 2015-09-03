@@ -2,6 +2,7 @@
 #define MICHEL_CUTONFIDUCIALVOLUME_CXX
 
 #include "CutOnFiducialVolume.h"
+#include "Fmwk/MichelException.h"
 #include <sstream>
 
 namespace michel {
@@ -58,24 +59,36 @@ bool CutOnFiducialVolume::ProcessCluster(MichelCluster& cluster,
 }
 
 
-/// Setter to exclude many wire ranges at once
-void CutOnFiducialVolume::SetExcludedWireRanges(std::vector<std::pair<double, double>> myranges)
-{
-  _excluded_wire_ranges.clear();
-  for (std::pair<double, double> my_pair : myranges)
-    AddExcludedWireRange(my_pair);
-}
-
-/// Setter to exclude many time ranges at once
-void CutOnFiducialVolume::SetExcludedTimeRanges(std::vector<std::pair<double, double>> myranges)
-{
-  _excluded_time_ranges.clear();
-  for (std::pair<double, double> my_pair : myranges)
-    AddExcludedTimeRange(my_pair);
-}
-
-
-
+  /// Setter to exclude many wire ranges at once
+  void CutOnFiducialVolume::SetExcludedWireRanges(std::vector<double> myranges_min,
+						  std::vector<double> myranges_max)
+  {
+    if (myranges_min.size() != myranges_max.size()){
+      std::cout << "\033[93m[ERROR]\033[00m list of min/max wire ranges should be equal in length but are not...you screwed up..."  << std::endl;
+      throw MichelException();
+  }
+    _excluded_wire_ranges.clear();
+    for (size_t i=0; i < myranges_min.size(); i++){
+      std::pair<double,double> my_pair(myranges_min[i],myranges_max[i]);
+      AddExcludedWireRange(my_pair);
+    }
+  }
+  
+  /// Setter to exclude many time ranges at once
+  void CutOnFiducialVolume::SetExcludedTimeRanges(std::vector<double> myranges_min,
+						  std::vector<double> myranges_max)
+  {
+    if (myranges_min.size() != myranges_max.size()){
+      std::cout << "\033[93m[ERROR]\033[00m list of min/max wire ranges should be equal in length but are not...you screwed up..."  << std::endl;
+      throw MichelException();
+  }
+    _excluded_time_ranges.clear();
+    for (size_t i=0; i < myranges_min.size(); i++){
+      std::pair<double,double> my_pair(myranges_min[i],myranges_max[i]);
+      AddExcludedTimeRange(my_pair);
+    }
+  }
+  
 }
 
 #endif

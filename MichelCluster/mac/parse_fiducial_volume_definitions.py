@@ -11,7 +11,8 @@ if not os.path.isfile(textfile):
 
 def list_wires_times_to_exclude():
     parsing_wires, parsing_times = False, False
-    wires_to_exclude, times_to_exclude = ROOT.std.vector(ROOT.std.pair("double","double"))(), ROOT.std.vector(ROOT.std.pair("double","double"))()
+    wires_to_exclude_min, times_to_exclude_min = ROOT.std.vector("double")(), ROOT.std.vector("double")()
+    wires_to_exclude_max, times_to_exclude_max = ROOT.std.vector("double")(), ROOT.std.vector("double")()
     for line in open(textfile):
         if line[:13] == 'exclude wires': 
             parsing_wires = True
@@ -30,10 +31,21 @@ def list_wires_times_to_exclude():
         if len(line.strip('\n').split('-')) < 2: continue
         
         region_to_exclude = tuple(line.strip('\n').split('-'))
-        region_to_exclude = ROOT.std.pair("double","double")(float(region_to_exclude[0]),float(region_to_exclude[1]))
-
-        if parsing_wires and not parsing_times: wires_to_exclude.push_back(region_to_exclude)
-        elif not parsing_wires and parsing_times: times_to_exclude.push_back(region_to_exclude)
-        else: print 'wtf kaleko screwed something up in the script that parses fiducial volume info'
+        region_to_exclude_min = float(region_to_exclude[0])
+        region_to_exclude_max = float(region_to_exclude[1])
         
-    return wires_to_exclude, times_to_exclude
+        if parsing_wires and not parsing_times: 
+            wires_to_exclude_min.push_back(region_to_exclude_min)
+            wires_to_exclude_max.push_back(region_to_exclude_max)
+        elif not parsing_wires and parsing_times:
+            times_to_exclude_min.push_back(region_to_exclude_min)
+            times_to_exclude_max.push_back(region_to_exclude_max)
+        else:
+            print 'wtf kaleko screwed something up in the script that parses fiducial volume info'
+
+    print len(wires_to_exclude_min)
+    print len(wires_to_exclude_max)
+    print len(times_to_exclude_min)
+    print len(times_to_exclude_max)
+
+    return wires_to_exclude_min, wires_to_exclude_max, times_to_exclude_min, times_to_exclude_max
