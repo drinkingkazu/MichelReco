@@ -16,8 +16,8 @@
 #define LARLITE_MICHELRECODRIVER_H
 
 #include "Analysis/ana_base.h"
-#include "MichelReco.h"
-#include "MichelTypes.h"
+#include "Fmwk/MichelReco.h"
+#include "Fmwk/MichelTypes.h"
 #include <TTree.h>
 
 namespace larlite {

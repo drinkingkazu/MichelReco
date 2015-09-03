@@ -11,7 +11,7 @@
 
 #pragma link C++ class larlite::MichelFilter+;
 #pragma link C++ class larlite::RemoveMichel+;
-
+#pragma link C++ class larlite::MichelRecoDriver+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 
