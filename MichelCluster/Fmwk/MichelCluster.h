@@ -2,7 +2,7 @@
  * \file MichelCluster.h
  *
  * \ingroup michel_filter
- * 
+ *
  * \brief Class def header for a class MichelCluster
  *
  * @author vgenty
@@ -23,40 +23,40 @@
 #include "HitPt.h"
 #include "ColorPrint.h"
 namespace michel {
-  /**
-     \class MichelCluster
-     User defined class MichelCluster ... these comments are used to generate
-     doxygen documentation!
-  */
-  
-  class MichelCluster : public ColorPrint {
-    friend class MichelReco;
+/**
+   \class MichelCluster
+   User defined class MichelCluster ... these comments are used to generate
+   doxygen documentation!
+*/
+
+class MichelCluster : public ColorPrint {
+    friend class MichelRecoManager;
     friend class MichelCluster;
-  public:
+public:
     /// Default constructor
     MichelCluster(size_t min_nhits = 0,
-		  double d_cutoff  = kMAX_DOUBLE );
+                  double d_cutoff  = kMAX_DOUBLE );
 
     /// Alternative ctor from hit list reference
     MichelCluster(const std::vector<HitPt>&,
-		  size_t min_nhits = 0,
-		  double d_cutoff  = kMAX_DOUBLE );
+                  size_t min_nhits = 0,
+                  double d_cutoff  = kMAX_DOUBLE );
 
 #ifndef __CINT__ // CINT (ROOT5) cannot understand std::move
     /// Copy ctor
     //MichelCluster(const MichelCluster& rhs) = default;
-    
+
     /// Alternative ctor from hit list reference
     MichelCluster(std::vector<HitPt>&&,
-		  size_t min_nhits = 0,
-		  double d_cutoff  = kMAX_DOUBLE );
-    
+                  size_t min_nhits = 0,
+                  double d_cutoff  = kMAX_DOUBLE );
+
     /// Alternative ctor from michel
     //MichelCluster(const MichelCluster&& rhs);
 #endif
-    
+
     /// Default destructor
-    virtual ~MichelCluster(){}
+    virtual ~MichelCluster() {}
 
     /// ID getter
     ClusterID_t ID() const { return _id; }
@@ -81,7 +81,7 @@ namespace michel {
 
     /// Unary addition
     MichelCluster& operator+=(const MichelCluster& other);
-   
+
     /// Find the closest hit to the reference from the cluster hit list
     const HitPt& ClosestHit(const HitPt& ref);
 
@@ -90,7 +90,7 @@ namespace michel {
 
     //
     // Data attributes
-    //    
+    //
     // Basic hit-based parameters
     std::vector<HitPt> _hits; ///< List of hits
     HitPt _start;             ///< Start point
@@ -111,8 +111,8 @@ namespace michel {
     // Attributes to be filled by external algorithms
     //
     HitIdx_t _boundary;   ///< Michel/Muon boundary point (not necessarily michel start exactly)
-    Michel _michel;       ///< Michel    
-    std::vector<double>   _chi2_v;      ///< Local linear chi2 fit 
+    Michel _michel;       ///< Michel
+    std::vector<double>   _chi2_v;      ///< Local linear chi2 fit
     std::vector<double>   _t_mean_v;    ///< Truncated mean
     std::vector<double>   _t_dqds_v;    ///< Truncated dqds
     std::vector<double>   _dirs_v;      ///< vector of slope @ hit point
@@ -132,7 +132,7 @@ namespace michel {
     //
     std::string Diff(const MichelCluster& rhs) const;
 
-  protected:
+protected:
 
     /// ID for a michel
     ClusterID_t _id;
@@ -144,15 +144,15 @@ namespace michel {
     void ProcessHits();
     /// Construct ordered index vector for near-by neighbor hits
     void OrderPoints(size_t start_index,
-		     std::vector<size_t>& ordered_index_v,
-		     std::vector<double>& ds_v,
-		     std::vector<double>& s_v);
+                     std::vector<size_t>& ordered_index_v,
+                     std::vector<double>& ds_v,
+                     std::vector<double>& s_v);
 
-  };
+};
 
-  /// A set of MichelCluster
-  typedef std::vector<michel::MichelCluster> MichelClusterArray;
+/// A set of MichelCluster
+typedef std::vector<michel::MichelCluster> MichelClusterArray;
 }
 #endif
-/** @} */ // end of doxygen group 
+/** @} */ // end of doxygen group
 

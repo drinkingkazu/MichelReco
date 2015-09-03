@@ -1,9 +1,9 @@
 /**
- * \file MichelReco.h
+ * \file MichelRecoManager.h
  *
  * \ingroup MichelCluster
- * 
- * \brief Class def header for a class MichelReco
+ *
+ * \brief Class def header for a class MichelRecoManager
  *
  * @author kazuhiro
  */
@@ -11,8 +11,8 @@
 /** \addtogroup MichelCluster
 
     @{*/
-#ifndef MICHELCLUSTER_MICHELRECO_H
-#define MICHELCLUSTER_MICHELRECO_H
+#ifndef MICHELCLUSTER_MICHELRECOMANAGER_H
+#define MICHELCLUSTER_MICHELRECOMANAGER_H
 
 #include <iostream>
 #include "MichelCluster.h"
@@ -26,31 +26,31 @@
 
 
 namespace michel {
-  /**
-     \class MichelReco
-     A class that handles event-wise michel electron identification and reconstruction. \n
-     It takes a list of clusters as an input where each cluster is represented as       \n
-     a collection of michel::HitPt. Internally each cluster is converted into another   \n
-     cluster representation michel::MichelCluster. Then a chain of following algorithms \n
-     are applied to reconstruct michel electron(s):                                     \n
-                                                                                        \n
-     1) Input cluster merging                                                           \n
-     2) Muon/Michel bounary finding                                                     \n
-     3) Michel Mis ID Filtering                                                         \n
-     3) Michel cluster ID                                                               \n
-     4) Michel re-clustering                                                            \n
-                                                                                        \n
-     in a consecutive order.
-  */
-  class MichelReco : public ColorPrint{
-    
-  public:
-    
+/**
+   \class MichelRecoManager
+   A class that handles event-wise michel electron identification and reconstruction. \n
+   It takes a list of clusters as an input where each cluster is represented as       \n
+   a collection of michel::HitPt. Internally each cluster is converted into another   \n
+   cluster representation michel::MichelCluster. Then a chain of following algorithms \n
+   are applied to reconstruct michel electron(s):                                     \n
+                                                                                      \n
+   1) Input cluster merging                                                           \n
+   2) Muon/Michel bounary finding                                                     \n
+   3) Michel Mis ID Filtering                                                         \n
+   3) Michel cluster ID                                                               \n
+   4) Michel re-clustering                                                            \n
+                                                                                      \n
+   in a consecutive order.
+*/
+class MichelRecoManager : public ColorPrint {
+
+public:
+
     /// Default constructor
-    MichelReco();
-    
+    MichelRecoManager();
+
     /// Default destructor
-    ~MichelReco(){}
+    ~MichelRecoManager() {}
 
     //
     // Configuration functions
@@ -82,13 +82,13 @@ namespace michel {
     /// all-hit register function w/ std::move
     void RegisterAllHits(std::vector<michel::HitPt>&& all_hit_v);
 #endif
-    
+
     //
     // Driver functions (change state)
     //
     /// Initializer (before event loop)
     void Initialize();
-    
+
     /// Executor (per event)
     void Process();
 
@@ -108,26 +108,26 @@ namespace michel {
     void SetMinNHits(int n)       { _min_nhits = n; }
 
     /// Setter for a debug mode
-    void SetDebug(bool doit=true) { _debug = doit; }
+    void SetDebug(bool doit = true) { _debug = doit; }
 
     /// algorithm verbosity setter
     //void SetAlgoVerbosity(msg::MSGLevel_t verbose) { _algo_verbosity = verbose; }
-    
+
     /// Getter for MichelClusterArray
     const MichelClusterArray& GetResult()
     { return _output_v; }
 
-  protected:
+protected:
 
     // MichelCluster configuration parameters
     ///< MichelCluster's cut-off distance for neighboring cluster
     ///< MAXIMUM distance. Set this to a huge number for very generous ordering
     ///< Set this to a very small number for very conservative ordering.
-    double _d_cutoff;  
+    double _d_cutoff;
 
     // algorithm's verbosity
     //msg::MSGLevel_t _algo_verbosity;
-    
+
     size_t _min_nhits; ///< MichelCluster's min # hits to claim a cluster
     /// Debug mode
     bool _debug;
@@ -142,7 +142,7 @@ namespace michel {
     //
     // Algorithms
     //
-    BaseAlgMerger*        _alg_merge;          ///< Merging algorithm 
+    BaseAlgMerger*        _alg_merge;          ///< Merging algorithm
     /// Algorithms to be executed
     std::vector< michel::BaseMichelAlgo* > _alg_v;
     /// Analysis to be executed
@@ -158,9 +158,9 @@ namespace michel {
     /// Event information
     EventID _id;
 
-  };
+};
 }
 
 #endif
-/** @} */ // end of doxygen group 
+/** @} */ // end of doxygen group
 

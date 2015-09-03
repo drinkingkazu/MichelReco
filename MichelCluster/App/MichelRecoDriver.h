@@ -50,7 +50,7 @@ namespace larlite {
     virtual bool finalize();
 
     /// Reco manager getter
-    ::michel::MichelReco& Algo() { return _mgr; }
+    ::michel::MichelReco& GetManager() { return _mgr; }
 
     /**
      * @brief Set boolean to decide if to save michels in output cluster
