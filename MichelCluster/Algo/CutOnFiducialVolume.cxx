@@ -16,11 +16,21 @@ CutOnFiducialVolume::CutOnFiducialVolume()
   _wire_buffer_size = 3.;
   _time_buffer_size = 3.;
 
+  _debug = false;
+
 }
 
 bool CutOnFiducialVolume::ProcessCluster(MichelCluster& cluster,
     const std::vector<HitPt>& hits)
 {
+
+  if (_debug)
+    std::cout << "CutOnFiducialVolume is excluding "
+              << _excluded_wire_ranges.size()
+              << " wire ranges, and "
+              << _excluded_wire_ranges.size()
+              << " time ranges."
+              << std::endl;
 
   //If user never set ranges to exclude, of course do not exclude any clusters.
   if (!_excluded_wire_ranges.size() && !_excluded_time_ranges.size()) return true;
@@ -41,11 +51,30 @@ bool CutOnFiducialVolume::ProcessCluster(MichelCluster& cluster,
       if (ihit._w > (_ex_t.first - _time_buffer_size) &&
           ihit._w < (_ex_t.second + _time_buffer_size) )
         return false;
-      
+
   }
 
   return true;
 }
+
+
+/// Setter to exclude many wire ranges at once
+void CutOnFiducialVolume::SetExcludedWireRanges(std::vector<std::pair<double, double>> myranges)
+{
+  _excluded_wire_ranges.clear();
+  for (std::pair<double, double> my_pair : myranges)
+    AddExcludedWireRange(my_pair);
+}
+
+/// Setter to exclude many time ranges at once
+void CutOnFiducialVolume::SetExcludedTimeRanges(std::vector<std::pair<double, double>> myranges)
+{
+  _excluded_time_ranges.clear();
+  for (std::pair<double, double> my_pair : myranges)
+    AddExcludedTimeRange(my_pair);
+}
+
+
 
 }
 

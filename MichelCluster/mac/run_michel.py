@@ -101,6 +101,15 @@ largeangle.SetMinStraightMichelHits(5)
 #largeangle.SetVerbosity(michel.msg.kDEBUG)
 mgr.AddAlgo(largeangle)
 
+# MID filter that removes michels close to wire gaps/edges
+fidvolfilter = michel.CutOnFiducialVolume()
+import parse_fiducial_volume_definitions as fidparser
+wires_to_exclude, times_to_exclude = fidparser.list_wires_times_to_exclude()
+fidvolfilter.SetExcludedWireRanges(wires_to_exclude)
+fidvolfilter.SetExcludedTimeRanges(times_to_exclude)
+mgr.AddAlgo(fidvolfilter)
+
+
 # Attach ana unit
 mgr.AddAna(michel.CosmicAna())
 

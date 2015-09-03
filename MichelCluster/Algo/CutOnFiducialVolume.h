@@ -46,20 +46,21 @@ public:
                         const std::vector<HitPt>& hits);
 
     /// Setter to exclude a specific input wire range (in cm, cm units)
-    void SetExcludedWireRange(std::pair<double, double> myrange)
+    void AddExcludedWireRange(std::pair<double, double> myrange)
     { _excluded_wire_ranges.push_back(myrange); }
 
     /// Setter to exclude a specific input time range (in cm, cm units)
-    void SetExcludedTimeRange(std::pair<double, double> myrange)
+    void AddExcludedTimeRange(std::pair<double, double> myrange)
     { _excluded_time_ranges.push_back(myrange); }
 
     /// Setter to exclude many wire ranges at once
-    void SetExcludedWireRanges(std::vector<std::pair<double, double>> myranges)
-    { _excluded_wire_ranges = myranges; }
+    void SetExcludedWireRanges(std::vector<std::pair<double, double>> myranges);
 
     /// Setter to exclude many time ranges at once
-    void SetExcludedTimeRanges(std::vector<std::pair<double, double>> myranges)
-    { _excluded_time_ranges = myranges; }
+    void SetExcludedTimeRanges(std::vector<std::pair<double, double>> myranges);
+
+    /// Setter to show debug couts
+    void SetDebug(bool flag) { _debug = flag; }
 
 private:
 
@@ -73,6 +74,8 @@ private:
     /// then if a michel has any hits in the range (12.3 - 3, 45.6 + 3) will be rejected
     double _wire_buffer_size;
     double _time_buffer_size;
+
+    bool _debug;
 };
 }
 
