@@ -76,7 +76,7 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
   covariance_in_largest_cluster.reserve( output_cluster_v.size() * 4 * 25);
 
   //get the number of clusters
-  int number_of_good_clusters = 0;
+  //int number_of_good_clusters = 0;
 
   // count number of output clusters
   int n_clus = 0;
