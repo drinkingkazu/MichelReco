@@ -88,6 +88,19 @@ supersonic = michel.SuperSonicClusterer()
 stepsonic  = michel.StepSuperSonicCluster()
 mgr.AddAlgo(stepsonic)
 
+# final mid algo cutting on num of michel hits
+michelhits = michel.CutOnMichelNumHits()
+michelhits.SetMinMichelHits(5)
+michelhits.SetMaxMichelHits(35)
+mgr.AddAlgo(michelhits)
+
+# require large angle between michel and muon
+largeangle = michel.RequireLargeAngle()
+largeangle.SetMinAngle(30.*3.14/180.)
+largeangle.SetMinStraightMichelHits(5)
+#largeangle.SetVerbosity(michel.msg.kDEBUG)
+mgr.AddAlgo(largeangle)
+
 # Attach ana unit
 mgr.AddAna(michel.CosmicAna())
 
