@@ -25,7 +25,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    SuperSonicClusterer(){_name="SuperSonicClusterer";}
+    SuperSonicClusterer();
     
     /// Default destructor
     ~SuperSonicClusterer(){}
@@ -36,6 +36,21 @@ namespace michel {
     /// Re-cluster michel electrons w/ un-used hits
     bool ProcessCluster(MichelCluster& cluster,
 			const std::vector<HitPt>& hits);
+
+    /// Setter for merge-till-converge
+    void SetMergeTillConverge(bool on) { _merge_till_converge = on; }
+
+    /// set max radius within which to search for michel hits
+    void SetMaxRadius(double r) { _max_radius = r; }
+
+  private:
+
+    /// Merge 'till converge flag
+    bool _merge_till_converge;
+
+    /// max radius within to search for potential hits to
+    /// add to michel
+    double _max_radius;
     
   };
 }

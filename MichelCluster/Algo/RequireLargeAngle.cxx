@@ -129,7 +129,8 @@ namespace michel{
 
     double angle = fabs(atan(arctan));
 
-    std::cout << "Angle is: " << angle << std::endl;
+    if(_verbosity <= msg::kINFO)
+      std::cout << "Angle is: " << angle << std::endl;
 
     if (angle < _min_angle){
       if(_verbosity <= msg::kINFO) {
