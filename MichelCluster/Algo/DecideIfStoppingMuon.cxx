@@ -40,69 +40,6 @@ namespace michel{
       return false;
     }
 
-    // First start with some initial cuts
-    // these are (stringent) sanity checks
-    // to remove generally very bad michels
-
-    // chi values for entire muon track
-    std::vector<double> chi_muon;
-
-    // count of michel hits with chi above some value
-    int high_chi_michel = 0;
-    // total number of michel hits
-    int num_michel_hits = 0;
-
-    // if the muon is too short -> ignore
-    double muon_len = 0;
-    if (forward){
-      num_michel_hits = hit_v.size()-boundary;
-      for (size_t i=boundary; i < hit_v.size()-1; i++)
-	if (fabs(chi_v[i]) > 0.95) high_chi_michel += 1;
-      for (size_t i=0; i < boundary; i++)
-	chi_muon.push_back(fabs(chi_v[i]));
-      auto& mu_s = hit_v[0];
-      muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
-    }
-    else{
-      num_michel_hits = boundary;
-      for (size_t i=0; i < boundary; i++)
-	if (fabs(chi_v[i]) > 0.95) high_chi_michel += 1;
-      for (size_t i=boundary; i < hit_v.size()-1; i++)
-	chi_muon.push_back(fabs(chi_v[i]));
-      auto& mu_s = hit_v[hit_v.size()-1];
-      muon_len = (mu_s._w-start._w)*(mu_s._w-start._w) + (mu_s._t-start._t)*(mu_s._t-start._t);
-    }
-
-    // *************************************************
-    // require the muon segment to have a minimum length
-    if (muon_len < _min_muon_length*_min_muon_length)
-      return false;
-
-    /*
-    // *********************************************************************************
-    // if the number of michel hits with chi > 0.9 is larger than 5 -> remove this event
-    if (high_chi_michel > 5){
-      Print(msg::kERROR,__FUNCTION__,"michel has too many high chi hits...");
-      return false;
-    }
-
-    // **************************************
-    // if number of michel hits < 3 -> reject
-    if (num_michel_hits < 5){
-      Print(msg::kERROR,__FUNCTION__,"michel has too few hits...");
-      return false;
-    }
-    */
-
-    // ******************************************************************
-    // if < 50% of chi_v entries belonging to muon are above 80% -> remove
-    int num_above_cut = 0;
-    for (auto& c : chi_muon)
-      if (c > 0.8) num_above_cut += 1;
-    double frac_above = ((double)num_above_cut) / ((double)chi_muon.size());
-    if (frac_above < 0.5)
-      return false;
-
     // how this algorithm works:
     // the idea is to take the straight track of a the muon-portion
     // of the cluster and get an average slope for the muon-like line
