@@ -16,7 +16,7 @@
 #define LARLITE_MICHELRECODRIVER_H
 
 #include "Analysis/ana_base.h"
-#include "Fmwk/MichelReco.h"
+#include "Fmwk/MichelRecoManager.h"
 #include "Fmwk/MichelTypes.h"
 #include <TTree.h>
 //Backtracker
@@ -50,7 +50,7 @@ namespace larlite {
     virtual bool finalize();
 
     /// Reco manager getter
-    ::michel::MichelReco& GetManager() { return _mgr; }
+    ::michel::MichelRecoManager& GetManager() { return _mgr; }
 
     /**
      * @brief Set boolean to decide if to save michels in output cluster
@@ -72,7 +72,7 @@ namespace larlite {
   protected:
 
     /// Reco manager
-    ::michel::MichelReco _mgr;
+    ::michel::MichelRecoManager _mgr;
 
     /// Input cluster producer name string
     std::string _producer;
