@@ -3,6 +3,7 @@
 
 #include "MichelReco.h"
 #include "MichelException.h"
+#include <sstream>
 namespace michel {
 
   //-----------------------------------------------------------------
@@ -11,8 +12,6 @@ namespace michel {
     : _d_cutoff           ( 6.0 ) //Used to be 3.6
     , _min_nhits          ( 4   ) //Used to be 25
     , _debug              ( false )
-    , _verbosity          ( msg::kNORMAL )
-
     , _alg_merge          ( nullptr )
       
     , _alg_v        ()
@@ -115,7 +114,7 @@ namespace michel {
   {
    	
     if(_verbosity <= msg::kDEBUG)
-      std::cout << "<<Process>> start!" << std::endl;
+      Print(msg::kDEBUG,__FUNCTION__,"start!");
 
     // If nothing to be done, return
     if(_input_v.empty()) return;
@@ -129,9 +128,13 @@ namespace michel {
 	_used_hit_marker_v[i] = false;
     }
 
-    if(_verbosity <= msg::kDEBUG)
+    if(_verbosity <= msg::kDEBUG) {
 
-      std::cout << "<<Process>> running algo : " << _alg_merge->Name() << std::endl;
+      std::stringstream ss;
+      ss << "running algo : " << _alg_merge->Name();
+      Print(msg::kDEBUG,__FUNCTION__,ss.str());
+
+    }
     
     //
     // Step 1 ... merge clusters
@@ -153,12 +156,10 @@ namespace michel {
       for(auto const& hit_pt : cluster._hits) {
 
 	if(hit_pt._id >= _used_hit_marker_v.size()) {
-
-	  std::cout << "\033[93m[ERROR]\033[00m "
-		    << "Found a hit index out of range! "
-		    << hit_pt._id << " out of " << _used_hit_marker_v.size()
-		    << std::endl;
-	  throw MichelException();
+	  std::stringstream ss;
+	  ss << "Found a hit index out of range! "
+	     << hit_pt._id << " out of " << _used_hit_marker_v.size();
+	  Print(msg::kEXCEPTION,__FUNCTION__,ss.str());
 	}
 	_used_hit_marker_v[hit_pt._id] = true;
       }
@@ -173,9 +174,11 @@ namespace michel {
       bool keep = true;
       for (size_t n=0; n < _alg_v.size() && keep; n++){
 	if(_verbosity <= msg::kDEBUG) {
-	  std::cout << "<<Process>> running algo : " << _alg_v[n]->Name()
-		    << "(" << n << ")"
-		    << " on MichelCluster ID: " << cluster._id << std::endl;
+	  std::stringstream ss;
+	  ss << "running algo : " << _alg_v[n]->Name()
+	     << "(" << n << ")"
+	     << " on MichelCluster ID: " << cluster._id;
+	  Print(msg::kDEBUG,__FUNCTION__,ss.str());
 	}
 	_watch.Start();
 	if(!_debug)
@@ -185,19 +188,21 @@ namespace michel {
 	  keep = _alg_v[n]->ProcessCluster(cluster,_all_hit_v);
 	  auto const diff_msg = before.Diff(cluster);
 	  if(!diff_msg.empty()) {
-	    std::cout << "<<Process>>"
-		      << "\033[93m Detected a change in MichelCluster (ID="<<cluster._id<<")!\033[00m"
-		      << " by algorithm "
-		      << "\033[95m " << _alg_v[n]->Name() << " (" << n << ") \033[00m" << std::endl
-		      << diff_msg
-		      << std::endl;
+	    std::stringstream ss;
+	    ss << "\033[93m Detected a change in MichelCluster (ID="<<cluster._id<<")!\033[00m"
+	       << " by algorithm "
+	       << "\033[95m " << _alg_v[n]->Name() << " (" << n << ") \033[00m" << std::endl
+	       << diff_msg;
+	    Print(msg::kNORMAL,__FUNCTION__,ss.str());
 	  }
 	}
 	_alg_time_v[n] += _watch.RealTime();
 	_alg_ctr_v[n] += 1;
 	if(!keep && _verbosity <= msg::kDEBUG) {
-	  std::cout << "<<" << __FUNCTION__ << ">> dropping MichelCluster due to algorithm: "
-		    << 	_alg_v[n]->Name() << std::endl;
+	  std::stringstream ss;
+	  ss <<"dropping MichelCluster due to algorithm: "
+	     << _alg_v[n]->Name();
+	  Print(msg::kDEBUG,__FUNCTION__,ss.str());
 	}
       }// looping through algorithms
       
@@ -219,7 +224,7 @@ namespace michel {
     }
 
     if(_verbosity <= msg::kDEBUG)
-      std::cout << "<<Process>> end!" << std::endl;
+      Print(msg::kDEBUG,__FUNCTION__,"end!");
 
   }
   

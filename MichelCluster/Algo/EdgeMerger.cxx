@@ -2,7 +2,7 @@
 #define MICHELCLUSTER_EDGEMERGER_CXX
 
 #include "EdgeMerger.h"
-
+#include <sstream>
 namespace michel{
   
   void EdgeMerger::EventReset()
@@ -12,13 +12,15 @@ namespace michel{
   {
     /// Do not currently have confiure function yet, just use "6 [cm]" dist as before..."
     if(_verbosity <=  msg::kDEBUG) {
-      std::cout << "Cluster A start/end:" << std::endl
-		<< a._start.Print().c_str() << std::endl
-		<< a._end.Print().c_str() << std::endl;
-      std::cout << "Cluster B start/end:" << std::endl
-		<< b._start.Print().c_str() << std::endl
-		<< b._end.Print().c_str() << std::endl
-		<< std::endl;
+      std::stringstream ss;
+      ss << "Cluster A start/end:" << std::endl
+	 << a._start.Print().c_str() << std::endl
+	 << a._end.Print().c_str() << std::endl;
+      ss << "Cluster B start/end:" << std::endl
+	 << b._start.Print().c_str() << std::endl
+	 << b._end.Print().c_str() << std::endl
+	 << std::endl;
+      Print(msg::kDEBUG,__FUNCTION__,ss.str());
     }
     
     /// True if near, false if not

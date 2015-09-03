@@ -1,25 +1,24 @@
 /**
  * \file CMergeBookKeeper.h
  *
- * \ingroup CMTool
+ * \ingroup Fmwk
  * 
  * \brief Class def header for a class CMergeBookKeeper
  *
  * @author kazuhiro
  */
 
-/** \addtogroup CMTool
+/** \addtogroup Fmwk
 
     @{*/
-#ifndef RECOTOOL_CMERGEBOOKKEEPER_H
-#define RECOTOOL_CMERGEBOOKKEEPER_H
+#ifndef MICHELCLUSTER_CMERGEBOOKKEEPER_H
+#define MICHELCLUSTER_CMERGEBOOKKEEPER_H
 
 #include <iostream>
 #include <vector>
 #include <TString.h>
-#include "CMTException.h"
-
-namespace cmtool {
+#include "ColorPrint.h"
+namespace michel {
 
   /**
      \class CMergeBookKeeper
@@ -32,7 +31,8 @@ namespace cmtool {
      CMergeBookKeeper keeps track of which clusters are asked to merge together, and it can be
      asked to return a vector of merged cluster indexes.
   */
-  class CMergeBookKeeper : public std::vector<unsigned short>{
+  class CMergeBookKeeper : public std::vector<unsigned short>,
+			   public ColorPrint{
     
   public:
     

@@ -109,17 +109,19 @@ namespace michel {
   */
   void MichelCluster::Dump() const
   {
-    std::cout << "\t\n==start dump==\n";
-    std::cout << "A cluster with " << _hits.size() << " hits \n";
-    std::cout << "The start point is at (" << _start._w << "," << _start._t << ")\n";
-    std::cout << "The end point is at ("   << _end._w << ","   << _end._t   << ")\n";
-    std::cout << _ordered_pts.size() << " of the hits are ordered and nearby ";
-    //std::cout << "I may or may not have a michel, do i? " << _has_michel << "\n";
-    /*
-    if(_has_michel) 
-      std::cout << "ok I do, it is at a distance : " << _michel_dist << " from one of the hits in my cham\n";
-    */
-    std::cout << "\t\n==end dump==\n";
+    std::stringstream ss;
+    ss << "\t\n==start dump==" << std::endl
+       << "A cluster with " << _hits.size() << " hits " << std::endl
+       << "The start point is at (" << _start._w << "," << _start._t << ")" << std::endl
+       << "The end point is at ("   << _end._w << ","   << _end._t   << ")" << std::endl
+       << _ordered_pts.size() << " of the hits are ordered and nearby "
+      //<< "I may or may not have a michel, do i? " << _has_michel << "" << std::endl;
+      /*
+	if(_has_michel) 
+	<< "ok I do, it is at a distance : " << _michel_dist << " from one of the hits in my cham" << std::endl;
+      */
+       << "\t\n==end dump==" << std::endl;
+    Print(msg::kNORMAL,__FUNCTION__,ss.str());
   }
 
   void MichelCluster::SetHits(const std::vector<HitPt>& hits)
@@ -138,12 +140,12 @@ namespace michel {
   {
     // Check if hit count
     if(_hits.size() < _min_nhits) {
-      std::cerr << "\033[93m[ERROR]\033[00m "
-		<< "<<" << __FUNCTION__ << ">> " 
-		<< "Number of hit ("<< _hits.size() 
-		<< ") is smaller than required (" 
-		<< _min_nhits << ")" << std::endl;
-      throw MichelException();
+      std::stringstream ss;
+      ss << "<<" << __FUNCTION__ << ">> " 
+	 << "Number of hit ("<< _hits.size() 
+	 << ") is smaller than required (" 
+	 << _min_nhits << ")";
+      Print(msg::kEXCEPTION,__FUNCTION__,ss.str());
     }
 
     // Find min/max hits in terms of wire position
@@ -162,12 +164,9 @@ namespace michel {
       }
     }
     // Check index validity
-    if(min_index == kINVALID_SIZE || max_index == kINVALID_SIZE) {
-      std::cerr << "\033[93m[ERROR]\033[00m <<" << __FUNCTION__ << ">> "
-		<< "Did not find valid edge points..."
-		<< std::endl;
-      throw MichelException();
-    }
+    if(min_index == kINVALID_SIZE || max_index == kINVALID_SIZE)
+      Print(msg::kEXCEPTION,__FUNCTION__,"Did not find valid edge points...");
+
     //order the points right => left
     OrderPoints(min_index, _ordered_pts, _ds_v, _s_v);
 
@@ -208,10 +207,10 @@ namespace michel {
     if(_hits.empty()) return;
 
     if(start_index >= _hits.size()) {
-      std::cerr << "\033[93m[ERROR]\033[00m <<" << __FUNCTION__ << ">> "
-		<< "Start index (" << start_index << ") is >= hit length "
-		<< "(" << _hits.size() << ")" << std::endl;
-      throw MichelException();
+      std::stringstream ss;
+      ss << "Start index (" << start_index << ") is >= hit length "
+	 << "(" << _hits.size() << ")";
+      Print(msg::kEXCEPTION,__FUNCTION__,ss.str());
     }
 
     // Result holder, reserve max possible entries
@@ -264,17 +263,19 @@ namespace michel {
     // Verbosity report
     if( _verbosity <= msg::kINFO ) {
       // INFO level prints out where it starts & # points
-      std::cout << "Ordered from index " << start_index
-		<< " ... found " << ordered_index_v.size()
-		<< " points!" <<std::endl;
+      std::stringstream ss;
+      ss << "Ordered from index " << start_index
+	 << " ... found " << ordered_index_v.size()
+	 << " points!" <<std::endl;
       // DEBUG level prints out all indeces ... we never understand this anyway
       if(_verbosity <= msg::kDEBUG ) {
 	for(size_t i=0; i<ordered_index_v.size(); ++i) {
-	  std::cout << ordered_index_v[i] << " ";
-	  if(i%8==0) std::cout<<std::endl;
+	  ss << ordered_index_v[i] << " ";
+	  if(i%8==0) ss << std::endl;
 	}
-	std::cout<<std::endl;
+	ss << std::endl;
       }
+      Print(msg::kINFO,__FUNCTION__,ss.str());
     }
   }
 
@@ -324,10 +325,10 @@ namespace michel {
     }
 
     if(min_index == kINVALID_SIZE) {
-      std::cerr << "\033[93m[ERROR]\033[00m <<" << __FUNCTION__ << ">> "
-		<< "Did not find the closest hit point to the reference (ref ID="
-		<< ref._id << ")" << std::endl;
-      throw MichelException();
+      std::stringstream ss;
+      ss << "Did not find the closest hit point to the reference (ref ID="
+	 << ref._id << ")";
+      Print(msg::kEXCEPTION,__FUNCTION__,ss.str());
     }
 
     return _hits[min_index];

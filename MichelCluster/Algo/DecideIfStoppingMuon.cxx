@@ -2,7 +2,7 @@
 #define DECIDEIFSTOPPINGMUON_CXX
 
 #include "DecideIfStoppingMuon.h"
-
+#include <sstream>
 namespace michel{
 
   DecideIfStoppingMuon::DecideIfStoppingMuon()
@@ -82,14 +82,14 @@ namespace michel{
     // *********************************************************************************
     // if the number of michel hits with chi > 0.9 is larger than 5 -> remove this event
     if (high_chi_michel > 5){
-      std::cout << "michel has too many high chi hits..." << std::endl;
+      Print(msg::kERROR,__FUNCTION__,"michel has too many high chi hits...");
       return false;
     }
 
     // **************************************
     // if number of michel hits < 3 -> reject
     if (num_michel_hits < 5){
-      std::cout << "michel has too few hits..." << std::endl;
+      Print(msg::kERROR,__FUNCTION__,"michel has too few hits...");
       return false;
     }
     */
@@ -168,7 +168,11 @@ namespace michel{
     
     // require that we have used at least 70% of the hits in the cluster
     double frac_used = (double)count / (double)hit_v.size();
-    // std::cout << "Frac. of hits used to get slope: " << frac_used << std::endl;
+    if(_verbosity <= msg::kINFO) {
+      std::stringstream ss;
+      ss << "Frac. of hits used to get slope: " << frac_used;
+      Print(msg::kINFO,__FUNCTION__,ss.str());
+    }
     if (frac_used < _frac_min_hits)
       return false;
 
@@ -193,11 +197,13 @@ namespace michel{
     double b = t_avg - slope * w_avg;
     
     if (_verbosity <=  msg::kINFO) {
-      std::cout << "\tDecideIfStoppingMuon Algo" << std::endl;
-      std::cout << "\tStart Point: [" << start._w << ", " << start._t << "]" << std::endl;
-      std::cout << "\tslope: " << slope << std::endl;
-      std::cout << "\thits used to calculate slope: " << count << std::endl;
-      std::cout << "\tline: y = s * x + b   ...  b = " << b << std::endl;
+      std::stringstream ss;
+      ss << "\tDecideIfStoppingMuon Algo"<< std::endl
+	 << "\tStart Point: [" << start._w << ", " << start._t << "]"<< std::endl
+	 << "\tslope: " << slope<< std::endl
+	 << "\thits used to calculate slope: " << count<< std::endl
+	 << "\tline: y = s * x + b   ...  b = " << b ;
+      Print(msg::kINFO,__FUNCTION__,ss.str());
     }
     
     

@@ -4,7 +4,7 @@
 #include "ClusterVectorCalculator.h"
 #include "Fmwk/MichelException.h"
 #include <cmath>
-
+#include <sstream>
 namespace michel {
   
   unsigned int ClusterVectorCalculator::nCk( unsigned int n, unsigned int k )
@@ -91,7 +91,9 @@ namespace michel {
   template<typename S>
   S ClusterVectorCalculator::calc_mean(const std::vector<S>& data)
   {
-    if(!data.size()){ std::cout << "You have me nill to calc_mean\n"; throw MichelException(); }
+    if(!data.size())
+      Print(msg::kEXCEPTION,__FUNCTION__,"You have me nill to calc_mean");
+
     auto sum = S{0.0};
     for(const auto& d : data) sum += d;
     return sum / ( (S) data.size() ); //hopefully this isn't int :)
@@ -233,17 +235,21 @@ namespace michel {
       auto sX = stdev(X);
       auto sY = stdev(Y);
       auto r  = c/(sX * sY);
-      
-      // std::cout << "c: "  << c <<  "\n";
-      // std::cout << "sX: " << sX <<  "\n";
-      // std::cout << "sY: " << sY <<  "\n";
-      // std::cout << "r: "  << r <<  "\n";
+
+      if(_verbosity <= msg::kDEBUG) {
+	std::stringstream ss;
+	ss << "c: "  << c << std::endl
+	   << "sX: " << sX <<  std::endl
+	   << "sY: " << sY <<  std::endl
+	   << "r: "  << r <<  std::endl;
+	Print(msg::kDEBUG,__FUNCTION__,ss.str());
+      }
       if(isnan(r)) r = 0.0; 
       R.push_back(r);
       
 
       // if(R.size() != 1 && R.size() != hits.size())
-      // 	if(isnan(r)) { std::cout<<"Covariance is nan not on edge\n"; throw MichelException();}
+      // 	if(isnan(r)) Print(msg::kEXCEPTION,__FUNCTION__,"Covariance is nan not on edge");
       
       X.clear(); Y.clear();
     }    
@@ -258,8 +264,8 @@ namespace michel {
   double ClusterVectorCalculator::cov (const std::vector<double>& data1,
 				  const std::vector<double>& data2)
   {
-    if(data1.size() == 0){ std::cout << "You have me nill to cov\n"; throw MichelException(); }
-    if(data2.size() == 0){ std::cout << "You have me nill to cov\n"; throw MichelException(); }
+    if(data1.size() == 0) Print(msg::kEXCEPTION,__FUNCTION__,"You have me nill to cov");
+    if(data2.size() == 0) Print(msg::kEXCEPTION,__FUNCTION__,"You have me nill to cov");
 
     double result = 0.0;
     auto   mean1  = mean(data1);
@@ -274,7 +280,7 @@ namespace michel {
   
   double ClusterVectorCalculator::stdev(const std::vector<double>& data)
   {
-    if(data.size() == 0){ std::cout << "You have me nill to stdev\n"; throw MichelException(); }
+    if(data.size() == 0) Print(msg::kEXCEPTION,__FUNCTION__,"You have me nill to stdev");
 
     double result = 0.0;
     auto    avg   = mean(data);
@@ -286,7 +292,7 @@ namespace michel {
   
   double ClusterVectorCalculator::mean(const std::vector<double>& data)
   {
-    if(data.size() == 0){ std::cout << "You have me nill to mean\n"; throw MichelException(); }
+    if(data.size() == 0) Print(msg::kEXCEPTION,__FUNCTION__,"You have me nill to mean");
 	
     double result = 0.0;
 

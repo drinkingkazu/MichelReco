@@ -21,7 +21,7 @@
 #include "MichelConstants.h"
 #include "Michel.h"
 #include "HitPt.h"
-
+#include "ColorPrint.h"
 namespace michel {
   /**
      \class MichelCluster
@@ -29,7 +29,7 @@ namespace michel {
      doxygen documentation!
   */
   
-  class MichelCluster {
+  class MichelCluster : public ColorPrint {
     friend class MichelReco;
     friend class MichelCluster;
   public:

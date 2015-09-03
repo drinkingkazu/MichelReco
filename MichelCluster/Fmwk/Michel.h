@@ -17,12 +17,14 @@
 #include "MichelTypes.h"
 #include "HitPt.h"
 #include <vector>
+#include "ColorPrint.h"
 namespace michel {
 
   /**
      \class Michel
   */
-  class Michel : public std::vector<michel::HitPt> {
+  class Michel : public ColorPrint,
+		 public std::vector<michel::HitPt> {
 
   public:
 

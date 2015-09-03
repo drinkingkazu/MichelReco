@@ -2,7 +2,7 @@
 #define RADIUSMICHELCLUSTER_CXX
 
 #include "RadiusMichelCluster.h"
-
+#include <sstream>
 namespace michel {
 
   void RadiusMichelCluster::EventReset()
@@ -22,11 +22,13 @@ namespace michel {
     if (radius < _min_radius) radius = _min_radius;
     
     if (_verbosity <=  msg::kINFO) {
-      std::cout << "\n\n\tRadius clustering"
-		<< "\n\twe use a radius of: " << radius
-		<< "\n\tto cluster the remaining "
-		<< "\n\thits.size() : " << hits.size()
-		<< "\n\tinput\n\n";
+      std::stringstream ss;
+      ss << "\tRadius clustering" << std::endl
+	 << "\twe use a radius of: " << radius << std::endl
+	 << "\tto cluster the remaining " << std::endl
+	 << "\thits.size() : " << hits.size() << std::endl
+	 << "\tinput";
+      Print(msg::kINFO,__FUNCTION__,ss.str());
     }
     
     

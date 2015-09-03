@@ -16,12 +16,12 @@
 
 #include "MichelTypes.h"
 #include "MichelCluster.h"
-
+#include "ColorPrint.h"
 namespace michel {
   /**
      \class BaseMichelAlgo
   */
-  class BaseMichelAlgo{
+  class BaseMichelAlgo : public ColorPrint{
     
   public:
     
@@ -32,10 +32,6 @@ namespace michel {
     /// Default destructor
     virtual ~BaseMichelAlgo(){}
 
-    /// Verbosity setter
-    void SetVerbosity(msg::MSGLevel_t level)
-    { _verbosity = level; }
-    
     /// Event-wise reset function
     virtual void EventReset() = 0;
 
@@ -56,9 +52,6 @@ namespace michel {
     const std::string Name() const { return _name.c_str(); }
 
   protected:
-
-    /// Verbosity level
-    msg::MSGLevel_t _verbosity;
 
     /// Name for algorithm
     std::string _name;

@@ -3,7 +3,7 @@
 
 #include "StepSuperSonicCluster.h"
 #include <algorithm>
-
+#include <sstream>
 namespace michel {
 
   void StepSuperSonicCluster::EventReset()
@@ -82,9 +82,11 @@ namespace michel {
     }// for all hits in michel
 	
     if (_verbosity == msg::kINFO){
-      std::cout << "michel start : [" << start._w << ", " << start._t << "]" << std::endl
-		<< "michel end   : [" << end._w   << ", " << end._t   << "]"  << std::endl
-		<< "max radius   : " << dMax << std::endl;
+      std::stringstream ss;
+      ss << "michel start : [" << start._w << ", " << start._t << "]" << std::endl
+	 << "michel end   : [" << end._w   << ", " << end._t   << "]"  << std::endl
+	 << "max radius   : " << dMax;
+      Print(msg::kINFO,__FUNCTION__,ss.str());
     }
 
     // get a list of hits that is less than dMax away from either the start or end point
@@ -124,7 +126,7 @@ namespace michel {
     michel._charge = 0;
     for(const auto& michel_hit : michel)
       michel._charge += michel_hit._q;
-    
+    return true;
   }
   
   

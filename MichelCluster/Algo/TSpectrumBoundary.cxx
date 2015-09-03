@@ -3,7 +3,7 @@
 
 #include "TSpectrumBoundary.h"
 #include <cmath>
-
+#include <sstream>
 namespace michel {
   
   void TSpectrumBoundary::EventReset()
@@ -43,10 +43,12 @@ namespace michel {
     //Lets play with truncated mean shaving...
     
     if(_verbosity <= msg::kINFO) {
-      std::cout << "\n\t\tIn TSpectrumBoundary\n"
-		<< "\tI have " << truncated_mean.size() << " truncated mean size\n"
-		<< "\twith   " << truncated_dqds.size() << " derivative points.\n"
-		<< "\tMy incoming cluster has " << cluster._hits.size() << " hits in it...\n";
+      std::stringstream ss;
+      ss << "\t\tIn TSpectrumBoundary" << std::endl
+	 << "\tI have " << truncated_mean.size() << " truncated mean size" << std::endl
+	 << "\twith   " << truncated_dqds.size() << " derivative points." << std::endl
+	 << "\tMy incoming cluster has " << cluster._hits.size() << " hits in it...";
+      Print(msg::kINFO,__FUNCTION__,ss.str());
     }
     
     

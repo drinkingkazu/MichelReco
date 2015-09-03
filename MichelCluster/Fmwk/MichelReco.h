@@ -19,6 +19,7 @@
 #include "BaseAlgMerger.h"
 #include "BaseMichelAlgo.h"
 #include "MichelAnaBase.h"
+#include "ColorPrint.h"
 #include <TFile.h>
 #include <TStopwatch.h>
 #include <math.h>
@@ -41,7 +42,7 @@ namespace michel {
                                                                                         \n
      in a consecutive order.
   */
-  class MichelReco{
+  class MichelReco : public ColorPrint{
     
   public:
     
@@ -67,9 +68,6 @@ namespace michel {
     /// Cluster configuration paramters
     void SetClusterConfig(size_t min_nhits, double d_cutoff)
     { _min_nhits = min_nhits; _d_cutoff = d_cutoff; }
-
-    /// Verbosity setter
-    void SetVerbosity(msg::MSGLevel_t level) { _verbosity = level; }
 
     //
     // Data register functions
@@ -126,8 +124,6 @@ namespace michel {
     size_t _min_nhits; ///< MichelCluster's min # hits to claim a cluster
     /// Debug mode
     bool _debug;
-    /// Verbosity
-    msg::MSGLevel_t _verbosity;
     /// Input clusters
     MichelClusterArray _input_v;
     /// Output clusters

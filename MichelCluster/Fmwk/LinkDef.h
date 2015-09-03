@@ -22,10 +22,8 @@
 #pragma link C++ class michel::BaseAlgMerger+;
 #pragma link C++ class michel::BaseAlgBinaryMerger+;
 
-#pragma link C++ class cmtool::CMergeBookKeeper+;
-#pragma link C++ class cmtool::CMTException+;
+#pragma link C++ class michel::CMergeBookKeeper+;
 
-#pragma link C++ class larlite::MichelRecoDriver+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

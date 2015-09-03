@@ -15,7 +15,7 @@ namespace michel {
     
     while(_recursive) {
       // Instantiate a book keeper
-      ::cmtool::CMergeBookKeeper bk(result_v.size());
+      CMergeBookKeeper bk(result_v.size());
 
       // Compute the priority order & store in an ordered map
       std::multimap<double,size_t> score_index_m;

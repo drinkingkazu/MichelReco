@@ -4,6 +4,7 @@
 #include "Michel.h"
 #include "UtilFunc.h"
 #include <iostream>
+#include <sstream>
 namespace michel {
 
   Michel::Michel()
@@ -47,11 +48,13 @@ namespace michel {
   }
 
   void Michel::Dump() const {
-    std::cout << "\n\t -- Start Michel --\n";
-    std::cout << "\tenergy : " << _energy << " length: " << _length << " charge " << _charge << "\n";
-    std::cout << "\tat position : (" << _start._w << "," << _start._t << ")" << std::endl;
-    std::cout << "\twith number of hits " << this->size() << std::endl;
-    std::cout << "\t -- End Michel --\n";
+    std::stringstream ss;
+    ss << "\n\t -- Start Michel --" << std::endl
+       << "\tenergy : " << _energy << " length: " << _length << " charge " << _charge << "" << std::endl
+       << "\tat position : (" << _start._w << "," << _start._t << ")" << std::endl
+       << "\twith number of hits " << this->size() << std::endl
+       << "\t -- End Michel --";
+    Print(msg::kNORMAL,__FUNCTION__,ss.str());
   }
 }
 

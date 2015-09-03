@@ -5,7 +5,7 @@
 #include "Fmwk/MichelException.h"
 #include "ClusterVectorCalculator.h"
 #include <cmath>
-
+#include <sstream>
 namespace michel {
   
   void TruncatedQBoundary::EventReset()
@@ -43,8 +43,10 @@ namespace michel {
 						   _p_above);
 
     if(truncated_mean.size() < _edgefix) {
-      std::cout << "\n\tUnable to fix edges on truncated mean, edgefix size: " << _edgefix
-		<< "\t and truncated_mean.size(): " << truncated_mean.size() << "\n";
+      std::stringstream ss;
+      ss << "\tUnable to fix edges on truncated mean, edgefix size: " << _edgefix
+	 << "\t and truncated_mean.size(): " << truncated_mean.size();
+      Print(msg::kERROR,__FUNCTION__,ss.str());
       return false;
     }
     
@@ -65,16 +67,18 @@ namespace michel {
         
     //Lets play with truncated mean shaving...
     if(_verbosity <= msg::kINFO) {
-      std::cout << "\n\t\tIn TruncatedQBoundary\n"
-		<< "\tI have " << truncated_mean.size() << " truncated mean size\n"
-		<< "\twith   " << truncated_dqds.size() << " derivative points.\n"
-		<< "\tMy incoming cluster has " << cluster._hits.size() << " hits in it...\n";
+      std::stringstream ss;
+      ss << "\t\tIn TruncatedQBoundary" << std::endl
+	 << "\tI have " << truncated_mean.size() << " truncated mean size" << std::endl
+	 << "\twith   " << truncated_dqds.size() << " derivative points." << std::endl
+	 << "\tMy incoming cluster has " << cluster._hits.size() << " hits in it...";
+      Print(msg::kINFO,__FUNCTION__,ss.str());
     }
     
     //With this new information, calculate the boundary point between possible muon end and michel start
     
-    auto candidate_loc     = _clusterCalc.find_max(truncated_mean);
-    auto dqdscandidate_loc = _clusterCalc.find_min(truncated_dqds); 
+    int candidate_loc     = _clusterCalc.find_max(truncated_mean);
+    int dqdscandidate_loc = _clusterCalc.find_min(truncated_dqds); 
 
     std::swap(cluster._t_mean_v,truncated_mean);
     std::swap(cluster._t_dqds_v,truncated_dqds);

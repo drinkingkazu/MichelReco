@@ -23,14 +23,16 @@ namespace michel {
   class MichelException : public std::exception {
     
   public:
-    
-    /// Default constructor
-    MichelException(){}
-    
-    /// Default destructor
-    ~MichelException(){}
 
+    MichelException(const std::string& msg="");
     
+    virtual ~MichelException() throw(){}
+
+    virtual const char* what() const throw();
+
+  private:
+
+    std::string _msg;
     
   };
 }

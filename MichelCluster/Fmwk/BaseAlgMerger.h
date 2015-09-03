@@ -15,12 +15,12 @@
 #define BASEALGMERGER_H
 
 #include "MichelCluster.h"
-
+#include "ColorPrint.h"
 namespace michel {
   /**
      \class BaseAlgMerger
   */
-  class BaseAlgMerger{
+  class BaseAlgMerger : public ColorPrint{
   
   public:
     
@@ -34,10 +34,6 @@ namespace michel {
     /// Event-wise reset function
     virtual void EventReset() = 0;
 
-    /// Verbosity setter
-    void SetVerbosity(msg::MSGLevel_t level)
-    { _verbosity = level; }
-
     /// Function to be implemented by children classes
     virtual MichelClusterArray Merge(const MichelClusterArray& input_v) = 0;
 
@@ -47,9 +43,6 @@ namespace michel {
     std::string Name() { return _name; }
 
   protected:
-
-    /// Verbosity level
-    msg::MSGLevel_t _verbosity;
 
     /// Name for algorithm
     std::string _name;

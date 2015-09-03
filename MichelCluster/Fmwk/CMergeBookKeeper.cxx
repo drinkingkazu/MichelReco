@@ -1,9 +1,9 @@
-#ifndef RECOTOOL_CMERGEBOOKKEEPER_CXX
-#define RECOTOOL_CMERGEBOOKKEEPER_CXX
+#ifndef MICHELCLUSTER_CMERGEBOOKKEEPER_CXX
+#define MICHELCLUSTER_CMERGEBOOKKEEPER_CXX
 
 #include "CMergeBookKeeper.h"
 
-namespace cmtool {
+namespace michel {
 
   CMergeBookKeeper::CMergeBookKeeper(unsigned short nclusters)
   { 
@@ -29,18 +29,19 @@ namespace cmtool {
   {
     if(index1 == index2)
 
-      throw CMTException(Form("<<%s>> Two input clusters identical (%d)",__FUNCTION__,index1));
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Two input clusters identical (%d)",index1));
 
 
     if( index1 >= this->size() || index2 >= this->size() )
 
-      throw CMTException(Form("Input cluster index (%d and/or %d) out of range",index1,index2));
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Input cluster index (%d and/or %d) out of range",index1,index2));
 
     auto out_index1 = this->at(index1);
     auto out_index2 = this->at(index2);
 
     if(out_index1 == out_index2)
-      throw CMTException(Form("Cluster %d and %d already merged!",index1,index2));    
+
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Cluster %d and %d already merged!",index1,index2));
 
     if(out_index2 < out_index1) std::swap(out_index1,out_index2);
 
@@ -54,13 +55,13 @@ namespace cmtool {
 
     if(index1 == index2)
 
-      throw CMTException(Form("<<%s>> Two input clusters identical (%d)",__FUNCTION__,index1));
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Two input clusters identical (%d)",index1));
 
 
     if( index1 >= this->size() || index2 >= this->size() )
 
-      throw CMTException(Form("Input cluster index (%d and/or %d) out of range",index1,index2));
-
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Input cluster index (%d and/or %d) out of range",index1,index2));
+  
     auto out_index1 = this->at(index1);
     auto out_index2 = this->at(index2);
 
@@ -77,12 +78,12 @@ namespace cmtool {
 
     if(index1 == index2)
 
-      throw CMTException(Form("<<%s>> Two input clusters identical (%d)",__FUNCTION__,index1));
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Two input clusters identical (%d)",index1));
 
 
     if( index1 >= this->size() || index2 >= this->size() )
 
-      throw CMTException(Form("Input cluster index (%d and/or %d) out of range",index1,index2));
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Input cluster index (%d and/or %d) out of range",index1,index2));
 
     auto out_index1 = this->at(index1);
     auto out_index2 = this->at(index2);
@@ -93,7 +94,7 @@ namespace cmtool {
 
     if(_prohibit_merge.at(out_index1).at(out_index2-out_index1))
       
-      throw CMTException(Form("Clusters (%d,%d) correspond to output (%d,%d) which is prohibited to merge",
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Clusters (%d,%d) correspond to output (%d,%d) which is prohibited to merge",
 				   index1,index2,
 				   out_index1,out_index2));
 
@@ -242,7 +243,7 @@ namespace cmtool {
   bool CMergeBookKeeper::IsMerged(unsigned short index1, unsigned short index2) const
   { 
     if( index1 >= this->size() || index2 >= this->size() )
-      throw CMTException(Form("Invalid cluster index: %d or %d",index1,index2));
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Invalid cluster index: %d or %d",index1,index2));
 
     return this->at(index1) == this->at(index2); 
   }
@@ -252,7 +253,7 @@ namespace cmtool {
   {
 
     if( index1 >= this->size() )
-      throw CMTException(Form("Invalid cluster index: %d ",index1));
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Invalid cluster index: %d ",index1));
 
     auto out_index = this->at(index1);
     std::vector<unsigned short> result;
@@ -279,10 +280,10 @@ namespace cmtool {
     std::vector<std::vector<unsigned short> > my_result;
     this->PassResult(my_result);
     if(my_result.size() != another.size()) {
-      throw CMTException(Form("Input has an incompatible size (%zu != %zu)",
-			      my_result.size(),
-			      another.size())
-			 );
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("Input has an incompatible size (%zu != %zu)",
+					      my_result.size(),
+					      another.size())
+	    );
       return;
     }
 
@@ -290,10 +291,10 @@ namespace cmtool {
     std::vector<std::vector<unsigned short> > another_result;
     another.PassResult(another_result);
     if(another_result.size() >= my_result.size())
-      throw CMTException(Form("The input has equal or more number of output clusters (%zu>=%zu)",
-			      another_result.size(),
-			      my_result.size())
-			 );
+      Print(msg::kEXCEPTION,__FUNCTION__,Form("The input has equal or more number of output clusters (%zu>=%zu)",
+					       another_result.size(),
+					      my_result.size())
+	    );
 
     // Combine
     for(auto const& ares : another_result) {

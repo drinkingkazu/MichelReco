@@ -16,12 +16,12 @@
 
 #include <algorithm>
 #include "Fmwk/MichelCluster.h"
-
+#include "Fmwk/ColorPrint.h"
 namespace michel {
   /**
      \class ClusterVectorCalculator
   */
-  class ClusterVectorCalculator {
+  class ClusterVectorCalculator : public ColorPrint{
     
   public:
     
