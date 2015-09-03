@@ -5,7 +5,7 @@
  *
  * \brief Class def header for a class CutOnFiducialVolume
  *
- * @author david caratelli
+ * @author david kaleko
  */
 
 /** \addtogroup MichelCluster
@@ -45,8 +45,34 @@ public:
     bool ProcessCluster(MichelCluster& michel,
                         const std::vector<HitPt>& hits);
 
+    /// Setter to exclude a specific input wire range (in cm, cm units)
+    void SetExcludedWireRange(std::pair<double, double> myrange)
+    { _excluded_wire_ranges.push_back(myrange); }
+
+    /// Setter to exclude a specific input time range (in cm, cm units)
+    void SetExcludedTimeRange(std::pair<double, double> myrange)
+    { _excluded_time_ranges.push_back(myrange); }
+
+    /// Setter to exclude many wire ranges at once
+    void SetExcludedWireRanges(std::vector<std::pair<double, double>> myranges)
+    { _excluded_wire_ranges = myranges; }
+
+    /// Setter to exclude many time ranges at once
+    void SetExcludedTimeRanges(std::vector<std::pair<double, double>> myranges)
+    { _excluded_time_ranges = myranges; }
+
 private:
 
+    /// pairs of ([cm], [cm]) that indicate a (start, stop) list of dead wires
+    /// code will exclude michels that have hits within _buffer [cm] of these boundaries
+    /// (and of course no hits will exist in these exact ranges if wires are dead there)
+    std::vector<std::pair<double, double>> _excluded_wire_ranges;
+    std::vector<std::pair<double, double>> _excluded_time_ranges;
+
+    /// buffer size. if buffer size is 3cm, and the range (12.3, 45.6) is excluded
+    /// then if a michel has any hits in the range (12.3 - 3, 45.6 + 3) will be rejected
+    double _wire_buffer_size;
+    double _time_buffer_size;
 };
 }
 
