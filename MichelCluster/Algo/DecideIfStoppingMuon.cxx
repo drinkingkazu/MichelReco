@@ -109,7 +109,7 @@ namespace michel{
       Print(msg::kINFO,__FUNCTION__,ss.str());
     }
     if (frac_used < _frac_min_hits)
-      return false;
+	return false;
 
     slope /= count;
     w_avg /= count;
@@ -172,8 +172,14 @@ namespace michel{
       }
     }
 
-    if (nbad > _min_bad_hits)
+    if (nbad > _min_bad_hits){
+      if(_verbosity <= msg::kINFO) {
+	std::stringstream ss;
+	ss << "Bad hits aligned with muon: " << nbad;
+	Print(msg::kINFO,__FUNCTION__,ss.str());
+      }
       return false;
+    }
 
     return true;
   }

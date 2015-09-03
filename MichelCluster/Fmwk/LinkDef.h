@@ -17,6 +17,7 @@
 #pragma link C++ class std::vector<michel::MichelCluster>+;
 #pragma link C++ class michel::MichelException+;
 #pragma link C++ class michel::MichelReco+;
+#pragma link C++ class michel::ColorPrint+;
 #pragma link C++ class michel::MichelAnaBase+;
 #pragma link C++ class michel::BaseMichelAlgo+;
 #pragma link C++ class michel::BaseAlgMerger+;

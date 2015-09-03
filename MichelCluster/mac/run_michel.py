@@ -44,7 +44,8 @@ my_unit.saveMichelClusters(True)
 # Get manager for michel reco
 mgr = my_unit.Algo()
 
-mgr.SetVerbosity(michel.msg.kDEBUG)
+#mgr.SetVerbosity(michel.msg.kDEBUG)
+#mgr.SetDebug(True)
 
 # Attach algorithm for merging
 mgr.AddMergingAlgo(michel.EdgeMerger())
@@ -72,8 +73,15 @@ midalgo.SetFracMinHits(0.7)
 midalgo.SetHitRadius(30)
 midalgo.SetMaxDist(3.0)
 midalgo.SetMinBadHits(10)
-midalgo.SetMinMuonLength(10)
+#midalgo.SetVerbosity(michel.msg.kDEBUG)
 mgr.AddAlgo(midalgo)
+minlength = michel.CutOnMuonLength()
+minlength.SetMinMuonLength(10)
+mgr.AddAlgo(minlength)
+minlinearity = michel.CutOnMuonLinearity()
+minlinearity.SetChiMin(0.8)
+minlinearity.SetFracMinHits(0.5)
+mgr.AddAlgo(minlinearity)
 
 # Attach algorithm to recluster michel
 supersonic = michel.SuperSonicClusterer()

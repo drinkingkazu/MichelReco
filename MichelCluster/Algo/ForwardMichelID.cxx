@@ -54,7 +54,7 @@ namespace michel {
     //we could not determine forward so we return default contructor. This is a "bad" michel.   
     else { return false; }
     
-    auto electron = cluster._michel;
+    auto& electron = cluster._michel;
     std::vector<size_t> ordered_pts_idx;
 
     for( size_t i = 0 ; i < cluster._ordered_pts.size(); ++i) {

@@ -109,17 +109,24 @@ namespace michel {
 
     /// Setter for a debug mode
     void SetDebug(bool doit=true) { _debug = doit; }
+
+    /// algorithm verbosity setter
+    //void SetAlgoVerbosity(msg::MSGLevel_t verbose) { _algo_verbosity = verbose; }
     
     /// Getter for MichelClusterArray
     const MichelClusterArray& GetResult()
     { return _output_v; }
 
   protected:
+
     // MichelCluster configuration parameters
     ///< MichelCluster's cut-off distance for neighboring cluster
     ///< MAXIMUM distance. Set this to a huge number for very generous ordering
     ///< Set this to a very small number for very conservative ordering.
     double _d_cutoff;  
+
+    // algorithm's verbosity
+    //msg::MSGLevel_t _algo_verbosity;
     
     size_t _min_nhits; ///< MichelCluster's min # hits to claim a cluster
     /// Debug mode

@@ -12,9 +12,9 @@ namespace michel {
     : _d_cutoff           ( 6.0 ) //Used to be 3.6
     , _min_nhits          ( 4   ) //Used to be 25
     , _debug              ( false )
+      //, _algo_verbosity     ( msg::kNORMAL )
     , _alg_merge          ( nullptr )
-      
-    , _alg_v        ()
+    , _alg_v              ( )
   {}
   
   //-----------------------------------------------------------------
@@ -97,10 +97,10 @@ namespace michel {
       ana->SetVerbosity(_verbosity);
       ana->Initialize();
     }
-
+    /*
     for(size_t i=0; i<_alg_v.size(); ++i) 
       if(_alg_v[i]) _alg_v[i]->SetVerbosity(_verbosity);
-      
+    */
   }
   
   //-----------------------------------------------------------------
