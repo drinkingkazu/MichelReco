@@ -42,10 +42,10 @@ namespace michel {
                                                                                       \n
    in a consecutive order.
 */
-class MichelRecoManager : public ColorPrint {
-
-public:
-
+  class MichelRecoManager : public ColorPrint {
+    
+  public:
+    
     /// Default constructor
     MichelRecoManager();
 
@@ -58,9 +58,9 @@ public:
 
     /// Add Merging ALgo
     void AddMergingAlgo(BaseAlgMerger *algo);
-
+    
     /// Reco algorithm setter
-    void AddAlgo(BaseMichelAlgo *algo);
+    void AddAlgo(BaseMichelAlgo *algo,size_t stage=0);
 
     /// Ana algorithm adder
     void AddAna(MichelAnaBase* ana);
@@ -144,7 +144,7 @@ protected:
     //
     BaseAlgMerger*        _alg_merge;          ///< Merging algorithm
     /// Algorithms to be executed
-    std::vector< michel::BaseMichelAlgo* > _alg_v;
+    std::vector< std::vector< michel::BaseMichelAlgo* > > _alg_v;
     /// Analysis to be executed
     std::vector< michel::MichelAnaBase* >  _ana_v;
 
@@ -152,13 +152,13 @@ protected:
     // Time profilers
     //
     TStopwatch _watch; ///< For profiling
-    std::vector<double> _alg_time_v; ///< Overall time for processing
-    std::vector<size_t> _alg_ctr_v;  ///< Overall number of clusters processed by algo
+    std::vector<std::vector<double> > _alg_time_v; ///< Overall time for processing
+    std::vector<std::vector<size_t> > _alg_ctr_v;  ///< Overall number of clusters processed by algo
 
     /// Event information
     EventID _id;
 
-};
+  };
 }
 
 #endif

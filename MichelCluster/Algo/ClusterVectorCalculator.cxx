@@ -78,7 +78,7 @@ namespace michel {
     charge.reserve(cluster._ordered_pts.size());
 
     for(const auto& o : cluster._ordered_pts)
-      charge.push_back(cluster._hits[o]._q);
+      charge.push_back(cluster.GetHits()[o]._q);
 
     for(auto window : get_windows(charge,_n_window_size) ) {
       if(window.size() > window_cutoff) 

@@ -33,7 +33,7 @@ namespace michel {
     if(_has_michel != rhs._has_michel)
       msg += "  bool _has_michel changed\n";
 
-    if(!IsSame(_hits,rhs._hits))
+    if(!IsSame(_hits,rhs.GetHits()))
       msg += "    std::vector<HitPt> _hits changed\n";
 
     if(!IsSame(_ds_v,rhs._ds_v))
@@ -63,7 +63,7 @@ namespace michel {
   MichelCluster::MichelCluster(size_t min_nhits, double d_cutoff)
     : _min_nhits ( min_nhits     )
     , _d_cutoff  ( d_cutoff      )
-    , _id        ( kINVALID_SIZE ) 
+    , _id        ( kINVALID_SIZE )
   { 
     _verbosity = msg::kNORMAL;
   }
@@ -71,9 +71,9 @@ namespace michel {
   MichelCluster::MichelCluster(const std::vector<HitPt>& hits,
 			       size_t min_nhits,
 			       double d_cutoff)
-    : _hits(hits)
-    , _min_nhits ( min_nhits )
+    : _min_nhits ( min_nhits )
     , _d_cutoff  ( d_cutoff  )
+    , _hits(hits)
   {
     _verbosity = msg::kNORMAL;
     ProcessHits();
@@ -82,31 +82,14 @@ namespace michel {
   MichelCluster::MichelCluster(std::vector<HitPt>&& hits,
 			       size_t min_nhits,
 			       double d_cutoff)
-    : _hits(std::move(hits))
-    , _min_nhits ( min_nhits )
+    : _min_nhits ( min_nhits )
     , _d_cutoff  ( d_cutoff  )
+    , _hits(std::move(hits))
   {
     _verbosity = msg::kNORMAL;
     ProcessHits();
   }
-  /*
-  MichelCluster::MichelCluster(const MichelCluster&& rhs)
-    : _hits      ( std::move( rhs._hits     ) )
-    , _start     ( std::move( rhs._start    ) )
-    , _end       ( std::move( rhs._end      ) )
-    , _ordered_pts ( std::move( rhs._ordered_pts ) )
-    , _ds_v      ( std::move( rhs._ds_v     ) )
-    , _s_v       ( std::move( rhs._s_v      ) )
-    , _boundary  ( rhs._boundary              )
-    , _michel    ( std::move( rhs._michel   ) )
-    , _chi2_v    ( std::move( rhs._chi2_v   ) )
-    , _t_mean_v  ( std::move( rhs._t_mean_v ) )
-    , _t_dqds_v  ( std::move( rhs._t_dqds_v ) )
-    , _verbosity ( rhs._verbosity )
-    , _min_nhits ( rhs._min_nhits )
-    , _d_cutoff  ( rhs._d_cutoff  )
-  {}
-  */
+
   void MichelCluster::Dump() const
   {
     std::stringstream ss;
@@ -122,18 +105,6 @@ namespace michel {
       */
        << "\t\n==end dump==" << std::endl;
     Print(msg::kNORMAL,__FUNCTION__,ss.str());
-  }
-
-  void MichelCluster::SetHits(const std::vector<HitPt>& hits)
-  {
-    _hits = hits;
-    ProcessHits();
-  }
-
-  void MichelCluster::SetHits(std::vector<HitPt>&& hits)
-  {
-    std::swap(_hits,hits);
-    ProcessHits();
   }
 
   void MichelCluster::ProcessHits()
@@ -282,7 +253,7 @@ namespace michel {
   MichelCluster MichelCluster::operator+(const MichelCluster& rhs) const
   {
     auto const& hits_lhs = (*this)._hits;
-    auto const& hits_rhs = rhs._hits;
+    auto const& hits_rhs = rhs.GetHits();
 
     std::vector<HitPt> hits;
     hits.reserve(hits_lhs.size() + hits_rhs.size());
@@ -299,13 +270,39 @@ namespace michel {
 
   MichelCluster& MichelCluster::operator+=(const MichelCluster& rhs)
   {
-    _hits.reserve(_hits.size() + rhs._hits.size());
+    _hits.reserve(_hits.size() + rhs.GetHits().size());
 
-    for(auto const& h : rhs._hits) _hits.push_back(h);
+    for(auto const& h : GetHits()) _hits.push_back(h);
 
     ProcessHits();
 
     return (*this);
+  }
+
+  std::vector<HitPt> MichelCluster::ExcludeHits(const std::vector<size_t>& hit_index_v)
+  {
+    if(hit_index_v.empty()) return std::vector<HitPt>();
+    std::vector<bool> remove_flag_v(_hits.size(),false);
+    for(auto const& index : hit_index_v) {
+
+      if(index >= _hits.size())
+	Print(msg::kEXCEPTION,__FUNCTION__,"Cannot remove a hit index larger than the size of hit list!");
+
+      remove_flag_v[index]=true;
+
+    }
+    
+    std::vector<HitPt> hits_a, hits_b;
+    hits_a.reserve(_hits.size()-hit_index_v.size());
+    hits_b.reserve(hit_index_v.size());
+    for(size_t index=0; index < remove_flag_v.size(); ++index) {
+
+      if(remove_flag_v[index]) hits_b.emplace_back(_hits[index]);
+      else hits_a.emplace_back(_hits[index]);
+
+    }
+    std::swap(hits_a,_hits);
+    return hits_b;
   }
 
   const HitPt& MichelCluster::ClosestHit(const HitPt& ref)

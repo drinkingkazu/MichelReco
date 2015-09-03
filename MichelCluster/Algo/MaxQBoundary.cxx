@@ -16,7 +16,7 @@ namespace michel {
     charges.reserve(cluster._ordered_pts.size());
     
     for(const auto& o: cluster._ordered_pts)
-      charges.push_back(cluster._hits[o]._q);
+      charges.push_back(cluster.GetHits()[o]._q);
     
     auto idx = find_max(charges);
 

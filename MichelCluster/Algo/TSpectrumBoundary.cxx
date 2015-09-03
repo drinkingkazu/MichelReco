@@ -47,7 +47,7 @@ namespace michel {
       ss << "\t\tIn TSpectrumBoundary" << std::endl
 	 << "\tI have " << truncated_mean.size() << " truncated mean size" << std::endl
 	 << "\twith   " << truncated_dqds.size() << " derivative points." << std::endl
-	 << "\tMy incoming cluster has " << cluster._hits.size() << " hits in it...";
+	 << "\tMy incoming cluster has " << cluster.GetHits().size() << " hits in it...";
       Print(msg::kINFO,__FUNCTION__,ss.str());
     }
     
@@ -113,7 +113,7 @@ namespace michel {
     auto idx = 0;
 
     for(int w = iMin; w <= iMax; ++w) {
-      auto c = cluster._hits[cluster._ordered_pts[w]]._q;
+      auto c = cluster.GetHits()[cluster._ordered_pts[w]]._q;
       if(c > k) { k = c; idx = w; }
     }
     
@@ -194,7 +194,7 @@ namespace michel {
     charge.reserve(cluster._ordered_pts.size());
 
     for(const auto& o : cluster._ordered_pts)
-      charge.push_back(cluster._hits[o]._q);
+      charge.push_back(cluster.GetHits()[o]._q);
 
     for(auto window : get_windows(charge,_n_window_size) ) {
       if(window.size() > window_cutoff) 

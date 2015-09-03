@@ -22,9 +22,8 @@ void MichelRecoManager::Append(const std::vector<michel::HitPt>& hit_v)
 //-----------------------------------------------------------------
 {
   if (hit_v.size() < _min_nhits) return;
-  MichelCluster cluster(_min_nhits, _d_cutoff);
+  MichelCluster cluster(hit_v,_min_nhits, _d_cutoff);
   cluster.SetVerbosity(_verbosity);
-  cluster.SetHits(hit_v);
   if (cluster._hits.size() < _min_nhits) return;
   _input_v.emplace_back(cluster);
   _input_v.back()._id = (_input_v.size() - 1);
@@ -74,12 +73,17 @@ void MichelRecoManager::AddMergingAlgo(BaseAlgMerger* algo)
 }
 
 //-----------------------------------------------------------------
-void MichelRecoManager::AddAlgo(BaseMichelAlgo* algo)
+  void MichelRecoManager::AddAlgo(BaseMichelAlgo* algo,size_t stage)
 //-----------------------------------------------------------------
 {
-  _alg_v.push_back(algo);
-  _alg_time_v.push_back(0.);
-  _alg_ctr_v.push_back(0);
+  if(_alg_v.size() <= stage) {
+    _alg_v.resize(stage+1);
+    _alg_time_v.resize(stage+1);
+    _alg_ctr_v.resize(stage+1);
+  }
+  _alg_v[stage].push_back(algo);
+  _alg_time_v[stage].push_back(0.);
+  _alg_ctr_v[stage].push_back(0);
 }
 
 //-----------------------------------------------------------------
@@ -97,10 +101,6 @@ void MichelRecoManager::Initialize()
     ana->SetVerbosity(_verbosity);
     ana->Initialize();
   }
-  /*
-  for(size_t i=0; i<_alg_v.size(); ++i)
-    if(_alg_v[i]) _alg_v[i]->SetVerbosity(_verbosity);
-  */
 }
 
 //-----------------------------------------------------------------
@@ -141,8 +141,8 @@ void MichelRecoManager::Process()
   else {
     _watch.Start();
     _output_v = _alg_merge->Merge(_input_v);
-    _alg_time_v [kClusterMerger] += _watch.RealTime();
-    _alg_ctr_v  [kClusterMerger] += _input_v.size();
+    //_alg_time_v [kClusterMerger] += _watch.RealTime();
+    //_alg_ctr_v  [kClusterMerger] += _input_v.size();
   }
 
   // Update "used hits" list
@@ -160,54 +160,61 @@ void MichelRecoManager::Process()
     }
   }
 
-  std::vector<MichelCluster> processed_cluster_v;
-  processed_cluster_v.reserve(_output_v.size());
+  for(size_t alg_set_index=0; alg_set_index<_alg_v.size(); ++alg_set_index) {
 
-  for (auto& cluster : _output_v ) {
-    // start going through algorithms and executing
-    // them consecutively
-    bool keep = true;
-    for (size_t n = 0; n < _alg_v.size() && keep; n++) {
-      if (_verbosity <= msg::kDEBUG) {
-        std::stringstream ss;
-        ss << "running algo : " << _alg_v[n]->Name()
-           << "(" << n << ")"
-           << " on MichelCluster ID: " << cluster._id;
-        Print(msg::kDEBUG, __FUNCTION__, ss.str());
+    auto& alg_set = _alg_v[alg_set_index];
+    if(alg_set.empty()) continue;
+    
+    std::vector<MichelCluster> processed_cluster_v;
+    processed_cluster_v.reserve(_output_v.size());
+    for (auto& cluster : _output_v ) {
+      // start going through algorithms and executing
+      // them consecutively
+      bool keep = true;
+      for (size_t alg_index = 0; alg_index < alg_set.size() && keep; alg_index++) {
+	auto& alg = alg_set[alg_index];
+	if (_verbosity <= msg::kDEBUG) {
+	  std::stringstream ss;
+	  ss << "running algo : " << alg->Name()
+	     << "(" << alg_set_index << "." << alg_index << ")"
+	     << " on MichelCluster ID: " << cluster._id;
+	  Print(msg::kDEBUG, __FUNCTION__, ss.str());
+	}
+	_watch.Start();
+	if (!_debug)
+	  keep = alg->ProcessCluster(cluster, _all_hit_v);
+	else {
+	  MichelCluster before(cluster);
+	  keep = alg->ProcessCluster(cluster, _all_hit_v);
+	  auto const diff_msg = before.Diff(cluster);
+	  if (!diff_msg.empty()) {
+	    std::stringstream ss;
+	    ss << "\033[93m Detected a change in MichelCluster (ID=" << cluster._id << ")!\033[00m"
+	       << " by algorithm "
+	       << "\033[95m " << alg->Name() << " (" << alg_set_index << "." << alg_index << ") \033[00m" << std::endl
+	       << diff_msg;
+	    Print(msg::kNORMAL, __FUNCTION__, ss.str());
+	  }
+	}
+	_alg_time_v[alg_set_index][alg_index] += _watch.RealTime();
+	_alg_ctr_v[alg_set_index][alg_index]  += 1;
+	if (!keep && _verbosity <= msg::kDEBUG) {
+	  std::stringstream ss;
+	  ss << "dropping MichelCluster due to algorithm: "
+	     << alg->Name();
+	  Print(msg::kDEBUG, __FUNCTION__, ss.str());
+	}
+      }// looping through each algorithm in one set
+      
+      // If keep is true, move it
+      if (keep) {
+	processed_cluster_v.push_back(MichelCluster());
+	std::swap(cluster, processed_cluster_v.back());
       }
-      _watch.Start();
-      if (!_debug)
-        keep = _alg_v[n]->ProcessCluster(cluster, _all_hit_v);
-      else {
-        MichelCluster before(cluster);
-        keep = _alg_v[n]->ProcessCluster(cluster, _all_hit_v);
-        auto const diff_msg = before.Diff(cluster);
-        if (!diff_msg.empty()) {
-          std::stringstream ss;
-          ss << "\033[93m Detected a change in MichelCluster (ID=" << cluster._id << ")!\033[00m"
-             << " by algorithm "
-             << "\033[95m " << _alg_v[n]->Name() << " (" << n << ") \033[00m" << std::endl
-             << diff_msg;
-          Print(msg::kNORMAL, __FUNCTION__, ss.str());
-        }
-      }
-      _alg_time_v[n] += _watch.RealTime();
-      _alg_ctr_v[n] += 1;
-      if (!keep && _verbosity <= msg::kDEBUG) {
-        std::stringstream ss;
-        ss << "dropping MichelCluster due to algorithm: "
-           << _alg_v[n]->Name();
-        Print(msg::kDEBUG, __FUNCTION__, ss.str());
-      }
-    }// looping through algorithms
+    }// for all clusters
+    std::swap(processed_cluster_v, _output_v);
+  }
 
-    // If keep is true, move it
-    if (keep) {
-      processed_cluster_v.push_back(MichelCluster());
-      std::swap(cluster, processed_cluster_v.back());
-    }
-  }// for all clusters
-  std::swap(processed_cluster_v, _output_v);
 
   //
   // Finally call analyze
@@ -227,7 +234,8 @@ void MichelRecoManager::Process()
 void MichelRecoManager::EventReset()
 //-----------------------------------------------------------------
 {
-  for (auto& alg : _alg_v) if (alg) alg->EventReset();
+  for (auto& alg_set : _alg_v)
+    for(auto& alg : alg_set) alg->EventReset();
   for (auto& ana : _ana_v) ana->EventReset();
   _input_v.clear();
   _output_v.clear();
@@ -243,11 +251,13 @@ void MichelRecoManager::Finalize(TFile *fout)
   // loop through algos and evaluate time-performance
   std::cout << std::endl
             << "=================== Time Report =====================" << std::endl;
-  for (size_t n = 0; n < _alg_v.size(); n++) {
-    double alg_time = _alg_time_v[n] / ((double)_alg_ctr_v[n]);
-    std::cout <<  _alg_v[n]->Name() << "\t Algo Time: " << alg_time * 1.e6     << " [us/cluster]" << std::endl;
+  for (size_t i = 0; i < _alg_v.size(); i++) {
+    std::cout << "\t Stage " << i << std::endl;
+    for(size_t j=0; j<_alg_v[i].size(); ++j) {
+      double alg_time = _alg_time_v[i][j] / ((double)_alg_ctr_v[i][j]);
+      std::cout <<  _alg_v[i][j]->Name() << "\t Algo Time: " << alg_time * 1.e6     << " [us/cluster]" << std::endl;
+    }
   }
-
   std::cout << "=====================================================" << std::endl
             << std::endl;
 }

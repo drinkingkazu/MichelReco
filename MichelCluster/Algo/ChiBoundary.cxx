@@ -67,8 +67,8 @@ namespace michel {
     
       for(int i = 0; i < window_size; ++i) {
 	graph.SetPoint( i,
-			cluster._hits[cluster._ordered_pts[i]]._w,
-			cluster._hits[cluster._ordered_pts[i]]._t);
+			cluster.GetHits()[cluster._ordered_pts[i]]._w,
+			cluster.GetHits()[cluster._ordered_pts[i]]._t);
       }
       
       tf.SetParameter(0,1);

@@ -60,13 +60,13 @@ namespace michel {
     for( size_t i = 0 ; i < cluster._ordered_pts.size(); ++i) {
       if(cluster._forward)  {
 	if(i >= the_michel_start) {
-	  electron.push_back(cluster._hits[cluster._ordered_pts[i]]);
+	  electron.push_back(cluster.GetHits()[cluster._ordered_pts[i]]);
 	  ordered_pts_idx.push_back(i);
 	}
       }
       else {
 	if(i <= the_michel_start)  {
-	  electron.push_back(cluster._hits[cluster._ordered_pts[i]]);
+	  electron.push_back(cluster.GetHits()[cluster._ordered_pts[i]]);
 	  ordered_pts_idx.push_back(i);
 	}
       }
@@ -80,7 +80,7 @@ namespace michel {
     auto length = determine_length(cluster,ordered_pts_idx); //true radius with no minimum
     
     electron._length = length;
-    electron._start  = cluster._hits[cluster._ordered_pts[the_michel_start]];
+    electron._start  = cluster.GetHits()[cluster._ordered_pts[the_michel_start]];
     
     //loop over the ordered points, add hits to the electron that are NOT in orderedpts
     //BUT append new hits found in the vicinity of the vertex
@@ -110,11 +110,11 @@ namespace michel {
     for (HitIdx_t i = 0; i < N_ordered_pts; ++i){
       if (i < cluster._boundary) {
 	lower_idx++;
-	lower_idx_Q += cluster._hits[cluster._ordered_pts[i]]._q;
+	lower_idx_Q += cluster.GetHits()[cluster._ordered_pts[i]]._q;
       }
       else if (i > cluster._boundary){
 	higher_idx++;
-	higher_idx_Q += cluster._hits[cluster._ordered_pts[i]]._q;
+	higher_idx_Q += cluster.GetHits()[cluster._ordered_pts[i]]._q;
       }
     }
     
@@ -149,9 +149,9 @@ namespace michel {
       
       for (size_t i = cluster._boundary - w_cutoff; i < cluster._boundary + w_cutoff; ++i){
     	if (i < cluster._boundary)
-    	  lower_idx_Q_window  += cluster._hits[cluster._ordered_pts[i]]._q;
+    	  lower_idx_Q_window  += cluster.GetHits()[cluster._ordered_pts[i]]._q;
     	else if (i > cluster._boundary) 
-    	  higher_idx_Q_window += cluster._hits[cluster._ordered_pts[i]]._q;
+    	  higher_idx_Q_window += cluster.GetHits()[cluster._ordered_pts[i]]._q;
       }
       
       if (lower_idx_Q_window > higher_idx_Q_window)

@@ -77,8 +77,8 @@ namespace michel {
 	      min_nhits = cluster._min_nhits;
 	      d_cutoff  = cluster._d_cutoff;
 	    }
-	    hits.reserve(hits.size() + cluster._hits.size());
-	    for(auto const& h : cluster._hits)
+	    hits.reserve(hits.size() + cluster.GetHits().size());
+	    for(auto const& h : cluster.GetHits())
 	      hits.push_back(h);
 	  }
 	  //MichelCluster merged(std::move(hits), min_nhits,d_cutoff);

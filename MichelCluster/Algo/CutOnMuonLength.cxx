@@ -16,13 +16,13 @@ namespace michel{
   {
 
     // get the hit vector
-    auto const& hit_v = cluster._hits;
+    auto const& hit_v = cluster.GetHits();
     // get the boundary point
     auto const& boundary = (int)cluster._boundary;
     // is the michel forward (from boundary to end) or back
     auto const& forward = cluster._forward;
     // michel's start point
-    auto const& start = cluster._hits[boundary];
+    auto const& start = cluster.GetHits()[boundary];
 
     // ***************************************************
     // the boundary defines where the michel starts in the

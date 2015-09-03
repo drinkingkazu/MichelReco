@@ -19,7 +19,7 @@ namespace michel{
     // get the chi vector
     auto const& chi_v = cluster._chi2_v;
     // get the hit vector
-    auto const& hit_v = cluster._hits;
+    auto const& hit_v = cluster.GetHits();
     // get the boundary point
     auto const& boundary = (int)cluster._boundary;
     // is the michel forward (from boundary to end) or back
