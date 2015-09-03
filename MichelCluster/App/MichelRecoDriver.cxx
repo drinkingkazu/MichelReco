@@ -23,6 +23,7 @@ namespace larlite {
     _save_clusters=false;
     _Efield=0.5;
     _use_mc = false;
+    
     // FIX ME: currently set only plane 2 reconstruction
     SetPlane(2);
   }
@@ -35,23 +36,24 @@ namespace larlite {
     }
     
     _hit_tree = new TTree("_hit_tree","Hit Tree [all hits in event]");
-    _hit_tree->Branch("_q_v","std::vector<double>",&_q_v);
-    _hit_tree->Branch("_w_v","std::vector<double>",&_w_v);
-    _hit_tree->Branch("_t_v","std::vector<double>",&_t_v);
-    _hit_tree->Branch("_p_v","std::vector<double>",&_p_v);
-    _hit_tree->Branch("_run",&_run,"run/I");
-    _hit_tree->Branch("_subrun",&_subrun,"subrun/I");
-    _hit_tree->Branch("_event",&_event,"event/I");
+    _hit_tree->Branch("_run"   , &_run    , "run/I");
+    _hit_tree->Branch("_subrun", &_subrun , "subrun/I");
+    _hit_tree->Branch("_event" , &_event  , "event/I");
+    
+    _hit_tree->Branch("_q_v" , "std::vector<double>" , &_q_v);
+    _hit_tree->Branch("_w_v" , "std::vector<double>" , &_w_v);
+    _hit_tree->Branch("_t_v" , "std::vector<double>" , &_t_v);
+    _hit_tree->Branch("_p_v" , "std::vector<double>" , &_p_v);
 
     _mc_tree = new TTree("_mc_tree","MC comparison TTree");
-    _mc_tree->Branch("_run",&_run,"run/I");
-    _mc_tree->Branch("_subrun",&_subrun,"subrun/I");
-    _mc_tree->Branch("_event",&_event,"event/I");
+    _mc_tree->Branch("_run"   , &_run    , "run/I");
+    _mc_tree->Branch("_subrun", &_subrun , "subrun/I");
+    _mc_tree->Branch("_event" , &_event  , "event/I");
     
-    _mc_tree->Branch("_mc_energy",&_mc_energy,"mc_energy/D");
-    _mc_tree->Branch("_reco_energy",&_reco_energy,"reco_energy/D");
-    _mc_tree->Branch("_michel_hit_frac","std::vector<double>",&_michel_hit_frac);
-
+    _mc_tree->Branch("_mc_energy"      , &_mc_energy           , "mc_energy/D");
+    _mc_tree->Branch("_reco_energy"    , &_reco_energy         , "reco_energy/D");
+    _mc_tree->Branch("_michel_hit_frac", "std::vector<double>" , &_michel_hit_frac);
+    
     _mgr.Initialize();
 
     return true;
@@ -213,10 +215,13 @@ namespace larlite {
       auto ev_mcshower = storage->get_data<event_mcshower>( "mcreco"  );
       auto ev_simch    = storage->get_data<event_simch>   ( "largeant");      
 
-      if(ev_mcshower->size() == 0) { std::cout << "No mcshower found " << "\n"; throw std::exception(); }
-      if(ev_simch->size()    == 0) { std::cout << "No simch    found " << "\n"; throw std::exception(); }
+      //not required, you can send in MC background w/ no MC showers!
+      //if(ev_mcshower->size() == 0) { std::cout << "No mc shower  found " << "\n"; throw std::exception(); }
+      
+      if(ev_simch->size()    == 0) { std::cout << "No Simchannel found " << "\n"; throw std::exception(); }
  
-      bool made_michel = true;
+      bool made_michel   = true;
+      bool showers_exist = true;
 
       _reco_energy = 0;
       _mc_energy = -1;
@@ -235,10 +240,17 @@ namespace larlite {
 	made_michel = false;
 
       //********************************
-      // Is there a Michel or no, if yes i should search simchannel
-      // if not don't fill the tree
+      // If there are no MCshowers in the event, don't waste
+      // time searching simchannel for it
       
-      if(made_michel) {
+      if (ev_mcshower->size() == 0)
+	showers_exist = false;
+      
+      //********************************
+      // If there is an MC shower in this event, backtrack reconstructed
+      // hits and find charge deposition
+ 
+      if(showers_exist) {
 
 	//********************************
 	// Get the MeV scale energy for this shower
@@ -269,7 +281,7 @@ namespace larlite {
 	  if( (mcs.MotherPdgCode() == 13                &&
 	       mcs.Process() == "muMinusCaptureAtRest") &&
 	      (mcs.DetProfile().E()/mcs.Start().E()  > 0.5
-	       || mcs.DetProfile().E() >= 15) ) { // same criteria as a few lines above, 1/event I hope
+	       || mcs.DetProfile().E() >= 15) ) { // same criteria as a few lines above, 1 per event I hope
 	    
 	    double energy = mcs.DetProfile().E();
 	    
@@ -289,10 +301,10 @@ namespace larlite {
 	  }
 	}
 
-	if(g4_trackid_v.size() == 0) { std::cout << "No tracks found breh \n"; throw std::exception(); } 
+	if(g4_trackid_v.size() == 0) { std::cout << "No tracks found!!! \n"; throw std::exception(); } 
 	
         try { _BTAlg.BuildMap(g4_trackid_v, *ev_simch, *ev_hit, hit_ass_set); }
-	catch(...) { std::cout << "\n ~~..~~ Exception at build map ~~..~~ \n"; }
+	catch(...) { std::cout << "\n Exception at building BTAlg map...\n"; }
 	
 	auto btalgo = _BTAlg.BTAlg();
 	
@@ -303,7 +315,7 @@ namespace larlite {
 	  
 	  ::btutil::WireRange_t wire_hit(h.Channel(),h.StartTick(),h.EndTick());
 
-	  //offending malloc
+	  //offending malloc if _BTAlg is not class member...
 	  auto parts = btalgo.MCQ(wire_hit);
 
 	  double michel_part = parts.at(0);
@@ -312,28 +324,25 @@ namespace larlite {
 	  
 	  hit_frac_michel.push_back(hit_frac);
 	}
-	
-	//for(const auto& h : hit_frac_michel) { std::cout << " h: " << h << " "; } std::cout << std::endl;	
 
 	if(hit_frac_michel.size() != ev_hit->size()) {
 	  std::cout << "I ran backtracker but for some reason, hit_frac_michel didn't come out same size as "
-		    << "ev_hit!!!!!\n";
+		    << "ev_hit take a second look at logic here in _use_mc conditional block\n";
 	  throw std::exception();
 	}
 	
 	
 	//********************************
 	// How do we really know one of our hits is michel, well it has higher fraction of
-	// number of electrons from michel than "not"
+	// number of electrons from michel than "not", go ahead and swap for writeout, if this vector
+	// is empty in TTree then there was no MC shower
+	
 	std::swap(_michel_hit_frac,hit_frac_michel);
 	
       }
       
       _mc_tree->Fill();
       _michel_hit_frac.clear();
-      
-
-      
     }
   
 
