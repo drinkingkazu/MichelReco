@@ -19,6 +19,8 @@
 #include "Fmwk/MichelReco.h"
 #include "Fmwk/MichelTypes.h"
 #include <TTree.h>
+//Backtracker
+#include "MCComp/MCMatchAlg.h"
 
 namespace larlite {
 
@@ -64,6 +66,9 @@ namespace larlite {
     /// set if to use MC info or not
     void SetUseMC(bool on) { _use_mc = on; }
 
+    /// Specifier for a specific plane reconstruction
+    void SetPlane(unsigned int p) { _reco_plane.resize(p+1,false); _reco_plane[p]=true; }
+
   protected:
 
     /// Reco manager
@@ -72,8 +77,11 @@ namespace larlite {
     /// Input cluster producer name string
     std::string _producer;
 
-    // boolean. Use MC info?
+    /// boolean. Use MC info?
     bool _use_mc;
+
+    /// Option to set specific-plane-only reco
+    std::vector<bool> _reco_plane;
 
     /// Output analysis TTree ptr
     TTree* _hit_tree;
@@ -81,6 +89,8 @@ namespace larlite {
     std::vector<double> _q_v;
     std::vector<double> _w_v;
     std::vector<double> _t_v;
+    std::vector<double> _p_v;
+    
     int _run;
     int _subrun;
     int _event;
@@ -89,12 +99,16 @@ namespace larlite {
     TTree* _mc_tree;
     double _mc_energy;
     double _reco_energy;
-
+    std::vector<double> _michel_hit_frac;
+    
     /// boolean to select if to save Michel Clusters or not
     bool _save_clusters;
 
     /// electric field strength [ kV/cm]
     double _Efield;
+
+  private:
+    ::btutil::MCMatchAlg _BTAlg;
 
 
   };

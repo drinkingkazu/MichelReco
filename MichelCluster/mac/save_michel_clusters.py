@@ -88,11 +88,11 @@ mgr.SetAlgo(michel.kMichelCluster, stepsonic)
 mgr.AddAna(michel.CosmicAna())
 
 # add process to get moving
-#my_proc.add_process(the_filter)
+my_proc.add_process(the_filter)
 my_proc.add_process(my_unit)
 
-my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
-#my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
+#my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
+my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
 my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
 #my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
 my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
@@ -106,7 +106,7 @@ print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-#my_proc.run(145,5);
+# my_proc.run(145,5);
 my_proc.run()
 
 # done!

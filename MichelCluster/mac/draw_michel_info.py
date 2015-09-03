@@ -25,7 +25,8 @@ attempts = 0
 # set to -1 by default
 whattoscan = -1
 # text file where to search for signal/background handscan result
-handscanresults = 'mac/michel_handscanning_results_v3_stepsonic.txt'
+#handscanresults = 'mac/michel_handscanning_results_v3_stepsonic.txt'
+handscanresults = 'mac/michel_handscanning_results.txt'
 while (whattoscan == -1):
     ret = raw_input('Enter command...')
     if (ret == 's'):
@@ -54,6 +55,7 @@ scanDict = {}
 
 if ((whattoscan == 0) or (whattoscan == 1)):
     fin = open(handscanresults)
+
     for line in fin:
         words = line.split()
         run    = int(words[0])
@@ -62,6 +64,7 @@ if ((whattoscan == 0) or (whattoscan == 1)):
         index  = int(words[3])
         what   = int(words[4])
         scanDict[(run,event,index)] = what
+        print what
 
 fin = sys.argv[-1]
 
@@ -81,23 +84,39 @@ scale2 = axarr[1,1].twinx()
 
 f = ROOT.TFile(fin)
 
-t = f.Get('out_tree')
-
+t   = f.Get( 'out_tree' )
 
 
 arr = tree2rec(t,branches=['_michel_clustered_charge','_michel_Z','_michel_X','_X','_Z','_q_v','_s_v','_chi_v','_t_dqds_v',
                            '_t_q_v','_mean_chi','_lowest_chi','_rms_chi','_boundary','_chi_at_boundary',
                            '_event','_run','_subrun','_clus_idx','_forward'])
 
+ismc = False;
+if f.GetListOfKeys().Contains('_mc_tree'):
+    ismc = True
+
 all_hits = False
 if (f.GetListOfKeys().Contains('_hit_tree')):
     all_hits = True
     #hit tree
-    hit_tree = f.Get('_hit_tree')
+    hit_tree    = f.Get('_hit_tree')
+
+
     # get hit information
-    hits = pd.DataFrame(tree2rec(hit_tree,branches=['_run','_subrun','_event','_q_v','_w_v','_t_v']))
-    # fill a dictionary that goes from (run,subrun,event) -> data frame with hit info for that event
+    hits       = pd.DataFrame(tree2rec(hit_tree   ,branches=['_run','_subrun','_event','_q_v','_w_v','_t_v','_p_v']))
+
     hitDict = {}
+        
+    hit_mc_tree = ROOT.TTree()
+    mchit_info  = pd.DataFrame()
+
+    if ismc :
+        hit_mc_tree = f.Get( '_mc_tree'  )
+        mchit_info  = pd.DataFrame(tree2rec(hit_mc_tree,branches=['_run','_subrun','_event','_michel_hit_frac']))
+        hits = pd.concat([hits,mchit_info._michel_hit_frac],axis=1)
+
+    # fill a dictionary that goes from (run,subrun,event) -> data frame with hit info for that event
+        
     for n in xrange(len(hits)):
         run    = hits['_run'][n]
         subrun = hits['_subrun'][n]
@@ -106,22 +125,27 @@ if (f.GetListOfKeys().Contains('_hit_tree')):
 
 
 # define function that, given an array, returns a sub-array with values within a certain range
-def getSubArray(xarr,xmin,xmax,yarr,ymin,ymax):
+def getSubArray(xarr,xmin,xmax,yarr,ymin,ymax,parr):
     if (len(xarr) != len(yarr)):
         return [],[]
     xret = []
     yret = []
+    idx  = []
     for n in xrange(len(xarr)):
         x = xarr[n]
         y = yarr[n]
-        if ( (x > xmin) and (x < xmax) and (y > ymin) and (y < ymax) ):
+        p = parr[n]
+        if ( (x > xmin) and (x < xmax) and (y > ymin) and (y < ymax) and p == 2):
             xret.append(x)
             yret.append(y)
-    return xret,yret
+            idx.append(n)
+            
+    #return xret, yret, idx
+    return idx
 
 # number of event to scan
 n = 0
-
+print len(arr)
 while ( n < len(arr) ):
 
     print 'scanning TTree enrty: %i'%n
@@ -228,21 +252,58 @@ while ( n < len(arr) ):
     zmin = np.amin(np.array(michel_z))
     dx = xmax-xmin
     dz = zmax-zmin
+<<<<<<< HEAD
     xmax += 15
     xmin -= 15
     zmax += 15
     zmin -= 15
+=======
+    xmax += dx/2
+    xmin -= dx/2
+    zmax += dz/2
+    zmin -= dz/2
+    print evt
+    print subrun
+    print run
+    
+>>>>>>> 714522cc47739d6991f63d1b7186f0239b204967
     if (all_hits):
         df = hitDict[(run,subrun,evt)]
-        zpoints,xpoints = getSubArray(np.array(df['_w_v'])[0],zmin,zmax,np.array(df['_t_v'])[0],xmin,xmax)
-        axarr[0,0].scatter(zpoints,xpoints,c='k',edgecolor='none',alpha=0.2,s=30)
+        ######xxx
+        #zpoints,xpoints,idx = getSubArray(np.array(df['_w_v'])[0],zmin,zmax,np.array(df['_t_v'])[0],xmin,xmax)
+        idx = getSubArray(np.array(df['_w_v'])[0],zmin,zmax,np.array(df['_t_v'])[0],xmin,xmax,df['_p_v'].values[0])
+        zpoints = df['_w_v'].values[0][idx]
+        xpoints = df['_t_v'].values[0][idx]
+
+        weights = 30
+
+        c = 'k'
+        
+        if ismc:
+            weights = 200*df['_michel_hit_frac'].values[0][idx]
+            c='purple'
+        
+        axarr[0,0].scatter(zpoints,
+                           xpoints,
+                           c='purple',
+                           edgecolor='none',
+                           alpha=0.75,
+                           s=weights)
+        
+        
+
+        
     # draw full cluster
     axarr[0,0].scatter(clus_z,clus_x,c=dq,s=50,edgecolor='none')
     # draw michel cluster
     axarr[0,0].scatter(michel_z,michel_x,c='k',edgecolor='none',s=60)
+<<<<<<< HEAD
     axarr[0,0].set_title('Evt: %i Run: %i Idx: %i'%(evt,run,idx))
     axarr[0,0].set_xlim([zmin,zmax])
     axarr[0,0].set_ylim([xmin,xmax])
+=======
+    #axarr[0,0].set_title('Evt: %i Run: %i Idx: %i' % (evt,run,idx))
+>>>>>>> 714522cc47739d6991f63d1b7186f0239b204967
     axarr[0,0].grid()
 
 
