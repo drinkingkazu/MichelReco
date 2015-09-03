@@ -34,6 +34,8 @@
 #pragma link C++ class michel::DecideIfStoppingMuon+;
 #pragma link C++ class michel::CutOnMuonLength+;
 #pragma link C++ class michel::CutOnMuonLinearity+;
+#pragma link C++ class michel::CutOnMichelNumHits+;
+#pragma link C++ class michel::RequireLargeAngle+;
 
 /// Various method classes
 #pragma link C++ class michel::ClusterVectorCalculator+;
