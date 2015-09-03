@@ -13,7 +13,6 @@ namespace michel{
     _hit_radius = 10;
     _max_dist   = 3;
     _min_bad_hits = 10;
-    _min_muon_length = 10;
   }
 
   bool DecideIfStoppingMuon::ProcessCluster(MichelCluster& cluster,
@@ -37,6 +36,7 @@ namespace michel{
     // the boundary defines where the michel starts in the
     // ordered hit list. If less then 0 then wtf
     if (boundary < 0){
+      std::cout << "boundary not set..." << std::endl;
       return false;
     }
 
@@ -103,7 +103,6 @@ namespace michel{
     if (frac_above < 0.5)
       return false;
 
-
     // how this algorithm works:
     // the idea is to take the straight track of a the muon-portion
     // of the cluster and get an average slope for the muon-like line
@@ -123,7 +122,6 @@ namespace michel{
     // this aims to resolve:
     // 1) deltas tagged as michels
     // 2) muons continuing after a section of broken wires
-
 
 
     // use the high-chi hits (value close to 1)

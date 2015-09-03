@@ -31,8 +31,9 @@
 #pragma link C++ class michel::StepSuperSonicCluster+;
 
 /// MIDFilter
-#pragma link C++ class michel::EmptyMIDFilter+;
 #pragma link C++ class michel::DecideIfStoppingMuon+;
+#pragma link C++ class michel::CutOnMuonLength+;
+#pragma link C++ class michel::CutOnMuonLinearity+;
 
 /// Various method classes
 #pragma link C++ class michel::ClusterVectorCalculator+;
