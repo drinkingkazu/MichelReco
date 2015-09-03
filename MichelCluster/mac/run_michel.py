@@ -83,21 +83,35 @@ minlinearity.SetChiMin(0.8)
 minlinearity.SetFracMinHits(0.5)
 mgr.AddAlgo(minlinearity)
 
+# MID filter that removes michels close to wire gaps/edges
+fidvolfilter = michel.CutOnFiducialVolume()
+import parse_fiducial_volume_definitions as fidparser
+wires_to_exclude_min, wires_to_exclude_max, times_to_exclude_min, times_to_exclude_max = fidparser.list_wires_times_to_exclude()
+fidvolfilter.SetExcludedWireRanges(wires_to_exclude_min,wires_to_exclude_max)
+fidvolfilter.SetExcludedTimeRanges(times_to_exclude_min,times_to_exclude_max)
+fidvolfilter.SetVerbosity(michel.msg.kDEBUG)
+mgr.AddAlgo(fidvolfilter)
+
 # Attach algorithm to recluster michel
 supersonic = michel.SuperSonicClusterer()
 supersonic.SetVerbosity(michel.msg.kDEBUG)
 supersonic.SetMergeTillConverge(True)
 supersonic.SetMaxRadius(15)
-stepsonic  = michel.StepSuperSonicCluster()
-stepsonic.SetMergeTillConverge(True)
-stepsonic.SetVerbosity(michel.msg.kDEBUG)
+supersonic.SetUseHitRadius(True)
+supersonic.SetHitRadius(3)
+#stepsonic  = michel.StepSuperSonicCluster()
+#stepsonic.SetMergeTillConverge(True)
+#stepsonic.SetVerbosity(michel.msg.kDEBUG)
 mgr.AddAlgo(supersonic)
+
 
 # final mid algo cutting on num of michel hits
 michelhits = michel.CutOnMichelNumHits()
 michelhits.SetMinMichelHits(5)
 michelhits.SetMaxMichelHits(35)
 mgr.AddAlgo(michelhits)
+
+
 
 # require large angle between michel and muon
 largeangle = michel.RequireLargeAngle()
@@ -106,17 +120,7 @@ largeangle.SetMinStraightMichelHits(5)
 #largeangle.SetVerbosity(michel.msg.kDEBUG)
 mgr.AddAlgo(largeangle)
 
-# MID filter that removes michels close to wire gaps/edges
-fidvolfilter = michel.CutOnFiducialVolume()
-import parse_fiducial_volume_definitions as fidparser
-wires_to_exclude_min, wires_to_exclude_max, times_to_exclude_min, times_to_exclude_max = fidparser.list_wires_times_to_exclude()
-print len(wires_to_exclude_min)
-print len(wires_to_exclude_max)
-print len(times_to_exclude_min)
-print len(times_to_exclude_max)
-fidvolfilter.SetExcludedWireRanges(wires_to_exclude_min,wires_to_exclude_max)
-fidvolfilter.SetExcludedTimeRanges(times_to_exclude_min,times_to_exclude_max)
-mgr.AddAlgo(fidvolfilter)
+
 
 
 # Attach ana unit

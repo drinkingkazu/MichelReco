@@ -43,6 +43,12 @@ namespace michel {
     /// set max radius within which to search for michel hits
     void SetMaxRadius(double r) { _max_radius = r; }
 
+    /// hit radius setter
+    void SetHitRadius(double r) { _hit_radius = r; }
+
+    /// setter for wether to use hit radius
+    void SetUseHitRadius(bool on) { _use_hit_radius = on; }
+
   private:
 
     /// Merge 'till converge flag
@@ -51,6 +57,13 @@ namespace michel {
     /// max radius within to search for potential hits to
     /// add to michel
     double _max_radius;
+
+    // hit radius : distance from each michel hit within which
+    // to search for new michel hits
+    double _hit_radius;
+
+    /// boolean on whether to use fixed hit radius or distance to start
+    bool _use_hit_radius;
     
   };
 }

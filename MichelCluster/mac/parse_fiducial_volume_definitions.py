@@ -33,19 +33,16 @@ def list_wires_times_to_exclude():
         region_to_exclude = tuple(line.strip('\n').split('-'))
         region_to_exclude_min = float(region_to_exclude[0])
         region_to_exclude_max = float(region_to_exclude[1])
-        
+
         if parsing_wires and not parsing_times: 
+            print 'Removing Wire region[%i,%i]'%(int(region_to_exclude_min),int(region_to_exclude_max))
             wires_to_exclude_min.push_back(region_to_exclude_min)
             wires_to_exclude_max.push_back(region_to_exclude_max)
         elif not parsing_wires and parsing_times:
+            print 'Removing Time region[%i,%i]'%(int(region_to_exclude_min),int(region_to_exclude_max))
             times_to_exclude_min.push_back(region_to_exclude_min)
             times_to_exclude_max.push_back(region_to_exclude_max)
         else:
             print 'wtf kaleko screwed something up in the script that parses fiducial volume info'
-
-    print len(wires_to_exclude_min)
-    print len(wires_to_exclude_max)
-    print len(times_to_exclude_min)
-    print len(times_to_exclude_max)
 
     return wires_to_exclude_min, wires_to_exclude_max, times_to_exclude_min, times_to_exclude_max

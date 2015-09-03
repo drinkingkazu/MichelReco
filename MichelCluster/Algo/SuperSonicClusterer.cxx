@@ -12,6 +12,8 @@ namespace michel {
     _merge_till_converge = false;
     _name = "SuperSonicClusterer";
     _max_radius = 10;
+    _hit_radius = 3;
+    _use_hit_radius = false;
   }
 
   void SuperSonicClusterer::EventReset()
@@ -125,12 +127,22 @@ namespace michel {
       // have a vector where additional hits are temporarily stored
       std::vector<michel::HitPt> newHits;
       for (auto& mh : michel){
-	// distance to start:
-	auto dstart = start.SqDist(mh);
-	for (auto& h : nearbyHits){
-	  if (mh.SqDist(h) < dstart)
-	    newHits.push_back(h);
-	}// for all nearby hits
+	// if we should use a fixed hit radius
+	if (_use_hit_radius){
+	  for (auto& h : nearbyHits){
+	    if (mh.SqDist(h) < _hit_radius)
+	      newHits.push_back(h);
+	  }
+	}
+	// else, if we use the distance to the start
+	else{
+	  // distance to start:
+	  auto dstart = start.SqDist(mh);
+	  for (auto& h : nearbyHits){
+	    if (mh.SqDist(h) < dstart)
+	      newHits.push_back(h);
+	  }
+	}// if we should use distance to start
       }// for all michel hits
       
       if (_verbosity <= msg::kINFO){

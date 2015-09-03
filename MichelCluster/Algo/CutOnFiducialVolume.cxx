@@ -46,13 +46,30 @@ bool CutOnFiducialVolume::ProcessCluster(MichelCluster& cluster,
     for (auto const& _ex_w : _excluded_wire_ranges )
       if (ihit._w > (_ex_w.first - _wire_buffer_size) &&
           ihit._w < (_ex_w.second + _wire_buffer_size) )
-        return false;
+	{
+	  if (_verbosity <= msg::kINFO){
+	    std::stringstream ss;
+	    ss << "Wire value is : " << ihit._w << " and is in range [" 
+	       << _ex_w.first - _wire_buffer_size << ", " 
+	       << _ex_w.first - _wire_buffer_size << "]";
+	    Print(msg::kINFO,this->Name(),ss.str());
+	  }
+	  return false;
+	}
     //For this hit, make sure it is not in any of the excluded time regions
     for (auto const& _ex_t : _excluded_time_ranges )
       if (ihit._w > (_ex_t.first - _time_buffer_size) &&
-          ihit._w < (_ex_t.second + _time_buffer_size) )
+          ihit._w < (_ex_t.second + _time_buffer_size) ){
+	if (_verbosity <= msg::kINFO){
+	  std::stringstream ss;
+	  ss << "Time value is : " << ihit._t << " and is in range [" 
+	     << _ex_t.first - _time_buffer_size << ", " 
+	     << _ex_t.first - _time_buffer_size << "]";
+	  Print(msg::kINFO,this->Name(),ss.str());
+	}
         return false;
-
+      }
+    
   }
 
   return true;
