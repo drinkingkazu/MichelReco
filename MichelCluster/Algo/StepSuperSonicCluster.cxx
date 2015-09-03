@@ -30,8 +30,9 @@ namespace michel {
 
     //temporary fix for SSS is add cluster hit ids to taken vector
     for (auto& ch : cluster._hits) taken_hits.push_back(ch._id);
-    
-    std::cout << "michel size before step: " << michel.size() << std::endl;
+
+    if (_verbosity == msg::kINFO)
+      std::cout << "michel size before step: " << michel.size() << std::endl;
     
     while(1) {
       
@@ -66,8 +67,8 @@ namespace michel {
       //return true;
     }
 
-
-    std::cout << "michel size after step: " << michel.size() << std::endl;
+    if (_verbosity == msg::kINFO)
+      std::cout << "michel size after step: " << michel.size() << std::endl;
     
     //return true;
     
@@ -113,8 +114,8 @@ namespace michel {
       if ( (start.SqDist(h) < dMax) or (end.SqDist(h) < dMax) )
 	nearbyHits.push_back(h);
     }
-
-    std::cout << " nearbyHits.size(): " << nearbyHits.size() << "\n";
+    if (_verbosity == msg::kINFO)
+      std::cout << " nearbyHits.size(): " << nearbyHits.size() << "\n";
     
     // now, for each hit in the michel
     // 1) determine its distance from the start point
