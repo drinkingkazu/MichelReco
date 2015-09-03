@@ -40,7 +40,7 @@ namespace michel {
 
 
     //temporary fix for SSS is add cluster hit ids to taken vector
-    for (auto& ch : cluster._hits) taken_hits.push_back(ch._id);
+    for (auto& ch : cluster.GetHits()) taken_hits.push_back(ch._id);
 
     if (_verbosity == msg::kINFO)
       std::cout << "michel size before step: " << michel.size() << std::endl;
@@ -124,7 +124,7 @@ namespace michel {
 
       bool there = false;
       for (auto& mh : michel) { if(mh._id == h._id) { there = true; break;} }
-      for (auto& ch : cluster._hits) { if(ch._id == h._id) { there = true; break;} }
+      for (auto& ch : cluster.GetHits()) { if(ch._id == h._id) { there = true; break;} }
 
       if (there) continue;
 
@@ -154,7 +154,7 @@ namespace michel {
 	there = false;
 	
 	for (auto& mh : michel) { if(mh._id == h._id) { there = true; break;} }
-	for (auto& ch : cluster._hits) { if(ch._id == h._id) { there = true; break;} }
+	for (auto& ch : cluster.GetHits()) { if(ch._id == h._id) { there = true; break;} }
 	if(there) continue;
 	
 	if ( (start.SqDist(h) < dMax) or (end.SqDist(h) < dMax) )

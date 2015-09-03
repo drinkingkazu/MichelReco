@@ -78,7 +78,7 @@ namespace michel {
 
       bool there = false;
       for (auto& mh : michel) { if(mh._id == h._id) { there = true; break;} }
-      for (auto& ch : cluster._hits) { if(ch._id == h._id) { there = true; break;} }
+      for (auto& ch : cluster.GetHits()) { if(ch._id == h._id) { there = true; break;} }
 
       if (there) continue;
 
@@ -108,7 +108,7 @@ namespace michel {
 	there = false;
 	
 	for (auto& mh : michel) { if(mh._id == h._id) { there = true; break;} }
-	for (auto& ch : cluster._hits) { if(ch._id == h._id) { there = true; break;} }
+	for (auto& ch : cluster.GetHits()) { if(ch._id == h._id) { there = true; break;} }
 	if(there) continue;
 	
 	if ( (start.SqDist(h) < dMax) or (end.SqDist(h) < dMax) )
