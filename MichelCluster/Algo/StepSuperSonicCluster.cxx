@@ -27,6 +27,13 @@ namespace michel {
     /// Step around on the end point a bit, jumping to the nearest
     /// hit with cutoff < _max_step.
 
+
+    //temporary fix for SSS is add cluster hit ids to taken vector
+    for (auto& ch : cluster._hits) taken_hits.push_back(ch._id);
+
+    if (_verbosity == msg::kINFO)
+      std::cout << "michel size before step: " << michel.size() << std::endl;
+    
     while(1) {
       
       bool   done = true;
@@ -57,13 +64,19 @@ namespace michel {
       
       if(done) break;
 
-      return true;
+      //return true;
     }
 
+    if (_verbosity == msg::kINFO)
+      std::cout << "michel size after step: " << michel.size() << std::endl;
+    
+    //return true;
+    
+    
     /// Add on David C algo, after we step around and make something, we then super sonic based
     /// on distance between michel start and location in michel, any other hits we find
     /// in this vicinity we to michel in no particular order
-
+    
     /// some input hits are now both michel and input, I don't know what's better at this point
     /// if we don't care about speed then I can void out the ones that were taken before
     /// or maybe since the michel is small might as well loop over it and check ID to avoid using
@@ -93,16 +106,17 @@ namespace michel {
     std::vector<michel::HitPt> nearbyHits;
     bool there;
     for (auto& h : hits) {
-
-      there = false;
       
-      for (auto& mh : michel) { if(mh._id == h._id) { there = true; break;} }
-      if(there) continue;
+      if(std::find(taken_hits.begin(),
+		   taken_hits.end(),
+		   h._id) != taken_hits.end()) continue;
       
       if ( (start.SqDist(h) < dMax) or (end.SqDist(h) < dMax) )
 	nearbyHits.push_back(h);
     }
-
+    if (_verbosity == msg::kINFO)
+      std::cout << " nearbyHits.size(): " << nearbyHits.size() << "\n";
+    
     // now, for each hit in the michel
     // 1) determine its distance from the start point
     // 2) loop through all hits in the "nearbyHits" vector
@@ -126,6 +140,7 @@ namespace michel {
     michel._charge = 0;
     for(const auto& michel_hit : michel)
       michel._charge += michel_hit._q;
+
     return true;
   }
   
