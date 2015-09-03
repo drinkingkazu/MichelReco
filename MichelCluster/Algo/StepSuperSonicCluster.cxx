@@ -4,6 +4,8 @@
 #include "StepSuperSonicCluster.h"
 #include <algorithm>
 #include <sstream>
+#include <cmath>
+
 namespace michel {
 
   StepSuperSonicCluster::StepSuperSonicCluster()
