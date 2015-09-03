@@ -42,7 +42,7 @@ my_unit.SetEField(0.5)
 my_unit.saveMichelClusters(True)
 
 # Get manager for michel reco
-mgr = my_unit.Algo()
+mgr = my_unit.GetManager()
 
 #mgr.SetVerbosity(michel.msg.kDEBUG)
 #mgr.SetDebug(True)

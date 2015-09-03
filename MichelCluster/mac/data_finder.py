@@ -29,7 +29,7 @@ my_unit = fmwk.MichelRecoDriver()
 my_unit.SetClusterProducer("linecluster")
 
 # Get manager for michel reco
-mgr = my_unit.Algo()
+mgr = my_unit.GetManager()
 
 #mgr.SetVerbosity(michel.msg.kDEBUG)
 
