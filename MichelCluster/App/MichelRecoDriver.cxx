@@ -221,8 +221,7 @@ namespace larlite {
       
       if(ev_simch->size()    == 0) { std::cout << "No Simchannel found " << "\n"; throw std::exception(); }
  
-      bool made_michel   = true;
-      bool showers_exist = true;
+      bool shower_exists = false;
 
       _reco_energy = 0;
       _mc_energy = -1;
@@ -237,32 +236,25 @@ namespace larlite {
 	for (auto const& h : mich)
 	  _reco_energy += h._q;
       }
-      else
-	made_michel = false;
-
+      
       //********************************
-      // If there are no MCshowers in the event, don't waste
-      // time searching simchannel for it
+      // Get the MeV scale energy for this shower
       
-      if (ev_mcshower->size() == 0)
-	showers_exist = false;
-      
+      for(auto const& mcs : *ev_mcshower){
+	if( (mcs.MotherPdgCode() == 13                &&
+	     mcs.Process() == "muMinusCaptureAtRest") &&
+	    (mcs.DetProfile().E()/mcs.Start().E()  > 0.5
+	     || mcs.DetProfile().E() >= 15) ) {
+	  _mc_energy = mcs.DetProfile().E();
+	    shower_exists = true;
+	}
+      }
+
       //********************************
       // If there is an MC shower in this event, backtrack reconstructed
       // hits and find charge deposition
- 
-      if(showers_exist) {
-
-	//********************************
-	// Get the MeV scale energy for this shower
-
-	for(auto const& mcs : *ev_mcshower){
-	  if( (mcs.MotherPdgCode() == 13                &&
-	       mcs.Process() == "muMinusCaptureAtRest") &&
-	      (mcs.DetProfile().E()/mcs.Start().E()  > 0.5
-	       || mcs.DetProfile().E() >= 15) )
-	    _mc_energy = mcs.DetProfile().E();
-	}
+      
+      if(shower_exists) { 
 	
 	//********************************
 	// You will probably complain about this but I need to use backtracker
