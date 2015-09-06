@@ -37,6 +37,7 @@
 #pragma link C++ class michel::CutOnMichelNumHits+;
 #pragma link C++ class michel::RequireLargeAngle+;
 #pragma link C++ class michel::CutOnFiducialVolume+;
+#pragma link C++ class michel::RemoveFakePMTSignals+;
 
 /// Various method classes
 #pragma link C++ class michel::ClusterVectorCalculator+;

@@ -89,12 +89,12 @@ import parse_fiducial_volume_definitions as fidparser
 wires_to_exclude_min, wires_to_exclude_max, times_to_exclude_min, times_to_exclude_max = fidparser.list_wires_times_to_exclude()
 fidvolfilter.SetExcludedWireRanges(wires_to_exclude_min,wires_to_exclude_max)
 fidvolfilter.SetExcludedTimeRanges(times_to_exclude_min,times_to_exclude_max)
-fidvolfilter.SetVerbosity(michel.msg.kDEBUG)
+#fidvolfilter.SetVerbosity(michel.msg.kDEBUG)
 mgr.AddAlgo(fidvolfilter)
 
 # Attach algorithm to recluster michel
 supersonic = michel.SuperSonicClusterer()
-supersonic.SetVerbosity(michel.msg.kDEBUG)
+#supersonic.SetVerbosity(michel.msg.kDEBUG)
 supersonic.SetMergeTillConverge(True)
 supersonic.SetMaxRadius(15)
 supersonic.SetUseHitRadius(True)
@@ -111,7 +111,11 @@ michelhits.SetMinMichelHits(5)
 michelhits.SetMaxMichelHits(35)
 mgr.AddAlgo(michelhits)
 
-
+# remove weird horizontal tracks from PMT
+pmtremoved = michel.RemoveFakePMTSignals()
+pmtremoved.SetVerbosity(michel.msg.kDEBUG)
+pmtremoved.SetMaxRMSTime(0.1)
+mgr.AddAlgo(pmtremoved)
 
 # require large angle between michel and muon
 largeangle = michel.RequireLargeAngle()
@@ -146,7 +150,7 @@ print
 
 # Let's run it.
 #my_proc.run(145,5);
-my_proc.run()
+my_proc.run(0,7200)
 
 # done!
 print
