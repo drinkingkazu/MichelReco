@@ -84,6 +84,8 @@ namespace michel {
     double GetPerpendicularDistance(const michel::HitPt& h,
 				    const double& slope,
 				    const double& intercept);
+
+    double GetMedian(std::vector<double>& v);
       
   };
 }

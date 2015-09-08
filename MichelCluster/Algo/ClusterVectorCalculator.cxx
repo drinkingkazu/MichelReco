@@ -4,7 +4,10 @@
 #include "ClusterVectorCalculator.h"
 #include "Fmwk/MichelException.h"
 #include <cmath>
+#include <algorithm>
+#include <functional>
 #include <sstream>
+
 namespace michel {
   
   unsigned int ClusterVectorCalculator::nCk( unsigned int n, unsigned int k )
@@ -356,6 +359,15 @@ namespace michel {
     double d_perp = fabs ( h._t - slope * h._w - intercept ) / fabs(slope);
 
     return d_perp;
+  }
+
+  // get the median value for a list of doubles
+  double ClusterVectorCalculator::GetMedian(std::vector<double>& v)
+  {
+
+    std::nth_element(v.begin(),v.begin() + v.size()/2, v.end());
+
+    return v[v.size()/2];
   }
 
 

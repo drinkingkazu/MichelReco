@@ -48,12 +48,12 @@ namespace michel {
     /**
      *@brief set the maximum allowed RMS on time
      */
-    void SetMaxRMSTime(double rms) { _maxRMStime = rms; }
+    void SetMaxErrorTime(double rms) { _maxErrorTime = rms; }
 
   private:
 
     // maximum rms allowed on time axis for this in michel
-    double _maxRMStime;
+    double _maxErrorTime;
     
   };
 }

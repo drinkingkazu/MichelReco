@@ -119,8 +119,8 @@ mgr.AddAlgo(michelhits)
 
 # remove weird horizontal tracks from PMT
 pmtremoved = michel.RemoveFakePMTSignals()
-#pmtremoved.SetVerbosity(michel.msg.kDEBUG)
-pmtremoved.SetMaxRMSTime(0.1)
+pmtremoved.SetVerbosity(michel.msg.kDEBUG)
+pmtremoved.SetMaxErrorTime(0.1)
 mgr.AddAlgo(pmtremoved)
 
 # require large angle between michel and muon

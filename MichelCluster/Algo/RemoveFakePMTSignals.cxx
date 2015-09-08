@@ -2,6 +2,8 @@
 #define REMOVEFAKEPMTSIGNALS_CXX
 
 #include "RemoveFakePMTSignals.h"
+#include "ClusterVectorCalculator.h"
+
 #include <sstream>
 
 namespace michel{
@@ -9,12 +11,14 @@ namespace michel{
   RemoveFakePMTSignals::RemoveFakePMTSignals()
   {
     _name    = "RemoveFakePMTSignals";
-    _maxRMStime = 0.;
+    _maxErrorTime = 0.;
   }
 
   bool RemoveFakePMTSignals::ProcessCluster(MichelCluster& cluster,
 					    const std::vector<HitPt>& hits)
   {
+
+    ClusterVectorCalculator _clusterCalc;
 
     // check the time of all hits in the michel
     // if almost all of them have the exact same time-tick
@@ -23,24 +27,67 @@ namespace michel{
     // remove the michel
     auto const& michel = cluster._michel;
 
+    // get a vector of the times in the hits
+    std::vector<double> michel_times;
+    for (auto const& h : michel)
+      michel_times.push_back(h._t);
+
+    if (_verbosity <= msg::kINFO){
+      std::stringstream ss;
+      ss << "michel Times: ";
+      for (auto const& t : michel_times) { ss << t << ", "; }
+      Print(msg::kINFO,this->Name(),ss.str());
+    }
+
+    // get the median time
+    double medianT = _clusterCalc.GetMedian(michel_times);
+    if (_verbosity <= msg::kINFO){
+      std::stringstream ss;
+      ss << "median is " << medianT;
+      Print(msg::kINFO,this->Name(),ss.str());
+    }
+
+    // what fraction of hits have the median time value?
+    int count = 0;
+    for (auto const& t : michel_times)
+      if (medianT == t) { count += 1; }
+
+    double frac_median = (double)count / (double)michel_times.size();
+    if (_verbosity <= msg::kINFO){
+      std::stringstream ss;
+      ss << frac_median << " is frac. of hits that have the median time.";
+      Print(msg::kINFO,this->Name(),ss.str());
+    }
+
     // calculate the RMS time-value
     // if too low (like really low)
     // then probably a perfectly horizontal PMT signal
     double avgT = 0;
     double rmsT = 0;
-    for (auto const& h : michel)
-      avgT += h._t;
-    avgT /= (double)michel.size();
+    for (auto const& t : michel_times)
+      avgT += t;
+    avgT /= (double)michel_times.size();
 
-    for (auto const& h : michel)
-      rmsT += (h._t-avgT)*(h._t-avgT);
-    rmsT = sqrt(rmsT/(double)michel.size());
+    for (auto const& t : michel_times)
+      rmsT += (t-avgT)*(t-avgT);
+    rmsT = sqrt(rmsT/(double)michel_times.size());
 
-    if (_verbosity <= msg::kINFO)
-      std::cout << "RMS on time is " << rmsT << std::endl;
+    double uncertainty = rmsT/sqrt((double)michel_times.size());
 
-    if (rmsT < _maxRMStime)
+    if (_verbosity <= msg::kINFO){
+      std::stringstream ss;
+      ss << "RMS on time is " << rmsT << "\tUncertainty on Mean is: " << uncertainty;
+      Print(msg::kINFO,this->Name(),ss.str());
+    }
+
+    if (uncertainty < _maxErrorTime){
+      if (_verbosity <= msg::kINFO){
+	std::stringstream ss;
+	ss << "Removing this event!";
+	Print(msg::kINFO,this->Name(),ss.str());
+      }
       return false;
+    }
 
     // if rms is low enough!
     return true;
