@@ -11,7 +11,6 @@
 #include "LArUtil/GeometryUtilities.h"
 #include "LArUtil/LArProperties.h"
 
-
 namespace larlite {
 
   MichelRecoDriver::MichelRecoDriver()
@@ -34,6 +33,8 @@ namespace larlite {
       print(msg::kERROR,__FUNCTION__,"Input data product producer name not specified!");
       throw std::exception();
     }
+
+    _events_info.clear();
     
     _hit_tree = new TTree("_hit_tree","Hit Tree [all hits in event]");
     _hit_tree->Branch("_run"   , &_run    , "run/I");
@@ -84,7 +85,17 @@ namespace larlite {
     id.run    = _run;
     id.subrun = _subrun;
     id.event  = _event;
+    
+    for (size_t i=0; i < _events_info.size(); i++){
+      auto past_event = _events_info[i];
+      if ( (past_event.run == id.run) and (past_event.subrun == id.subrun) and (past_event.event == id.event) ){
+	std::cout << "We have already scanned this event...skipping..." << std::endl;
+	return true;
+      }
+    }
 
+    _events_info.push_back(id);  
+    
     if(!ev_cluster || ev_cluster->empty()) return false;
 
     // Get hits & association

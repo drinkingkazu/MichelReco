@@ -29,6 +29,7 @@
 #pragma link C++ class michel::SuperSonicClusterer+;
 #pragma link C++ class michel::StepAroundCluster+;
 #pragma link C++ class michel::StepSuperSonicCluster+;
+#pragma link C++ class michel::ConeHitFinder+;
 
 /// MIDFilter
 #pragma link C++ class michel::DecideIfStoppingMuon+;

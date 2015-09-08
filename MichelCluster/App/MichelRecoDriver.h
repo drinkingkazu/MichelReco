@@ -95,6 +95,8 @@ namespace larlite {
     int _subrun;
     int _event;
 
+    std::vector<michel::EventID> _events_info;
+
     // mc tree
     TTree* _mc_tree;
     double _mc_energy;

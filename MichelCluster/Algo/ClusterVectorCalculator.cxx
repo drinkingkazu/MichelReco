@@ -303,5 +303,61 @@ namespace michel {
   }
 
 
+  std::pair<double,double> ClusterVectorCalculator::GetLinearFit(const std::vector<michel::HitPt>& pts)
+  {
+
+    // mean of x*y
+    double m_xy = 0;
+    // mean of x
+    double m_x  = 0;
+    // mean of y
+    double m_y  = 0;
+    // mean of x^2
+    double m_xx = 0;
+    // mean of y^2
+    double m_yy = 0;
+    
+    for (size_t n=0; n < pts.size(); n++){
+
+      double xi = pts[n]._w;
+      double yi = pts[n]._t;
+
+      m_xy += xi*yi;
+      m_x  += xi;
+      m_y  += yi;
+      m_xx += xi*xi;
+      m_yy += yi*yi;
+
+    }
+
+    double entries = (double)pts.size();
+
+    m_xy /= entries;
+    m_x  /= entries;
+    m_y  /= entries;
+    m_xx /= entries;
+    m_yy /= entries;
+
+    double slope = (m_xy-m_x*m_y)/(m_xx-m_x*m_x);
+    double intercept = m_y - slope * m_x;
+
+    return std::pair<double,double>(slope,intercept);
+  }
+
+
+  double ClusterVectorCalculator::GetPerpendicularDistance(const michel::HitPt& h,
+							   const double& slope,
+							   const double& intercept)
+  {
+
+    if (slope == 0)
+      return fabs ( h._t - intercept );
+
+    double d_perp = fabs ( h._t - slope * h._w - intercept ) / fabs(slope);
+
+    return d_perp;
+  }
+
+
 }
 #endif

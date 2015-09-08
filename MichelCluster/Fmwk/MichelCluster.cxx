@@ -76,7 +76,8 @@ namespace michel {
     , _d_cutoff  ( d_cutoff  )
   {
     _verbosity = msg::kNORMAL;
-    ProcessHits();
+    try{ ProcessHits(); }
+    catch (MichelException exception) { _hits.clear(); }
   }
 
   MichelCluster::MichelCluster(std::vector<HitPt>&& hits,
@@ -87,7 +88,8 @@ namespace michel {
     , _d_cutoff  ( d_cutoff  )
   {
     _verbosity = msg::kNORMAL;
-    ProcessHits();
+    try { ProcessHits(); }
+    catch (MichelException exception) { _hits.clear(); }
   }
   /*
   MichelCluster::MichelCluster(const MichelCluster&& rhs)
@@ -140,7 +142,7 @@ namespace michel {
   {
     // Check if hit count
     if(_hits.size() < _min_nhits) {
-      std::stringstream ss;
+      std::stringstream ss; 
       ss << "<<" << __FUNCTION__ << ">> " 
 	 << "Number of hit ("<< _hits.size() 
 	 << ") is smaller than required (" 
@@ -164,8 +166,11 @@ namespace michel {
       }
     }
     // Check index validity
-    if(min_index == kINVALID_SIZE || max_index == kINVALID_SIZE)
-      Print(msg::kEXCEPTION,__FUNCTION__,"Did not find valid edge points...");
+    if(min_index == kINVALID_SIZE || max_index == kINVALID_SIZE){
+      std::stringstream ss; 
+      ss << "Did not find valid edge points. Hit list size is " << _hits.size();
+      Print(msg::kEXCEPTION,__FUNCTION__,ss.str());
+    }
 
     //order the points right => left
     OrderPoints(min_index, _ordered_pts, _ds_v, _s_v);

@@ -62,6 +62,8 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
   clear_all();
   std::vector<double> EMPTYVEC = {};
 
+  if (output_cluster_v.size() > 0)
+
   // Loop over all output clusters, put X,Z into _Z,_X
   _Z.reserve( output_cluster_v.size() * 4 * 25);
   _X.reserve( output_cluster_v.size() * 4 * 25);

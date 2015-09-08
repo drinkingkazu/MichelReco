@@ -23,6 +23,9 @@ void MichelRecoManager::Append(const std::vector<michel::HitPt>& hit_v)
 {
   if (hit_v.size() < _min_nhits) return;
   MichelCluster cluster(_min_nhits, _d_cutoff);
+  // if the cluster has no hits -> do not append
+  if (cluster._hits.size() == 0)
+    return;
   cluster.SetVerbosity(_verbosity);
   cluster.SetHits(hit_v);
   if (cluster._hits.size() < _min_nhits) return;
@@ -36,6 +39,9 @@ void MichelRecoManager::Append(std::vector<michel::HitPt>&& hit_v)
 {
   if (hit_v.size() < _min_nhits) return;
   MichelCluster cluster(std::move(hit_v), _min_nhits, _d_cutoff);
+  // if the cluster has no hits -> do not append
+  if (cluster._hits.size() == 0)
+    return;
   cluster.SetVerbosity(_verbosity);
   if (cluster._hits.size() < _min_nhits) return;
   _input_v.emplace_back(cluster);
@@ -212,11 +218,13 @@ void MichelRecoManager::Process()
   //
   // Finally call analyze
   //
-  for (auto& ana : _ana_v) {
-    // firs set the event id for the ana
-    ana->SetEventID(_id);
-    ana->Analyze(_input_v, _output_v);
-  }
+  if (_output_v.size() > 0){
+    for (auto& ana : _ana_v) {
+      // firs set the event id for the ana
+	ana->SetEventID(_id);
+      ana->Analyze(_input_v, _output_v);
+    }
+  }// if there are any outputs to begin with
 
   if (_verbosity <= msg::kDEBUG)
     Print(msg::kDEBUG, __FUNCTION__, "end!");

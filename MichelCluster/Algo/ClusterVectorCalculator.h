@@ -68,6 +68,7 @@ namespace michel {
 
     std::vector<double> calc_covariance(const std::vector<::michel::HitPt>& hits, 
 					const int _n_window_size);
+
     
     double cov (const std::vector<double>& data1,
 		const std::vector<double>& data2);
@@ -77,7 +78,13 @@ namespace michel {
 
     size_t find_max(const std::vector<double>& data);
     size_t find_min(const std::vector<double>& data);
-    
+
+    std::pair<double,double> GetLinearFit(const std::vector<michel::HitPt>& pts);
+
+    double GetPerpendicularDistance(const michel::HitPt& h,
+				    const double& slope,
+				    const double& intercept);
+      
   };
 }
 

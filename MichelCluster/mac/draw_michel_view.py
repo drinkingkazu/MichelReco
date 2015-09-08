@@ -13,55 +13,6 @@ if (len(sys.argv) < 2):
     print
     sys.exit(0)
 
-# do you want to scan only throgh signal or background?
-print
-print "Do you want to scan only through Signal/Background events?"
-print "[ \'s\' = signal. \'b\' = background. \'q\' = no thanks, scan everything]" 
-print
-# how many times have we tried getting the correct input from the user
-attempts = 0
-# parameter deciding if to scan signal (1) or background (0)
-# value of 2 will scan everything
-# set to -1 by default
-whattoscan = -1
-# text file where to search for signal/background handscan result
-handscanresults = 'mac/michel_handscanning_results_v3_stepsonic.txt'
-while (whattoscan == -1):
-    ret = raw_input('Enter command...')
-    if (ret == 's'):
-        print
-        print 'Great! Looking for signal events in %s'%handscanresults
-        whattoscan = 1
-    elif (ret == 'b'):
-        print 'Great! Looking for background events in %s'%handscanresults
-        whattoscan = 0
-    elif (ret == 'q'):
-        print 'Great! Looping through all events in %s'%handscanresults
-        whattoscan = 2
-    else:
-        if (attempts >= 10):
-            print 'Ok...we are done here...we will scan everything...'
-            print
-            whattoscan = 2
-        else:
-            print
-            print 'You have failed at entering the requested input...try again...'
-            print "Do you want to scan only through Signal/Background events?"
-            print "[ \'s\' = signal. \'b\' = background. \'q\' = no thanks, scan everything]" 
-            attempts += 1
-
-scanDict = {}
-
-if ((whattoscan == 0) or (whattoscan == 1)):
-    fin = open(handscanresults)
-    for line in fin:
-        words = line.split()
-        run    = int(words[0])
-        subrun = int(words[1])
-        event  = int(words[2])
-        index  = int(words[3])
-        what   = int(words[4])
-        scanDict[(run,event,index)] = what
 
 fin = sys.argv[-1]
 
@@ -82,11 +33,8 @@ f = ROOT.TFile(fin)
 
 t = f.Get('out_tree')
 
-
-
-arr = tree2rec(t,branches=['_michel_clustered_charge','_michel_Z','_michel_X','_X','_Z','_q_v','_s_v','_chi_v','_t_dqds_v',
-                           '_t_q_v','_mean_chi','_lowest_chi','_rms_chi','_boundary','_chi_at_boundary',
-                           '_event','_run','_subrun','_clus_idx','_forward'])
+arr = tree2rec(t,branches=['_michel_clustered_charge','_michel_Z','_michel_X','_X','_Z','_q_v','_s_v',
+                           '_boundary','_event','_run','_subrun','_clus_idx','_forward'])
 
 all_hits = False
 if (f.GetListOfKeys().Contains('_hit_tree')):
@@ -118,29 +66,19 @@ def getSubArray(xarr,xmin,xmax,yarr,ymin,ymax):
             yret.append(y)
     return xret,yret
 
-# make list of bg entries
-bgList = []
-for x in xrange(len(arr)):
-    evt = arr['_event'][x]
-    run = arr['_run'][x]
-    subrun = arr['_subrun'][x]
-    idx = arr['_clus_idx'][x]
-    if not (run,evt,idx) in scanDict:
-        continue
-    if (scanDict[(run,evt,idx)] < 2):
-        bgList.append(x)
-
 # number of event to scan
 n = 0
 
-for k in xrange(len(bgList)/4):
+for uu in xrange(len(arr)):
 
-    print 'scanning TTree enrty: %i'%n
+    evt = arr['_event'][uu]
+    run = arr['_run'][uu]
+    subrun = arr['_subrun'][uu]
+    idx = arr['_clus_idx'][uu]
 
-    # first make sure that if we are scanning through signal or background only
-    # we are only looping through those events
+    print 'run: %i\tsubrun: %i\tevent: %i\tindex: %i'%(run,subrun,evt,idx)
 
-
+for k in xrange(len(arr)/4):
 
     # clear the axes...
     axarr[0,0].cla()
@@ -151,21 +89,23 @@ for k in xrange(len(bgList)/4):
 
     #plt.tight_layout()
 
-    evt = arr['_event'][bgList[n]]
-    run = arr['_run'][bgList[n]]
-    subrun = arr['_subrun'][bgList[n]]
-    idx = arr['_clus_idx'][bgList[n]]
+    evt = arr['_event'][n]
+    run = arr['_run'][n]
+    subrun = arr['_subrun'][n]
+    idx = arr['_clus_idx'][n]
 
-    clus_x = arr['_X'][bgList[n]]
-    clus_z = arr['_Z'][bgList[n]]
-    michel_x = arr['_michel_X'][bgList[n]]
-    michel_z = arr['_michel_Z'][bgList[n]]
-    boundary = arr['_boundary'][bgList[n]]
-    forward = arr['_forward'][bgList[n]]
-    dq    = arr['_q_v'][bgList[n]]
-    ds    = arr['_s_v'][bgList[n]]
-    tdq   = arr['_t_q_v'][bgList[n]]
-    tdqds = arr['_t_dqds_v'][bgList[n]]
+    print 'scanning TTree enrty: %i'%n
+    print 'evt: %i, idx: %i'%(evt,idx)
+    print
+
+    clus_x = arr['_X'][n]
+    clus_z = arr['_Z'][n]
+    michel_x = arr['_michel_X'][n]
+    michel_z = arr['_michel_Z'][n]
+    boundary = arr['_boundary'][n]
+    forward = arr['_forward'][n]
+    dq    = arr['_q_v'][n]
+    ds    = arr['_s_v'][n]
 
     # drawing michel cluster hit position
     #axarr[0,0].set_xlabel('x [cm]')
@@ -199,21 +139,23 @@ for k in xrange(len(bgList)/4):
 
     ###################################################
 
-    evt = arr['_event'][bgList[n+1]]
-    run = arr['_run'][bgList[n+1]]
-    subrun = arr['_subrun'][bgList[n+1]]
-    idx = arr['_clus_idx'][bgList[n+1]]
+    evt = arr['_event'][n+1]
+    run = arr['_run'][n+1]
+    subrun = arr['_subrun'][n+1]
+    idx = arr['_clus_idx'][n+1]
 
-    clus_x = arr['_X'][bgList[n+1]]
-    clus_z = arr['_Z'][bgList[n+1]]
-    michel_x = arr['_michel_X'][bgList[n+1]]
-    michel_z = arr['_michel_Z'][bgList[n+1]]
-    boundary = arr['_boundary'][bgList[n+1]]
-    forward = arr['_forward'][bgList[n+1]]
-    dq    = arr['_q_v'][bgList[n+1]]
-    ds    = arr['_s_v'][bgList[n+1]]
-    tdq   = arr['_t_q_v'][bgList[n+1]]
-    tdqds = arr['_t_dqds_v'][bgList[n+1]]
+    print 'scanning TTree enrty: %i'%(n+1)
+    print 'evt: %i, run %i, idx: %i'%(evt,run,idx)
+    print
+
+    clus_x = arr['_X'][n+1]
+    clus_z = arr['_Z'][n+1]
+    michel_x = arr['_michel_X'][n+1]
+    michel_z = arr['_michel_Z'][n+1]
+    boundary = arr['_boundary'][n+1]
+    forward = arr['_forward'][n+1]
+    dq    = arr['_q_v'][n+1]
+    ds    = arr['_s_v'][n+1]
 
     # drawing michel cluster hit position
     #axarr[0,1].set_xlabel('x [cm]')
@@ -248,21 +190,23 @@ for k in xrange(len(bgList)/4):
 
     #################################
 
-    evt = arr['_event'][bgList[n+2]]
-    run = arr['_run'][bgList[n+2]]
-    subrun = arr['_subrun'][bgList[n+2]]
-    idx = arr['_clus_idx'][bgList[n+2]]
+    evt = arr['_event'][n+2]
+    run = arr['_run'][n+2]
+    subrun = arr['_subrun'][n+2]
+    idx = arr['_clus_idx'][n+2]
 
-    clus_x = arr['_X'][bgList[n+2]]
-    clus_z = arr['_Z'][bgList[n+2]]
-    michel_x = arr['_michel_X'][bgList[n+2]]
-    michel_z = arr['_michel_Z'][bgList[n+2]]
-    boundary = arr['_boundary'][bgList[n+2]]
-    forward = arr['_forward'][bgList[n+2]]
-    dq    = arr['_q_v'][bgList[n+2]]
-    ds    = arr['_s_v'][bgList[n+2]]
-    tdq   = arr['_t_q_v'][bgList[n+2]]
-    tdqds = arr['_t_dqds_v'][bgList[n+2]]
+    print 'scanning TTree enrty: %i'%(n+2)
+    print 'evt: %i, idx: %i'%(evt,idx)
+    print
+
+    clus_x = arr['_X'][n+2]
+    clus_z = arr['_Z'][n+2]
+    michel_x = arr['_michel_X'][n+2]
+    michel_z = arr['_michel_Z'][n+2]
+    boundary = arr['_boundary'][n+2]
+    forward = arr['_forward'][n+2]
+    dq    = arr['_q_v'][n+2]
+    ds    = arr['_s_v'][n+2]
 
     # drawing michel cluster hit position
     #axarr[1,0].set_xlabel('x [cm]')
@@ -298,21 +242,24 @@ for k in xrange(len(bgList)/4):
 
     ###################################
 
-    evt = arr['_event'][bgList[n+3]]
-    run = arr['_run'][bgList[n+3]]
-    subrun = arr['_subrun'][bgList[n+3]]
-    idx = arr['_clus_idx'][bgList[n+3]]
+    evt = arr['_event'][n+3]
+    run = arr['_run'][n+3]
+    subrun = arr['_subrun'][n+3]
+    idx = arr['_clus_idx'][n+3]
 
-    clus_x = arr['_X'][bgList[n+3]]
-    clus_z = arr['_Z'][bgList[n+3]]
-    michel_x = arr['_michel_X'][bgList[n+3]]
-    michel_z = arr['_michel_Z'][bgList[n+3]]
-    boundary = arr['_boundary'][bgList[n+3]]
-    forward = arr['_forward'][bgList[n+3]]
-    dq    = arr['_q_v'][bgList[n+3]]
-    ds    = arr['_s_v'][bgList[n+3]]
-    tdq   = arr['_t_q_v'][bgList[n+3]]
-    tdqds = arr['_t_dqds_v'][bgList[n+3]]
+    print 'scanning TTree enrty: %i'%(n+3)
+    print 'evt: %i, idx: %i'%(evt,idx)
+    print
+
+
+    clus_x = arr['_X'][n+3]
+    clus_z = arr['_Z'][n+3]
+    michel_x = arr['_michel_X'][n+3]
+    michel_z = arr['_michel_Z'][n+3]
+    boundary = arr['_boundary'][n+3]
+    forward = arr['_forward'][n+3]
+    dq    = arr['_q_v'][n+3]
+    ds    = arr['_s_v'][n+3]
 
     # drawing michel cluster hit position
     #axarr[1,1].set_xlabel('x [cm]')

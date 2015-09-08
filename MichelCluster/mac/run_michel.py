@@ -104,6 +104,12 @@ supersonic.SetHitRadius(3)
 #stepsonic.SetVerbosity(michel.msg.kDEBUG)
 mgr.AddAlgo(supersonic)
 
+# cone-finding algorithm
+conefinder = michel.ConeHitFinder()
+#conefinder.SetVerbosity(michel.msg.kDEBUG)
+conefinder.SetMaxRadius(20)
+conefinder.SetMaxPerpendicularDistance(3)
+mgr.AddAlgo(conefinder)
 
 # final mid algo cutting on num of michel hits
 michelhits = michel.CutOnMichelNumHits()
@@ -113,7 +119,7 @@ mgr.AddAlgo(michelhits)
 
 # remove weird horizontal tracks from PMT
 pmtremoved = michel.RemoveFakePMTSignals()
-pmtremoved.SetVerbosity(michel.msg.kDEBUG)
+#pmtremoved.SetVerbosity(michel.msg.kDEBUG)
 pmtremoved.SetMaxRMSTime(0.1)
 mgr.AddAlgo(pmtremoved)
 
@@ -150,7 +156,7 @@ print
 
 # Let's run it.
 #my_proc.run(145,5);
-my_proc.run(0,7200)
+my_proc.run()
 
 # done!
 print
