@@ -31,7 +31,7 @@ the_filter = fmwk.MichelFilter()
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
 my_unit.SetClusterProducer("fuzzycluster")
-#my_unit.SetUseMC(True)
+my_unit.SetUseMC(True)
 #my_unit.SetClusterProducer("rawcluster")
 my_unit.SetEField(0.5)
 
@@ -116,7 +116,7 @@ mgr.AddAlgo(michelhits)
 
 # remove weird horizontal tracks from PMT
 pmtremoved = michel.RemoveFakePMTSignals()
-pmtremoved.SetVerbosity(michel.msg.kDEBUG)
+#pmtremoved.SetVerbosity(michel.msg.kDEBUG)
 pmtremoved.SetMaxErrorTime(0.1)
 mgr.AddAlgo(pmtremoved)
 
@@ -135,11 +135,11 @@ mgr.AddAna(michel.CosmicAna())
 
 # add process to get moving
 my_proc.add_process(the_filter)
-my_proc.add_process(my_unit)
+#my_proc.add_process(my_unit)
 
-my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
+#my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
 #my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
-my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
+#my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
 #my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
 my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
 #my_proc.set_data_to_write(fmwk.data.kAssociation,'rawclusters')
