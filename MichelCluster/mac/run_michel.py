@@ -19,27 +19,21 @@ my_proc = fmwk.ana_processor()
 for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(sys.argv[x+1])
 
-my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
-#my_proc.set_io_mode(fmwk.storage_manager.kREAD)
+my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
-#my_proc.set_ana_output_file("michel_tree.root")
+my_proc.set_ana_output_file("michel_tree.root")
 
-my_proc.set_output_file("michel_clusters.root")
-
-#Cheat and send in signal
-#my_proc.enable_filter(True)
-#the_filter = fmwk.MichelFilter()
-#the_filter = fmwk.RemoveMichel()
+#my_proc.set_output_file("michel_clusters.root")
 
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
 my_unit.SetClusterProducer("fuzzycluster")
-#my_unit.SetUseMC(True)
+my_unit.SetUseMC(False)
 #my_unit.SetClusterProducer("rawcluster")
 my_unit.SetEField(0.5)
 
 # set here if you want to save michels as an output cluster
-my_unit.saveMichelClusters(True)
+my_unit.saveMichelClusters(False)
 
 # Get manager for michel reco
 mgr = my_unit.GetManager()
@@ -137,7 +131,6 @@ mgr.AddAlgo(largeangle)
 mgr.AddAna(michel.CosmicAna())
 
 # add process to get moving
-#my_proc.add_process(the_filter)
 my_proc.add_process(my_unit)
 
 my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
@@ -148,7 +141,6 @@ my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
 #my_proc.set_data_to_write(fmwk.data.kAssociation,'rawclusters')
 #Write aho unit to get out MC vars whatever
 
-#my_proc.enable_event_alignment(False)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
