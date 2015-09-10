@@ -95,7 +95,7 @@ supersonic.SetUseHitRadius(True)
 supersonic.SetHitRadius(3)
 #stepsonic  = michel.StepSuperSonicCluster()
 #stepsonic.SetMergeTillConverge(True)
-#stepsonic.SetVerbosity(michel.msg.kDEBUG)
+#supersonic.SetVerbosity(michel.msg.kDEBUG)
 mgr.AddAlgo(supersonic)
 
 # cone-finding algorithm
@@ -109,11 +109,12 @@ mgr.AddAlgo(conefinder)
 michelhits = michel.CutOnMichelNumHits()
 michelhits.SetMinMichelHits(5)
 michelhits.SetMaxMichelHits(35)
+#michelhits.SetVerbosity(michel.msg.kDEBUG)
 mgr.AddAlgo(michelhits)
 
 # remove weird horizontal tracks from PMT
 pmtremoved = michel.RemoveFakePMTSignals()
-pmtremoved.SetVerbosity(michel.msg.kDEBUG)
+#pmtremoved.SetVerbosity(michel.msg.kDEBUG)
 pmtremoved.SetMaxErrorTime(0.1)
 mgr.AddAlgo(pmtremoved)
 

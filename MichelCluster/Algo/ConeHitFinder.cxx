@@ -62,8 +62,8 @@ namespace michel {
 	
     if (_verbosity <= msg::kINFO){
       std::stringstream ss;
-      ss << "michel start : [" << start._w << ", " << start._t << "]" << std::endl
-	 << "michel end   : [" << end._w   << ", " << end._t   << "]"  << std::endl
+      ss << "michel start : [" << start._w << ", " << start._t << "]"
+	 << "michel end   : [" << end._w   << ", " << end._t   << "]"
 	 << "max radius   : " << sqrt(dMax);
       Print(msg::kINFO,this->Name(),ss.str());
     }
@@ -99,7 +99,7 @@ namespace michel {
     if (_verbosity <= msg::kINFO){
       std::stringstream ss;
       ss << "michel slope     : " << slope << "\t"
-	 << "michel intercept : " << intercept << std::endl;
+	 << "michel intercept : " << intercept; 
       Print(msg::kINFO,this->Name(),ss.str());
     }
     

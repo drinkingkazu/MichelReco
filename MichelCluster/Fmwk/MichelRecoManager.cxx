@@ -253,7 +253,8 @@ void MichelRecoManager::Finalize(TFile *fout)
             << "=================== Time Report =====================" << std::endl;
   for (size_t n = 0; n < _alg_v.size(); n++) {
     double alg_time = _alg_time_v[n] / ((double)_alg_ctr_v[n]);
-    std::cout <<  _alg_v[n]->Name() << "\t Algo Time: " << alg_time * 1.e6     << " [us/cluster]" << std::endl;
+    std::cout <<  _alg_v[n]->Name() << "\t Algo Time: " << alg_time * 1.e6     << " [us/cluster]"
+	      << "\t Clusters Scanned: " << _alg_ctr_v[n] << std::endl;
   }
 
   std::cout << "=====================================================" << std::endl
