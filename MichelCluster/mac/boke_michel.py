@@ -21,116 +21,145 @@ for x in xrange(len(sys.argv)-1):
 
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
-my_proc.set_ana_output_file("michel_tree.root")
-my_proc.set_output_file("michel_clusters.root")
+my_proc.set_ana_output_file(  "michel_tree.root"  )
+my_proc.set_output_file    ("michel_clusters.root")
 
+#########################
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
 my_unit.SetClusterProducer("fuzzycluster")
 my_unit.SetUseMC(False)
-#my_unit.SetClusterProducer("rawcluster")
 my_unit.SetEField(0.5)
 
+###########################################################
 # set here if you want to save michels as an output cluster
-my_unit.saveMichelClusters(False)
+my_unit.saveMichelClusters(True)
 
+#############################
 # Get manager for michel reco
 mgr = my_unit.GetManager()
 
-#mgr.SetVerbosity(michel.msg.kDEBUG)
-#mgr.SetDebug(True)
+#####################################
+# Debug options
+# mgr.SetVerbosity(michel.msg.kDEBUG)
+# mgr.SetDebug(True)
 
+##############################
 # Attach algorithm for merging
 mgr.AddMergingAlgo(michel.EdgeMerger())
 
-# Attach algorithm for boundary finding
-truncBound = michel.TruncatedQBoundary()
-truncBound.SetMaxDistanceTruncatedPeaks(5)
-chiBound   = michel.ChiBoundary()
-matchBound = michel.MatchBoundaries()
-matchBound.SetMaxDistanceTruncatedPeaks(10)
-matchBound.SetMaxCovarianceAtStart(0.8)
-covariance = michel.CovarianceFollowBoundary()
-covariance.SetMaxDistanceTruncatedPeaks(10)
-mgr.AddAlgo(covariance)
+#########################################
+# calculate various cluster parameters...
+ctrunk = michel.CalcTruncated()
+#ctrunk.SetCovarianceWindowSize(int s)      
+#ctrunk.SetTruncatedQWindowSize(int s)      
+#ctrunk.SetPAbove(double p)                 
+#ctrunk.SetMinWindowSize(int w)             
+#ctrunk.SetEdgeEffectFix(int e)             
+mgr.AddAlgo(ctrunk)
 
+########################################
+# Attach algorithm for boundary finding
+boundaryalgo = michel.BoundaryFromTQMaxQ()
+boundaryalgo.SetMaxDistancesTruncatedQMaxQ(5)
+mgr.AddAlgo(boundaryalgo)
+
+##############################################
+# Attach algo for charge spectrum requirements
+closepeaks = michel.RequireCloseTruncatedPeaks()
+closepeaks.SetMaxDistanceTruncatedPeaks(5)
+mgr.AddAlgo(closepeaks)
+
+covdip = michel.RequireCovarianceDip()
+covdip.SetCovarianceDipCutoff(0.9)
+mgr.AddAlgo(covdip)
+
+lowcovbound = michel.RequireBoundaryInLowCov()
+lowcovbound.SetMaxCovarianceAtStart(0.8)
+mgr.AddAlgo(lowcovbound)
+
+slopeflip = michel.RequireSlopeSignFlip()
+mgr.AddAlgo(slopeflip)
+
+#############################################
 # Attach algorithm for finding michel cluster
 findMichel = michel.ForwardMichelID()
 findMichel.SetMaxMichelHits(0)
 mgr.AddAlgo(findMichel)
 
-# MID finding algorithm
+#########################
+# MID finding algorithms
 midalgo = michel.DecideIfStoppingMuon()
-midalgo.SetChiMin(0.9)
-midalgo.SetFracMinHits(0.7)
-midalgo.SetHitRadius(30)
-midalgo.SetMaxDist(3.0)
-midalgo.SetMinBadHits(10)
-#midalgo.SetVerbosity(michel.msg.kDEBUG)
+midalgo.SetChiMin     ( 0.9 )
+midalgo.SetFracMinHits( 0.7 )
+midalgo.SetHitRadius  ( 30  )
+midalgo.SetMaxDist    ( 3.0 )
+midalgo.SetMinBadHits ( 10  )
 mgr.AddAlgo(midalgo)
+
 minlength = michel.CutOnMuonLength()
 minlength.SetMinMuonLength(10)
 mgr.AddAlgo(minlength)
+
 minlinearity = michel.CutOnMuonLinearity()
-minlinearity.SetChiMin(0.8)
-minlinearity.SetFracMinHits(0.5)
+minlinearity.SetChiMin     ( 0.8 )
+minlinearity.SetFracMinHits( 0.5 )
 mgr.AddAlgo(minlinearity)
 
+#########################################################
 # MID filter that removes michels close to wire gaps/edges
 fidvolfilter = michel.CutOnFiducialVolume()
 import parse_fiducial_volume_definitions as fidparser
-wires_to_exclude_min, wires_to_exclude_max, times_to_exclude_min, times_to_exclude_max = fidparser.list_wires_times_to_exclude()
+
+wires_to_exclude_min, \
+    wires_to_exclude_max, \
+    times_to_exclude_min, \
+    times_to_exclude_max = fidparser.list_wires_times_to_exclude()
+
 fidvolfilter.SetExcludedWireRanges(wires_to_exclude_min,wires_to_exclude_max)
 fidvolfilter.SetExcludedTimeRanges(times_to_exclude_min,times_to_exclude_max)
-#fidvolfilter.SetVerbosity(michel.msg.kDEBUG)
 mgr.AddAlgo(fidvolfilter)
 
+######################################
 # Attach algorithm to recluster michel
 supersonic = michel.SuperSonicClusterer()
-#supersonic.SetVerbosity(michel.msg.kDEBUG)
 supersonic.SetMergeTillConverge(True)
-supersonic.SetMaxRadius(15)
-supersonic.SetUseHitRadius(True)
-supersonic.SetHitRadius(3)
-#stepsonic  = michel.StepSuperSonicCluster()
-#stepsonic.SetMergeTillConverge(True)
-#supersonic.SetVerbosity(michel.msg.kDEBUG)
+supersonic.SetUseHitRadius     (True)
+supersonic.SetMaxRadius( 15 )
+supersonic.SetHitRadius(  3 )
 mgr.AddAlgo(supersonic)
 
+#########################
 # cone-finding algorithm
 conefinder = michel.ConeHitFinder()
-#conefinder.SetVerbosity(michel.msg.kDEBUG)
-conefinder.SetMaxRadius(20)
-conefinder.SetMaxPerpendicularDistance(3)
+conefinder.SetMaxRadius               ( 20 )
+conefinder.SetMaxPerpendicularDistance(  3 )
 mgr.AddAlgo(conefinder)
 
+##############################################
 # final mid algo cutting on num of michel hits
 michelhits = michel.CutOnMichelNumHits()
-michelhits.SetMinMichelHits(5)
-michelhits.SetMaxMichelHits(35)
-#michelhits.SetVerbosity(michel.msg.kDEBUG)
+michelhits.SetMinMichelHits (  5 )
+michelhits.SetMaxMichelHits ( 35 )
 mgr.AddAlgo(michelhits)
 
+#########################################
 # remove weird horizontal tracks from PMT
 pmtremoved = michel.RemoveFakePMTSignals()
-#pmtremoved.SetVerbosity(michel.msg.kDEBUG)
 pmtremoved.SetMaxErrorTime(0.1)
 mgr.AddAlgo(pmtremoved)
 
+#############################################
 # require large angle between michel and muon
 largeangle = michel.RequireLargeAngle()
 largeangle.SetMinAngle(30.*3.14/180.)
 largeangle.SetMinStraightMichelHits(5)
-#largeangle.SetVerbosity(michel.msg.kDEBUG)
 mgr.AddAlgo(largeangle)
-
-
-
 
 # Attach ana unit
 mgr.AddAna(michel.CosmicAna())
 
-# add process to get moving
+# add process
 my_proc.add_process(my_unit)
 
 my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
