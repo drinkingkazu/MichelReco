@@ -20,6 +20,7 @@
 #pragma link C++ class michel::TSpectrumBoundary+;
 #pragma link C++ class michel::MatchBoundaries+;
 #pragma link C++ class michel::CovarianceFollowBoundary+;
+#pragma link C++ class michel::BoundaryFromTQMaxQ;
 
 /// MichelID
 #pragma link C++ class michel::ForwardMichelID+;
@@ -41,6 +42,8 @@
 #pragma link C++ class michel::RemoveFakePMTSignals+;
 #pragma link C++ class michel::RequireCovarianceDip+;
 #pragma link C++ class michel::RequireSlopeSignFlip+;
+#pragma link C++ class michel::RequireCloseTruncatedPeaks+;
+#pragma link C++ class michel::RequireBoundaryInLowCov+;
 
 /// Various method classes
 #pragma link C++ class michel::ClusterVectorCalculator+;

@@ -32,7 +32,7 @@ namespace michel {
       _n_window_size(15),
       _p_above(0.25),
       _window_cutoff(3),
-      _edgefix(3),
+      _edgefix(3)
     {_name="CalcTruncated";}
     
     /// Default destructor

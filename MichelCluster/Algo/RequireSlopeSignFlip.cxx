@@ -32,8 +32,7 @@ namespace michel {
       Print(msg::kEXCEPTION,this->Name(),"slope vector size less than num hits, run CalcTruncated");
       throw MichelException();
     }
- 
-    
+     
     const auto& slope = cluster._dirs_v;
     
     /// Lets just see if the slope changes sign, change in sign means
@@ -59,12 +58,11 @@ namespace michel {
       }
   
     if(!changed_sign) return false;    
+    
+    return true;
   }
   
-  return true;
-}
-
-
+  
   int RequireSlopeSignFlip::sign(double val)
   {
     if (val > 0) return  1;

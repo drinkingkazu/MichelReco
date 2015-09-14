@@ -28,7 +28,7 @@ namespace michel {
     /// Default constructor
     RequireCovarianceDip()
       :
-      _covariance_dip_cutoff(0.9),
+      _covariance_dip_cutoff(0.9)
     {_name="RequireCovarianceDip";}
       
       /// Default destructor
