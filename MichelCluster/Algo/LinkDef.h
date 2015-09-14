@@ -39,9 +39,12 @@
 #pragma link C++ class michel::RequireLargeAngle+;
 #pragma link C++ class michel::CutOnFiducialVolume+;
 #pragma link C++ class michel::RemoveFakePMTSignals+;
+#pragma link C++ class michel::RequireCovarianceDip+;
+#pragma link C++ class michel::RequireSlopeSignFlip+;
 
 /// Various method classes
 #pragma link C++ class michel::ClusterVectorCalculator+;
+#pragma link C++ class michel::CalcTruncated+;
 
 // #pragma link C++ class michel::ToyMerger+;
 // #pragma link C++ class michel::ToyBoundary+;
