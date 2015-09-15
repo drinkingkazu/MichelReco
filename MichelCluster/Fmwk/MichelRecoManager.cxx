@@ -166,6 +166,7 @@ void MichelRecoManager::Process()
     }
   }
 
+
   std::vector<MichelCluster> processed_cluster_v;
   processed_cluster_v.reserve(_output_v.size());
 
@@ -256,7 +257,7 @@ void MichelRecoManager::Finalize(TFile *fout)
     std::cout <<  _alg_v[n]->Name() << "\t Algo Time: " << alg_time * 1.e6     << " [us/cluster]"
 	      << "\t Clusters Scanned: " << _alg_ctr_v[n] << std::endl;
   }
-
+  
   std::cout << "=====================================================" << std::endl
             << std::endl;
 }

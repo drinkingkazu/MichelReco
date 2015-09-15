@@ -1,9 +1,8 @@
-#ifndef MICHELCLUSTER_COVARAIANCEFOLLOWBOUNDARY_CXX
-#define MICHELCLUSTER_COVARAIANCEFOLLOWBOUNDARY_CXX
+#ifndef MICHELCLUSTER_REQUIREBOUNDARINLOWCOV_CXX
+#define MICHELCLUSTER_REQUIREBOUNDARINLOWCOV_CXX
 
 #include "RequireBoundaryInLowCov.h"
 #include "Fmwk/MichelException.h"
-//#include "ClusterVectorCalculator.h"
 #include <cmath>
 #include <sstream>
 namespace michel {
@@ -19,20 +18,6 @@ namespace michel {
       Print(msg::kEXCEPTION,this->Name(),"Covariance vector size less than num hits, run CalcTruncated");
       throw MichelException();
     }
-
-    // if(cluster._t_mean_v.size() < cluster._hits.size()) {
-    //   Print(msg::kEXCEPTION,this->Name(),"Truncated Mean vector size less than num hits, run CalcTruncated");
-    //   throw MichelException();
-    // }
-    // if(cluster._t_dqds_v.size() < cluster._hits.size()) {
-    //   Print(msg::kEXCEPTION,this->Name(),"dQdS vector size less than num hits, run CalcTruncated");
-    //   throw MichelException();
-    // }
-    // if(cluster._dirs_v.size() < cluster._hits.size()) {
-    //   Print(msg::kEXCEPTION,this->Name(),"slope vector size less than num hits, run CalcTruncated");
-    //   throw MichelException();
-    // }
-
     
     const auto& covariance = cluster._chi2_v;
     const auto& idx = cluster._boundary;
@@ -60,7 +45,7 @@ namespace michel {
 
     if (avg_covariance > _maxCovarianceAtStart)
       return false;
-    
+
     return true;
   }
 

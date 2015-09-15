@@ -77,7 +77,7 @@ namespace michel {
     std::swap(cluster._t_dqds_v,truncated_dqds);
     std::swap(cluster._chi2_v  ,covariance);
     std::swap(cluster._dirs_v  ,slope);
-    
+
     return true;
   }
   

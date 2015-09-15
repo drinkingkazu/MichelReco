@@ -3,7 +3,6 @@
 
 #include "RequireSlopeSignFlip.h"
 #include "Fmwk/MichelException.h"
-//#include "ClusterVectorCalculator.h"
 #include <cmath>
 #include <sstream>
 
@@ -15,19 +14,6 @@ namespace michel {
   bool RequireSlopeSignFlip::ProcessCluster(MichelCluster& cluster,
 					    const std::vector<HitPt>& hits)
   { 
-
-    // if(cluster._chi2_v.size() < cluster._hits.size()) {
-    //   Print(msg::kEXCEPTION,this->Name(),"Covariance vector size less than num hits, run CalcTruncated");
-    //   throw MichelException();
-    // }
-    // if(cluster._t_mean_v.size() < cluster._hits.size()) {
-    //   Print(msg::kEXCEPTION,this->Name(),"Truncated Mean vector size less than num hits, run CalcTruncated");
-    //   throw MichelException();
-    // }
-    // if(cluster._t_dqds_v.size() < cluster._hits.size()) {
-    //   Print(msg::kEXCEPTION,this->Name(),"dQdS vector size less than num hits, run CalcTruncated");
-    //   throw MichelException();
-    // }
     if(cluster._dirs_v.size() < cluster._hits.size()) {
       Print(msg::kEXCEPTION,this->Name(),"slope vector size less than num hits, run CalcTruncated");
       throw MichelException();
@@ -58,7 +44,7 @@ namespace michel {
       }
   
     if(!changed_sign) return false;    
-    
+
     return true;
   }
   

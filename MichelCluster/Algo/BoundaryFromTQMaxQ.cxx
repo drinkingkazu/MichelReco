@@ -6,6 +6,7 @@
 #include "ClusterVectorCalculator.h"
 #include <cmath>
 #include <sstream>
+
 namespace michel {
   
   void BoundaryFromTQMaxQ::EventReset()
@@ -17,7 +18,7 @@ namespace michel {
 
     ClusterVectorCalculator _clusterCalc;
     
-    int candidate_loc     = _clusterCalc.find_max(cluster._t_mean_v);
+    int candidate_loc     = _clusterCalc.find_max(cluster._t_mean_v); // Truncated max... hopefully not degenerate
 
     auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
     auto left  = candidate_loc;
@@ -43,7 +44,7 @@ namespace michel {
     }
     
     cluster._boundary    = cluster._ordered_pts[idx];
-    
+
     return true;
   }
 

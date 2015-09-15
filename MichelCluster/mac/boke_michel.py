@@ -33,7 +33,7 @@ my_unit.SetEField(0.5)
 
 ###########################################################
 # set here if you want to save michels as an output cluster
-my_unit.saveMichelClusters(True)
+# my_unit.saveMichelClusters(True)
 
 #############################
 # Get manager for michel reco
@@ -74,12 +74,12 @@ covdip = michel.RequireCovarianceDip()
 covdip.SetCovarianceDipCutoff(0.9)
 mgr.AddAlgo(covdip)
 
+slopeflip = michel.RequireSlopeSignFlip()
+mgr.AddAlgo(slopeflip)
+
 lowcovbound = michel.RequireBoundaryInLowCov()
 lowcovbound.SetMaxCovarianceAtStart(0.8)
 mgr.AddAlgo(lowcovbound)
-
-slopeflip = michel.RequireSlopeSignFlip()
-mgr.AddAlgo(slopeflip)
 
 #############################################
 # Attach algorithm for finding michel cluster
@@ -176,7 +176,7 @@ print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-#my_proc.run(145,5);
+#my_proc.run(0,100);
 my_proc.run()
 
 # done!

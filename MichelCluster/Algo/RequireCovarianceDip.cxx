@@ -13,7 +13,7 @@ namespace michel {
   {}
   
   bool RequireCovarianceDip::ProcessCluster(MichelCluster& cluster,
-				     const std::vector<HitPt>& hits)
+					    const std::vector<HitPt>& hits)
   { 
 
     /// May be later I will extend this to N number of dips but it's
@@ -23,18 +23,6 @@ namespace michel {
       Print(msg::kEXCEPTION,this->Name(),"Covariance vector size less than num hits, run CalcTruncated");
       throw MichelException();
     }
-    // if(cluster._t_mean_v.size() < cluster._hits.size()) {
-    //   Print(msg::kEXCEPTION,this->Name(),"Truncated Mean vector size less than num hits, run CalcTruncated");
-    //   throw MichelException();
-    // }
-    // if(cluster._t_dqds_v.size() < cluster._hits.size()) {
-    //   Print(msg::kEXCEPTION,this->Name(),"dQdS vector size less than num hits, run CalcTruncated");
-    //   throw MichelException();
-    // }
-    // if(cluster._dirs_v.size() < cluster._hits.size()) {
-    //   Print(msg::kEXCEPTION,this->Name(),"slope vector size less than num hits, run CalcTruncated");
-    //   throw MichelException();
-    // }
 
     const auto& covariance = cluster._chi2_v;
     
