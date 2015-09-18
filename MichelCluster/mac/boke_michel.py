@@ -168,7 +168,6 @@ my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
 #my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
 my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
 #my_proc.set_data_to_write(fmwk.data.kAssociation,'rawclusters')
-#Write aho unit to get out MC vars whatever
 
 
 print
