@@ -21,6 +21,7 @@
 #pragma link C++ class michel::MatchBoundaries+;
 #pragma link C++ class michel::CovarianceFollowBoundary+;
 #pragma link C++ class michel::BoundaryFromTQMaxQ;
+#pragma link C++ class michel::FindBraggPeak;
 
 /// MichelID
 #pragma link C++ class michel::ForwardMichelID+;

@@ -109,6 +109,8 @@ namespace larlite {
 
     // tree
     TTree* _tree;
+    // final muon energy
+    double _Estop;
     // truncated charge vector
     std::vector<double> _dQ;
     // dS vector

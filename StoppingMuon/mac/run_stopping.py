@@ -37,7 +37,7 @@ stopping = fmwk.TagStoppingMuon()
 stopping.SetClusterProducer('cccluster')
 stopping.SetAlgo(michel.TruncatedQBoundary())
 
-my_proc.add_process(the_filter)
+#my_proc.add_process(the_filter)
 my_proc.add_process(stopping)
 
 print

@@ -5,6 +5,7 @@
 #include "LArUtil/GeometryUtilities.h"
 #include "DataFormat/cluster.h"
 #include "DataFormat/hit.h"
+#include "DataFormat/mctrack.h"
 #include <cmath>
 #include <algorithm>
 #include <functional>
@@ -25,6 +26,7 @@ namespace larlite {
 
     if (_tree) delete _tree;
     _tree = new TTree("_tree","Stopping Tree");
+    _tree->Branch("_Estop",&_Estop,"Estop/D");
     _tree->Branch("_dS","std::vector<double>",&_dS);
     _tree->Branch("_dQ","std::vector<double>",&_dQ);
     _tree->Branch("_muonMIPdS","std::vector<double>",&_muonMIPdS);
@@ -55,6 +57,27 @@ namespace larlite {
 
     _dQ.clear();
     _dS.clear();
+
+
+    // Start by looking at MC info if available
+    //Grab the MCTracks
+    auto ev_mctrack = storage->get_data<event_mctrack>("mcreco");    
+    
+    if(!ev_mctrack) {
+      print(larlite::msg::kERROR,__FUNCTION__,Form("Did not find specified data product, mctrack!"));
+    }  
+    //If no MCTracks in event, no muon for sure
+    else if(!ev_mctrack->size()){
+      print(larlite::msg::kERROR,__FUNCTION__,Form("No mctracks!"));
+    }
+    else{
+      for(auto const& mct : *ev_mctrack){
+	if(abs(mct.PdgCode()) == 13){
+	  _Estop = mct[mct.size()-1].E()-105.65;
+	  break;
+	}
+      }// for all mctracks
+    }
     
     auto ev_cluster = storage->get_data<event_cluster>(_clus_producer);
     
@@ -350,7 +373,7 @@ namespace larlite {
       if (v[i] > max) { max = v[i]; idx = i; }
 
     return std::pair<size_t,double>(idx,max);
-  }
+  }  
 
 
 

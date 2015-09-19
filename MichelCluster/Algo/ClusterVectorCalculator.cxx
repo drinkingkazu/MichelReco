@@ -10,7 +10,7 @@
 
 namespace michel {
   
-  unsigned int ClusterVectorCalculator::nCk( unsigned int n, unsigned int k )
+  unsigned int ClusterVectorCalculator::nCk( unsigned int n, unsigned int k ) const
   {
     if (k > n) return 0;
     if (k * 2 > n) k = n-k;
@@ -25,14 +25,15 @@ namespace michel {
   }
   
 
-  double ClusterVectorCalculator::coeff(double k, double N) {
+  double ClusterVectorCalculator::coeff(double k, double N)  const
+  {
     auto m = (N - 3.0)/2.0;
     return 1.0/pow(2,2*m+1) * (nCk(2*m,m-k+1) - nCk(2*m,m-k-1));
   }
 
   std::vector<double> ClusterVectorCalculator::calc_smooth_derive(const std::vector<double>& _dist,
 							     const std::vector<double>& tmeans, 
-							     const int s)
+							     const int s) const
   {
     std::vector<double> tdqds;
     tdqds.reserve(tmeans.size());
@@ -56,7 +57,7 @@ namespace michel {
   
   double ClusterVectorCalculator::do_smooth_derive(const std::vector<double>& f,
 					      const std::vector<double>& x,
-					      int N) 
+					      int N) const
   {
   
     // N should def be odd.
@@ -73,7 +74,7 @@ namespace michel {
   std::vector<double> ClusterVectorCalculator::calc_smooth_mean(const MichelCluster& cluster,
 							   const double _n_window_size,
 							   const int window_cutoff,
-							   const double p_above) 
+							   const double p_above) const
   {
     
     std::vector<double> charge;
@@ -92,7 +93,7 @@ namespace michel {
   }
   
   template<typename S>
-  S ClusterVectorCalculator::calc_mean(const std::vector<S>& data)
+  S ClusterVectorCalculator::calc_mean(const std::vector<S>& data) const
   {
     if(!data.size())
       Print(msg::kEXCEPTION,__FUNCTION__,"You have me nill to calc_mean");
@@ -104,7 +105,7 @@ namespace michel {
   
   
   template<typename W>
-  void ClusterVectorCalculator::cut(std::vector<W>& data, double frac) 
+  void ClusterVectorCalculator::cut(std::vector<W>& data, double frac) const
   {
     
     auto size   = data.size();
@@ -125,7 +126,7 @@ namespace michel {
   
   template<typename T>
   std::vector<std::vector<T> > ClusterVectorCalculator::get_windows(const std::vector<T>& the_thing,
-							       const int window_size)
+							       const int window_size) const
   {
     
     std::vector<std::vector<T> > data;
@@ -156,7 +157,8 @@ namespace michel {
   
   }
   
-  size_t ClusterVectorCalculator::find_max(const std::vector<double>& data) {
+  size_t ClusterVectorCalculator::find_max(const std::vector<double>& data) const
+  {
     
     auto the_max = double{0.0};
     size_t idx = kINVALID_SIZE;
@@ -170,7 +172,8 @@ namespace michel {
     return idx;
   }
   
-  size_t ClusterVectorCalculator::find_min(const std::vector<double>& data) {
+  size_t ClusterVectorCalculator::find_min(const std::vector<double>& data) const
+  {
   
     //get lowest dqds
     auto the_min = double{999999.0};
@@ -187,7 +190,7 @@ namespace michel {
   }
 
   std::vector<double> ClusterVectorCalculator::calc_slope(const std::vector<::michel::HitPt>& hits,
-							  const int _n_window_size)
+							  const int _n_window_size) const
   {
     std::vector<double> S;
     S.reserve(hits.size());
@@ -218,7 +221,7 @@ namespace michel {
   }
 
   std::vector<double>  ClusterVectorCalculator::calc_covariance(const std::vector<::michel::HitPt>& hits, 
-							   const int _n_window_size)
+							   const int _n_window_size) const
   {
     std::vector<double> R;
     R.reserve(hits.size());
@@ -265,7 +268,7 @@ namespace michel {
   
   
   double ClusterVectorCalculator::cov (const std::vector<double>& data1,
-				  const std::vector<double>& data2)
+				  const std::vector<double>& data2) const
   {
     if(data1.size() == 0) Print(msg::kEXCEPTION,__FUNCTION__,"You have me nill to cov");
     if(data2.size() == 0) Print(msg::kEXCEPTION,__FUNCTION__,"You have me nill to cov");
@@ -281,7 +284,7 @@ namespace michel {
       
   }
   
-  double ClusterVectorCalculator::stdev(const std::vector<double>& data)
+  double ClusterVectorCalculator::stdev(const std::vector<double>& data) const
   {
     if(data.size() == 0) Print(msg::kEXCEPTION,__FUNCTION__,"You have me nill to stdev");
 
@@ -293,7 +296,7 @@ namespace michel {
     return sqrt(result/((double)data.size()));
   }
   
-  double ClusterVectorCalculator::mean(const std::vector<double>& data)
+  double ClusterVectorCalculator::mean(const std::vector<double>& data) const
   {
     if(data.size() == 0) Print(msg::kEXCEPTION,__FUNCTION__,"You have me nill to mean");
 	
@@ -306,7 +309,7 @@ namespace michel {
   }
 
 
-  std::pair<double,double> ClusterVectorCalculator::GetLinearFit(const std::vector<michel::HitPt>& pts)
+  std::pair<double,double> ClusterVectorCalculator::GetLinearFit(const std::vector<michel::HitPt>& pts) const
   {
 
     // mean of x*y
@@ -348,9 +351,59 @@ namespace michel {
   }
 
 
+  std::pair<double,double> ClusterVectorCalculator::GetLinearFit(const std::vector<double>& x, 
+								 const std::vector<double>& y)
+  {
+
+    // make sure both vectors are the same size!
+    if (x.size() != y.size()){
+      std::cerr << "\033[93m[ERROR]\033[00m dS and dQ vectors do not have the same length"
+		<< std::endl;
+      throw michel::MichelException();
+    }
+
+    // mean of x*y
+    double m_xy = 0;
+    // mean of x
+    double m_x  = 0;
+    // mean of y
+    double m_y  = 0;
+    // mean of x^2
+    double m_xx = 0;
+    // mean of y^2
+    double m_yy = 0;
+    
+    for (size_t n=0; n < x.size(); n++){
+
+      double xi = x[n];
+      double yi = y[n];
+
+      m_xy += xi*yi;
+      m_x  += xi;
+      m_y  += yi;
+      m_xx += xi*xi;
+      m_yy += yi*yi;
+
+    }
+
+    double entries = (double)x.size();
+
+    m_xy /= entries;
+    m_x  /= entries;
+    m_y  /= entries;
+    m_xx /= entries;
+    m_yy /= entries;
+
+    double slope = (m_xy-m_x*m_y)/(m_xx-m_x*m_x);
+    double intercept = m_y - slope * m_x;
+
+    return std::pair<double,double>(slope,intercept);
+  }
+
+
   double ClusterVectorCalculator::GetPerpendicularDistance(const michel::HitPt& h,
 							   const double& slope,
-							   const double& intercept)
+							   const double& intercept) const
   {
 
     if (slope == 0)
@@ -362,12 +415,133 @@ namespace michel {
   }
 
   // get the median value for a list of doubles
-  double ClusterVectorCalculator::GetMedian(std::vector<double>& v)
+  double ClusterVectorCalculator::GetMedian(std::vector<double>& v) const
   {
 
     std::nth_element(v.begin(),v.begin() + v.size()/2, v.end());
 
     return v[v.size()/2];
+  }
+
+  size_t ClusterVectorCalculator::GetMIPendPos(const std::vector<double>& v,
+					       const size_t& max,
+					       const double distAsked) const
+  {
+
+    double distToPeak = v[max];
+    
+    for (size_t i=0; i < max; i++){
+      
+      double dist = distToPeak-v[max-i];
+      if (dist > distAsked)
+	return max-i;
+    }
+
+    //std::cout << "could not find a point " << distAsked
+    //      << " away from the bragg peak..." << std::endl;
+
+    return michel::kINVALID_SIZE;
+  }
+
+
+  std::vector<size_t> ClusterVectorCalculator::GetMIPindices(const std::vector<double>& dQ,
+							     const double& median,
+							     const double& rms,
+							     const double& alpha) const
+  {
+
+    std::vector<size_t> indices;
+
+    for (size_t n=0; n < dQ.size(); n++){
+      if ( (dQ[n] < median+rms) and (dQ[n] > median-rms) )
+	indices.push_back(n);
+    }
+
+    return indices;
+  }
+
+
+  std::vector<double> ClusterVectorCalculator::GetSubVector(const std::vector<double> v,
+							    const std::vector<size_t> idx) const
+  {
+
+    std::vector<double> out;
+
+    for (auto& i : idx){
+      if (i >= v.size()){
+	std::cerr << "\033[93m[ERROR]\033[00m trying to access element larger than vector size..."
+		  << std::endl;
+	throw michel::MichelException();
+      }
+      out.push_back(v[i]);
+    }
+    
+    return out;
+  }
+
+  double ClusterVectorCalculator::GetRms(const std::vector<double>& MIPdS,
+					 const std::vector<double>& MIPdQ,
+					 const double& slope,
+					 const double& intercept) const
+  {
+
+    double rms = 0.;
+    
+    for (size_t i=0; i < MIPdS.size(); i++)
+      rms += (MIPdQ[i] - ( intercept + slope * MIPdS[i] )) * (MIPdQ[i] - ( intercept + slope * MIPdS[i] ));
+    
+    if (MIPdS.size() == 0)
+      return 0;
+  
+    rms = sqrt(rms/(double)MIPdS.size());
+    
+    return rms;
+  }
+
+
+  std::pair<size_t,double> ClusterVectorCalculator::GetMaxIndex(const std::vector<double>& v) const
+  {
+
+    double max = 0;
+    size_t idx = 0;
+    for (size_t i=0; i < v.size(); i++)
+      if (v[i] > max) { max = v[i]; idx = i; }
+
+    return std::pair<size_t,double>(idx,max);
+  }  
+
+
+  double ClusterVectorCalculator::GetBraggArea(const std::vector<double>& dS,
+					       const std::vector<double>& dQ,
+					       const size_t& MIPendIdx,
+					       const size_t& braggIdx,
+					       const double& MIPm,
+					       const double& MIPs) const
+  {
+
+    if (MIPendIdx >= braggIdx){
+      std::cerr << "\033[93m[ERROR]\033[00m MIP end index comes after Bragg Peak index...something is wrong..."
+		<< std::endl;
+      throw michel::MichelException();
+    }
+
+    if (braggIdx > dS.size()){
+      std::cerr << "\033[93m[ERROR]\033[00m Bragg peak index is larger than vector size...something is wrong..."
+		<< std::endl;
+      throw michel::MichelException();
+    }
+
+    if (dQ.size() != dS.size()){
+      std::cerr << "\033[93m[ERROR]\033[00m dS and dQ vectors are not the same length...something is wrong..."
+		<< std::endl;
+      throw michel::MichelException();
+    }
+
+    double area = 0;
+    for (size_t i =  MIPendIdx; i < braggIdx; i++)
+      area += dQ[i] - ( MIPm + MIPs * dS[i] );
+
+    return area;
   }
 
 

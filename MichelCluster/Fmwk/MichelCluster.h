@@ -117,6 +117,11 @@ public:
     std::vector<double>   _t_dqds_v;    ///< Truncated dqds
     std::vector<double>   _dirs_v;      ///< vector of slope @ hit point
 
+    // mark the position of the Bragg Peak
+    // and of the end of the MIP region
+    HitIdx_t _braggPeak;
+    HitIdx_t _MIPend;
+
     //
     // Configurations
     //

@@ -27,7 +27,7 @@ namespace larlite {
 
     _pass = true;
 
-    //Grab the MCShowers
+    //Grab the MCTracks
     auto ev_mctrack = storage->get_data<event_mctrack>("mcreco");    
     if(!ev_mctrack) {
       print(larlite::msg::kERROR,__FUNCTION__,Form("Did not find specified data product, mctrack!"));
