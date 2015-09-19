@@ -113,7 +113,19 @@ public:
     /// algorithm verbosity setter
     //void SetAlgoVerbosity(msg::MSGLevel_t verbose) { _algo_verbosity = verbose; }
 
-    /// Getter for MichelClusterArray
+    /// Getter for input MichelClusterArray
+    MichelClusterArray GetMergedClusters()
+    { return _merged_v; }
+
+    /// Get algorithm vector
+    std::vector< michel::BaseMichelAlgo* > GetAlgoVector()
+      { return _alg_v; }    
+
+    /// get hit vector
+    const std::vector< ::michel::HitPt > GetHitVector()
+    { return _all_hit_v; }
+
+    /// Getter for output MichelClusterArray
     const MichelClusterArray& GetResult()
     { return _output_v; }
 
@@ -133,6 +145,8 @@ protected:
     bool _debug;
     /// Input clusters
     MichelClusterArray _input_v;
+    /// Merged clusters
+    MichelClusterArray _merged_v;
     /// Output clusters
     MichelClusterArray _output_v;
     /// "ALL" hit list

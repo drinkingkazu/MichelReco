@@ -4,6 +4,8 @@
 #include "MichelRecoManager.h"
 #include "MichelException.h"
 #include <sstream>
+#include <iomanip>
+
 namespace michel {
 
 //-----------------------------------------------------------------
@@ -151,6 +153,9 @@ void MichelRecoManager::Process()
     _alg_ctr_v  [kClusterMerger] += _input_v.size();
   }
 
+  // input same as output
+  _merged_v = _output_v;
+
   // Update "used hits" list
   for (auto const& cluster : _output_v) {
 
@@ -251,14 +256,15 @@ void MichelRecoManager::Finalize(TFile *fout)
 
   // loop through algos and evaluate time-performance
   std::cout << std::endl
-            << "=================== Time Report =====================" << std::endl;
+            << "========================================= Time Report =========================================" << std::endl;
   for (size_t n = 0; n < _alg_v.size(); n++) {
     double alg_time = _alg_time_v[n] / ((double)_alg_ctr_v[n]);
-    std::cout <<  _alg_v[n]->Name() << "\t Algo Time: " << alg_time * 1.e6     << " [us/cluster]"
+    std::cout <<  std::setw(25) << _alg_v[n]->Name() << "\t Algo Time: " 
+	      << std::setw(10) << alg_time * 1.e6  << " [us/cluster]"
 	      << "\t Clusters Scanned: " << _alg_ctr_v[n] << std::endl;
   }
   
-  std::cout << "=====================================================" << std::endl
+  std::cout << "===============================================================================================" << std::endl
             << std::endl;
 }
 
