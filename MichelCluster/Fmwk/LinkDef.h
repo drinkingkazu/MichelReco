@@ -12,6 +12,7 @@
 #pragma link C++ namespace michel+;
 #pragma link C++ namespace michel::msg+;
 #pragma link C++ class michel::HitPt+;
+#pragma link C++ class std::vector<michel::HitPt>+;
 #pragma link C++ class michel::Michel+;
 #pragma link C++ class michel::MichelCluster+;
 #pragma link C++ class std::vector<michel::MichelCluster>+;
