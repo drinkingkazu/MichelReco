@@ -137,7 +137,7 @@ namespace larlite {
 			       p );
     }
 
-    _hit_tree->Fill();
+
     
     // Reaching this point means we have something to process. Prepare.
     _mgr.EventReset();
@@ -175,6 +175,10 @@ namespace larlite {
     
     // Now process
     _mgr.Process();
+
+    auto const& michels = _mgr.GetResult();
+    if (michels.size() > 0)
+      _hit_tree->Fill();
 
     // We may want to save the michels we found as clusters
     // if this option is selected, take the michel hits
