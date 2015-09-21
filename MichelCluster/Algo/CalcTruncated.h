@@ -16,6 +16,7 @@
 
 #include "Fmwk/BaseMichelAlgo.h"
 #include <algorithm>
+#include <TStopwatch.h>
 
 namespace michel {
   /**
@@ -26,14 +27,7 @@ namespace michel {
   public:
     
     /// Default constructor
-    CalcTruncated()
-      :
-      _covariance_window(11),
-      _n_window_size(15),
-      _p_above(0.25),
-      _window_cutoff(3),
-      _edgefix(3)
-    {_name="CalcTruncated";}
+    CalcTruncated();
     
     /// Default destructor
     ~CalcTruncated(){}
@@ -63,7 +57,6 @@ namespace michel {
     /// edge set equal to truncatedQ[_edgefix], maybe 0 is best I don't know
     void SetEdgeEffectFix(int e)             { _edgefix = e; }
     
-    
   private:
 
     /// Sliding window size for calculating covariance/slope window
@@ -84,6 +77,11 @@ namespace michel {
     /// Try to correct edge effect by setting this number of points equal
     /// on both edges
     int _edgefix;
+    
+    // stop-watch for time-profiling
+    TStopwatch _watch;
+    double _t0, _t1, _t2, _t3;
+    int    _n0, _n1, _n2, _n3;
     
   };
 

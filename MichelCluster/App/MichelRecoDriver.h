@@ -69,6 +69,10 @@ namespace larlite {
     /// Specifier for a specific plane reconstruction
     void SetPlane(unsigned int p) { _reco_plane.resize(p+1,false); _reco_plane[p]=true; }
 
+    /// Set the minimum number of hits for a cluster to
+    /// be considered as a candidate MichelCluster
+    void SetMinClusSize(int n) { _minClusSize = n; }
+
   protected:
 
     /// Reco manager
@@ -108,6 +112,9 @@ namespace larlite {
 
     /// electric field strength [ kV/cm]
     double _Efield;
+
+    /// minimum cluster size for an input cluster to be considered
+    int _minClusSize;
 
   private:
     ::btutil::MCMatchAlg _BTAlg;

@@ -106,7 +106,7 @@ namespace michel{
     if(_verbosity <= msg::kINFO) {
       std::stringstream ss;
       ss << "Frac. of hits used to get slope: " << frac_used;
-      Print(msg::kINFO,__FUNCTION__,ss.str());
+      Print(msg::kINFO,this->Name(),ss.str());
     }
     if (frac_used < _frac_min_hits)
 	return false;
@@ -138,7 +138,7 @@ namespace michel{
 	 << "\tslope: " << slope<< std::endl
 	 << "\thits used to calculate slope: " << count<< std::endl
 	 << "\tline: y = s * x + b   ...  b = " << b ;
-      Print(msg::kINFO,__FUNCTION__,ss.str());
+      Print(msg::kINFO,this->Name(),ss.str());
     }
     
     
@@ -176,7 +176,7 @@ namespace michel{
       if(_verbosity <= msg::kINFO) {
 	std::stringstream ss;
 	ss << "Bad hits aligned with muon: " << nbad;
-	Print(msg::kINFO,__FUNCTION__,ss.str());
+	Print(msg::kINFO,this->Name(),ss.str());
       }
       return false;
     }

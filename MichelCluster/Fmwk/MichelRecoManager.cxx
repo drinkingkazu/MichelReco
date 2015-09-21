@@ -153,7 +153,7 @@ void MichelRecoManager::Process()
     _alg_ctr_v  [kClusterMerger] += _input_v.size();
   }
 
-  // input same as output
+  // save merged clusters
   _merged_v = _output_v;
 
   // Update "used hits" list
@@ -253,7 +253,7 @@ void MichelRecoManager::Finalize(TFile *fout)
 {
 
   for (auto& ana : _ana_v) ana->Finalize(fout);
-
+  
   // loop through algos and evaluate time-performance
   std::cout << std::endl
             << "========================================= Time Report =========================================" << std::endl;
@@ -262,12 +262,14 @@ void MichelRecoManager::Finalize(TFile *fout)
     std::cout <<  std::setw(25) << _alg_v[n]->Name() << "\t Algo Time: " 
 	      << std::setw(10) << alg_time * 1.e6  << " [us/cluster]"
 	      << "\t Clusters Scanned: " << _alg_ctr_v[n] << std::endl;
+    if (_alg_v[n]->Name() == "CalcTruncated")
+      _alg_v[n]->EventReset();
+    
+    std::cout << "===============================================================================================" << std::endl
+	      << std::endl;
   }
   
-  std::cout << "===============================================================================================" << std::endl
-            << std::endl;
 }
-
-
 }
 #endif
+  

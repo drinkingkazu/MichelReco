@@ -93,6 +93,7 @@ public:
     //
     // Basic hit-based parameters
     std::vector<HitPt> _hits; ///< List of hits
+    std::vector<HitPt> _all_hits; /// all hits in original cluster
     HitPt _start;             ///< Start point
     HitPt _end;               ///< End point
 

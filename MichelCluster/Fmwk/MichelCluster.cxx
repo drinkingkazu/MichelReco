@@ -150,6 +150,8 @@ namespace michel {
       Print(msg::kEXCEPTION,__FUNCTION__,ss.str());
     }
 
+    _all_hits = _hits;
+
     // Find min/max hits in terms of wire position
     size_t min_index = kINVALID_SIZE;
     size_t max_index = kINVALID_SIZE;
@@ -188,6 +190,12 @@ namespace michel {
     }
     _start = _hits[ _ordered_pts.front() ];
     _end   = _hits[ _ordered_pts.back()  ];
+
+    // now that we have a list of ordered hits
+    // swap the current _hits list which
+    // contains all hits in the cluster
+    // with the list containing only the
+    // ordered hit-list
 
     std::vector<HitPt> ordered_hits;
     ordered_hits.reserve(_ordered_pts.size());

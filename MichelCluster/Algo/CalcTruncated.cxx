@@ -8,9 +8,31 @@
 #include <sstream>
 
 namespace michel {
+
+  CalcTruncated::CalcTruncated()
+      :
+      _covariance_window(11),
+      _n_window_size(15),
+      _p_above(0.25),
+      _window_cutoff(3),
+      _edgefix(3)
+  {
+    _name="CalcTruncated";
+    _t0 = _t1 = _t2 = _t3 = 0;
+    _n0 = _n1 = _n2 = _n3 = 0;
+
+    return;
+  }
   
   void CalcTruncated::EventReset()
-  {}
+  {
+    /*
+    std::cout << "T0/clus = " << 1e6*_t0/(double)_n0 << std::endl
+	      << "T1/clus = " << 1e6*_t1/(double)_n1 << std::endl
+	      << "T2/clus = " << 1e6*_t2/(double)_n2 << std::endl
+	      << "T3/clus = " << 1e6*_t3/(double)_n3 << std::endl;
+    */
+  }
   
   bool CalcTruncated::ProcessCluster(MichelCluster& cluster,
 				     const std::vector<HitPt>& hits)
@@ -33,10 +55,13 @@ namespace michel {
     slope.reserve         (cluster._ordered_pts.size());
     
     //do truncated mean
+    _watch.Start();
     truncated_mean = _clusterCalc.calc_smooth_mean(cluster,
 						   _n_window_size,
 						   _window_cutoff,
 						   _p_above);
+    _t0 += _watch.RealTime();
+    _n0 += 1;
     
     if(truncated_mean.size() < _edgefix) {
       std::stringstream ss;
@@ -54,13 +79,22 @@ namespace michel {
     
     //Directionality considerations
     int dir_window = _covariance_window;
+    _watch.Start();
     covariance     = _clusterCalc.calc_covariance(cluster._hits,dir_window);
+    _t1 += _watch.RealTime();
+    _n1 += 1;
+    _watch.Start();
     slope          = _clusterCalc.calc_slope     (cluster._hits,dir_window);
+    _t2 += _watch.RealTime();
+    _n2 += 1;
     
     // must be odd, currently has no setter,
     // sorry that this method has no info on it, ask vic
     int s = 3; 
+    _watch.Start();
     truncated_dqds = _clusterCalc.calc_smooth_derive(cluster._s_v,truncated_mean,s);
+    _t3 += _watch.RealTime();
+    _n3 += 1;
         
     //Lets play with truncated mean shaving...
     if(_verbosity <= msg::kINFO) {

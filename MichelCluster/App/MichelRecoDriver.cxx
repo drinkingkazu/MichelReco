@@ -167,7 +167,7 @@ namespace larlite {
       }
       
       // Append a hit-list (cluster) to a manager if not empty
-      if(michel_cluster.size())
+      if(michel_cluster.size() > _minClusSize)
 	_mgr.Append(std::move(michel_cluster));
     }
 

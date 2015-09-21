@@ -43,6 +43,12 @@ namespace michel {
       if(c > k) { k = c; idx = w; }
     }
     
+    if (_verbosity <= msg::kINFO){
+      std::stringstream ss;
+      ss << "Boundary set @ dS = " << cluster._s_v[idx];
+      Print(msg::kINFO,this->Name(),ss.str());
+    }
+
     cluster._boundary    = cluster._ordered_pts[idx];
 
     return true;
