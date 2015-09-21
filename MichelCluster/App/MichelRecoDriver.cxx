@@ -67,6 +67,8 @@ namespace larlite {
   bool MichelRecoDriver::analyze(storage_manager* storage) {
 
     _QMichelReco = 0.;
+    _QMichel = 0.;
+    _totQHits = 0.;
 
     // use instances of LArUtil and GeometryUtilities
     // for (w,t) -> (cm, cm) conversion
