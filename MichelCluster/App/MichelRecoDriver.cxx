@@ -66,6 +66,8 @@ namespace larlite {
   
   bool MichelRecoDriver::analyze(storage_manager* storage) {
 
+    _QMichelReco = 0.;
+
     // use instances of LArUtil and GeometryUtilities
     // for (w,t) -> (cm, cm) conversion
     // wire->cm
@@ -348,6 +350,7 @@ namespace larlite {
 	  }
 	  
 	  // check if this hit has been added to the michel cluster...
+	  if (_mgr.GetResult().size() == 0) continue;
 	  auto michel = _mgr.GetResult()[0]._michel;
 	  for (auto const& h : michel){
 	    if (h._id == hit_index)
