@@ -54,6 +54,10 @@ namespace larlite {
     _mc_tree->Branch("_mc_energy"      , &_mc_energy           , "mc_energy/D");
     _mc_tree->Branch("_reco_energy"    , &_reco_energy         , "reco_energy/D");
     _mc_tree->Branch("_michel_hit_frac", "std::vector<double>" , &_michel_hit_frac);
+    _mc_tree->Branch("_michel_hit_Qtot", "std::vector<double>" , &_michel_hit_Qtot);
+    _mc_tree->Branch("_QMichel", &_QMichel, "QMichel/D");
+    _mc_tree->Branch("_QMichelReco", &_QMichelReco, "QMichelReco/D");
+    _mc_tree->Branch("_totQHits", &_totQHits, "totQHits/D");
     
     _mgr.Initialize();
 
@@ -318,8 +322,12 @@ namespace larlite {
 	
 	std::vector<double> hit_frac_michel;
 	hit_frac_michel.reserve(ev_hit->size());
+	std::vector<double> hit_Qtot_michel;
+	hit_Qtot_michel.reserve(ev_hit->size());
 	
-	for(const auto& h : *ev_hit) {
+	for (size_t hit_index = 0; hit_index < ev_hit->size(); hit_index++){
+
+	  const auto& h = ev_hit->at(hit_index);
 
 	  if(h.WireID().Plane != 2)
 	    continue;
@@ -332,8 +340,20 @@ namespace larlite {
 	  double michel_part = parts.at(0);
 	  double other_part  = parts.at(1);
 	  double hit_frac    = michel_part / ( michel_part + other_part );
-	  
+	  hit_Qtot_michel.push_back(michel_part);
 	  hit_frac_michel.push_back(hit_frac);
+	  if (hit_frac > 0.1){
+	    _QMichel += michel_part;
+	    _totQHits += (michel_part+other_part);
+	  }
+	  
+	  // check if this hit has been added to the michel cluster...
+	  auto michel = _mgr.GetResult()[0]._michel;
+	  for (auto const& h : michel){
+	    if (h._id == hit_index)
+	      _QMichelReco += (michel_part+other_part);
+	  }// for all michel hits
+	  
 	}	
 	
 	//********************************
@@ -342,11 +362,13 @@ namespace larlite {
 	// is empty in TTree then there was no MC shower
 	
 	std::swap(_michel_hit_frac,hit_frac_michel);
+	std::swap(_michel_hit_Qtot,hit_Qtot_michel);
 	
       }
-      
+
       _mc_tree->Fill();
       _michel_hit_frac.clear();
+      _michel_hit_Qtot.clear();
     }
   
 
