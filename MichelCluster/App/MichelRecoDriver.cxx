@@ -58,7 +58,7 @@ namespace larlite {
     _mc_tree->Branch("_QMichel", &_QMichel, "QMichel/D");
     _mc_tree->Branch("_QMichelReco", &_QMichelReco, "QMichelReco/D");
     _mc_tree->Branch("_totQHits", &_totQHits, "totQHits/D");
-    
+
     _mgr.Initialize();
 
     return true;
@@ -193,16 +193,22 @@ namespace larlite {
     // and group them in "michel" clusters
     if (_save_clusters){
 
+      // create michel cluster object
       auto michel_cluster = storage->get_data<event_cluster>("michel");
       // create association object for clusters
-      auto cluster_ass_v = storage->get_data<event_ass>(michel_cluster->name());
+      auto michel_cluster_ass_v = storage->get_data<event_ass>(michel_cluster->name());
+      // create muon cluster object
+      auto muon_cluster = storage->get_data<event_cluster>("muon");
+      // create association object for clusters
+      auto muon_cluster_ass_v = storage->get_data<event_ass>(muon_cluster->name());
       // set event ID through storage manager
       storage->set_id(storage->get_data<event_cluster>(_producer)->run(),
 		      storage->get_data<event_cluster>(_producer)->subrun(),
 		      storage->get_data<event_cluster>(_producer)->event_id()); 
 
       // create a vector where to store the cluster -> hit association
-      std::vector<std::vector<unsigned int> > clus_hit_ass_v;
+      std::vector<std::vector<unsigned int> > michel_clus_hit_ass_v;
+      std::vector<std::vector<unsigned int> > muon_clus_hit_ass_v;
       // we need to loop over the michel hits and add them to new clusters
 
       // get the vector of MichelCluster objects
@@ -210,8 +216,8 @@ namespace larlite {
       // for each get the hits associated
       for (auto const& michelClus : michels){
 	// prepare an empty cluster
-	larlite::cluster clus;
-	michel_cluster->push_back(clus);
+	larlite::cluster clus_michel;
+	michel_cluster->push_back(clus_michel);
 	// get the hits (in "michel" notation) for this cluster
 	auto const& michel = michelClus._michel; // this is a vector of HitPt
 	// michel is a list of HitPt
@@ -220,17 +226,42 @@ namespace larlite {
 	// the hit index is indeed the position inside the larlite::hit vector
 	// we basically need to create an association between the cluster
 	// and all the hits in this michel
-	// empty vector where to store hits associated for this specific cluster
-	std::vector<unsigned int> clus_hits;
+
+	// empty vector where to store hits associated for this specific michel cluster
+	std::vector<unsigned int> michel_clus_hits;
 	for (auto const& michel_hit : michel)
-	  clus_hits.push_back(michel_hit._id);
+	  michel_clus_hits.push_back(michel_hit._id);
 	// add this vector to the associations
-	if (clus_hits.size() > 3)
-	  clus_hit_ass_v.push_back(clus_hits);
+	if (michel_clus_hits.size() > 3){
+	  michel_clus_hit_ass_v.push_back(michel_clus_hits);
+	  // if we want to save the michel hits,
+	  // do the same for the muon hits
+	  // prepare an empty cluster
+	  larlite::cluster clus_muon;
+	  muon_cluster->push_back(clus_muon);
+	  auto const& muon = michelClus._hits;
+	  // empty vector where to store hits associated for this specific muon cluster
+	  std::vector<unsigned int> muon_clus_hits;
+	  // get the boundary position
+	  auto const& boundary = michelClus._boundary;
+	  // is the michel forwards or backwards?
+	  auto const& forwards = michelClus._forward;
+	  if (forwards){			
+	    for (size_t n=0; n < boundary; n++)
+	      muon_clus_hits.push_back(muon[n]._id);
+	  }
+	  else{
+	    for (size_t n=boundary; n < muon.size(); n++)
+	      muon_clus_hits.push_back(muon[n]._id);
+	  } 
+	  // add the association information
+	  muon_clus_hit_ass_v.push_back(muon_clus_hits);
+	}// if there are at least 3 hits in the michel cluster
 	
       }// loop over all found michels
       // now save the association information
-      cluster_ass_v->set_association(michel_cluster->id(),product_id(data::kHit,ev_hit->name()),clus_hit_ass_v);
+      michel_cluster_ass_v->set_association(michel_cluster->id(),product_id(data::kHit,ev_hit->name()),michel_clus_hit_ass_v);
+      muon_cluster_ass_v->set_association(muon_cluster->id(),product_id(data::kHit,ev_hit->name()),muon_clus_hit_ass_v);
     }// if we should save cluster
 
     // if we want to compare with mcshowers, we also add feature to backtrack
