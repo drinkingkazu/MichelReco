@@ -114,6 +114,8 @@ def PrepareMichelAlgo():
     largeangle = michel.RequireLargeAngle()
     largeangle.SetMinAngle(30.*3.14/180.)
     largeangle.SetMinStraightMichelHits(5)
+    largeangle.SetMuonLengthUsed(20)
+    #largeangle.SetVerbosity(michel.msg.kDEBUG)
     algoList.append(largeangle)
 
     return algoList

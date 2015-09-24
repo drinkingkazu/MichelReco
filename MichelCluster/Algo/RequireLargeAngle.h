@@ -46,15 +46,20 @@ namespace michel {
 			const std::vector<HitPt>& hits);
 
     /**
-     *@brief set the minimum angle between muon and michel clusters
+     * @brief set the minimum angle between muon and michel clusters
      */
     void SetMinAngle(double a) { _min_angle = a; }
 
     /**
-     *@brief minimum number of michel straight hits
+     * @brief minimum number of michel straight hits
      */
     void SetMinStraightMichelHits(int n) { _min_straight_michel_hits = n; }
-
+    
+    /**
+     * @brief muon distance to use for slope calculation
+     */
+    void SetMuonLengthUsed(double d) { _muon_length_used = d; }
+    
   private:
 
     // minimum angle between muon and michel clusters
@@ -62,6 +67,12 @@ namespace michel {
 
     // minimum number of straight michel hits
     int _min_straight_michel_hits;
+
+    // distance of muon to use for slope calculation
+    // starting at the michel boundary
+    // if the muon track is smaller than this distance
+    // use the full track
+    double _muon_length_used;
 
   };
 }

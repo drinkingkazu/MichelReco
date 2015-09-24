@@ -13,6 +13,7 @@ namespace michel{
     _name    = "RequireLargeAngle";
     _min_angle = (20.*3.14/180.);
     _min_straight_michel_hits = 0;
+    _muon_length_used = 20;
   }
 
   bool RequireLargeAngle::ProcessCluster(MichelCluster& cluster,
@@ -43,12 +44,16 @@ namespace michel{
     if(_verbosity <= msg::kINFO) {
       std::cout << std::endl;
       std::cout << "Michel Slope vector: [";
-      for (auto& s : michel_slope)
-	std::cout << s << ", ";
+      for (auto& s : michel_slope){
+	printf("%.02f",s);
+	std::cout << ", ";
+      }
       std::cout << "]" << std::endl;
       std::cout << "Michel Chi vector: [";
-      for (auto& c : michel_chi)
-	std::cout << c << ", ";
+      for (auto& c : michel_chi){
+	printf("%.02f",c);
+	std::cout << ", ";
+      }
       std::cout << "]" << std::endl;
     }
 
@@ -89,26 +94,29 @@ namespace michel{
     auto const& slope_v = cluster._dirs_v;
     // get the chi vector
     auto const& chi_v = cluster._chi2_v;
+    // get the dS vector
+    auto const& dist_v = cluster._s_v;
     // get the boundary point
     auto const& boundary = (int)cluster._boundary;
     // is the michel forward (from boundary to end) or back
     auto const& forward = cluster._forward;
-      
+
     // average slope for the straight muon section:
     if (forward){
       for (size_t i=0; i < boundary; i++){
-	if (fabs(chi_v[i]) > 0.7){
-	  avg_slope += slope_v[i];
-	  count += 1;
-	}
+	// only consider points w/ distance to boundary < _muon_length_used
+	if ( fabs( dist_v[i] - dist_v[boundary] ) > _muon_length_used ) continue;
+	if (fabs(chi_v[i]) < 0.7) continue;
+	avg_slope += slope_v[i];
+	count += 1;
       }
     }
     else{
       for (size_t i=boundary; i < chi_v.size(); i++){
-	if (fabs(chi_v[i]) > 0.7){
-	  avg_slope += slope_v[i];
-	  count += 1;
-	}
+	if ( fabs( dist_v[i] - dist_v[boundary] ) > _muon_length_used ) continue;
+	if (fabs(chi_v[i]) > 0.7) continue;
+	avg_slope += slope_v[i];
+	count += 1;
       }
     }
 
@@ -129,8 +137,11 @@ namespace michel{
 
     double angle = fabs(atan(arctan));
 
-    if(_verbosity <= msg::kINFO)
+    if(_verbosity <= msg::kINFO){
+      std::cout << "Muon slope   : " << slope_muon << std::endl;
+      std::cout << "Michel slope : " << slope_michel << std::endl;
       std::cout << "Angle is: " << angle << std::endl;
+    }
 
     if (angle < _min_angle){
       if(_verbosity <= msg::kINFO) {

@@ -112,6 +112,7 @@ public:
     // Attributes to be filled by external algorithms
     //
     HitIdx_t _boundary;   ///< Michel/Muon boundary point (not necessarily michel start exactly)
+    int GetBoundary() { return (int)_boundary; }
     Michel _michel;       ///< Michel
     std::vector<double>   _chi2_v;      ///< Local linear chi2 fit
     std::vector<double>   _t_mean_v;    ///< Truncated mean
