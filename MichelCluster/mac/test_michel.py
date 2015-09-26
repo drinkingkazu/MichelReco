@@ -20,7 +20,7 @@ my_proc = fmwk.ana_processor()
 for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(sys.argv[x+1])
 
-my_proc.set_io_mode(fmwk.storage_manager.kREAD)
+my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 my_proc.set_ana_output_file(  "michel_tree.root"  )
 my_proc.set_output_file    ("michel_clusters.root")
@@ -30,6 +30,7 @@ my_proc.set_output_file    ("michel_clusters.root")
 my_unit = fmwk.MichelRecoDriver()
 #my_unit.SetClusterProducer("fuzzycluster")
 my_unit.SetClusterProducer("rawcluster")
+my_unit.saveMichelClusters(True)
 #my_unit.SetClusterProducer("linecluster")
 my_unit.SetUseMC(False)
 my_unit.SetEField(0.27)
@@ -50,7 +51,7 @@ mgr = my_unit.GetManager()
 
 ##############################
 # Attach algorithm for merging
-mgr.AddMergingAlgo(michel.EdgeMerger())
+#mgr.AddMergingAlgo(michel.EdgeMerger())
 
 
 algoList = PrepareMichelAlgo()
@@ -64,12 +65,14 @@ mgr.AddAna(michel.CosmicAna())
 # add process
 my_proc.add_process(my_unit)
 
-#my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
-my_proc.set_data_to_write(fmwk.data.kHit,'linecluster')
+my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
+#my_proc.set_data_to_write(fmwk.data.kHit,'linecluster')
 #my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
 my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
+my_proc.set_data_to_write(fmwk.data.kCluster,'muon')
 #my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
 my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
+my_proc.set_data_to_write(fmwk.data.kAssociation,'muon')
 #my_proc.set_data_to_write(fmwk.data.kAssociation,'rawclusters')
 
 
