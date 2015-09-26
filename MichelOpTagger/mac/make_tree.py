@@ -4,7 +4,7 @@ def pmt_pos():
     xv = ROOT.std.vector("double")()
     yv = ROOT.std.vector("double")()
     zv = ROOT.std.vector("double")()
-    for line in open('opt_geo.txt','r').read().split('\n'):
+    for line in open('mac/opt_geo.txt','r').read().split('\n'):
         words = line.split()
         if not len(words) == 3: continue
         xv.push_back(float(words[0]))
@@ -26,7 +26,7 @@ from ROOT import flashana
 
 # Create ana_processor instance
 my_proc = fmwk.ana_processor()
-my_proc.enable_event_alignment(False)
+#my_proc.enable_event_alignment(False)
 
 # Set input root file
 for x in xrange(len(sys.argv)-1):
@@ -46,10 +46,10 @@ tagger.UseMC(False)
 tagger.UseY(True)
 tagger.SetEfield(0.5)
 #tagger.SetClusterProducer("cccluster")
-tagger.SetClusterProducer("rawluster")
-tagger.SetMinNumMuonPoints(20)
+#tagger.SetClusterProducer("rawcluster")
+tagger.SetClusterProducer("muon")
 minPointFilter = flashana.NPtFilter()
-minPointFilter.SetMinNumPoints(10)
+minPointFilter.SetMinNumPoints(30)
 tagger.Manager().SetAlgo(minPointFilter)
 tagger.Manager().SetAlgo(flashana.MaxNPEWindow())
 tagger.Manager().SetVerbosity(0)
@@ -65,9 +65,10 @@ xv,yv,zv = pmt_pos()
 #match_alg = flashana.QWeightPoint(xv,yv,zv,int(sys.argv[-1]))
 #match_alg.UsePhotonLibrary(True)
 
-match_alg = flashana.QLLMatch.GetME()
-match_alg.SetOpDetPositions(xv,yv,zv)
-match_alg.UsePhotonLibrary(True)
+#match_alg = flashana.QLLMatch.GetME()
+match_alg = flashana.QWeightPoint(5)#.GetME()
+#match_alg.SetOpDetPositions(xv,yv,zv)
+#match_alg.UsePhotonLibrary(True)
 
 tagger.Manager().SetAlgo(match_alg)
 
@@ -76,7 +77,7 @@ print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run(0);
+my_proc.run();
 
 # done!
 print

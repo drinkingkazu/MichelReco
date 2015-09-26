@@ -40,6 +40,7 @@ namespace larlite {
 
     _tree = new TTree("flash_tree","");
     _tree->Branch("npe",&_npe,"npe/D");
+    _tree->Branch("fx",&_flash_x,"fx/D");
     _tree->Branch("fy",&_flash_y,"fy/D");
     _tree->Branch("fz",&_flash_z,"fz/D");
     _tree->Branch("tx",&_tpc_x,"tx/D");
@@ -185,6 +186,8 @@ namespace larlite {
       _npe     = flash.TotalPE();
       _score   = match.score;
       _flash_time = flash.Time();
+      _flash_x = (_flash_time/0.5)*_t2cm; // 0.5 is sampling time
+      _flash_y = flash.YCenter();
       _mc_time = _mc_x = _mc_y = _mc_z = -1;
       if(_use_mc) {
 	auto const& mct = (*ev_mctrack)[match.tpc_id];
