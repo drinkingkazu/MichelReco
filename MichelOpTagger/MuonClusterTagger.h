@@ -17,6 +17,7 @@
 
 #include "Analysis/ana_base.h"
 #include "OpT0Finder/Base/FlashMatchManager.h"
+#include "FindOpMichel.h"
 #include <TTree.h>
 
 namespace larlite {
@@ -50,6 +51,9 @@ namespace larlite {
     
     void SetEfield(double efield) { _Efield = efield; }
 
+    /// add michel finding algorithm
+    void AddMichelFinder(larlite::FindOpMichel algo) { _FindOpMichel = algo; }
+
   protected:
 
     std::string _clusProducer;
@@ -79,6 +83,15 @@ namespace larlite {
     double _mc_y;
     double _mc_z;
     double _mc_dx;
+
+    // tree containing muon->michel optical match info
+    TTree* _match_tree;
+    double _dy, _dz;
+    double _muon_t, _michel_t;
+    double _muon_pe, _michel_pe;
+
+    // FindOpMichel algorithm
+    FindOpMichel _FindOpMichel;
     
   };
 }

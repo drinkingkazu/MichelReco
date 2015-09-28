@@ -16,6 +16,7 @@ namespace larlite {
 
   MuonClusterTagger::MuonClusterTagger()
     : _tree(nullptr)
+    , _match_tree(nullptr)
   {
     _Efield = 0.5; // kV/cm
     _clusProducer = "muon";
@@ -54,6 +55,14 @@ namespace larlite {
     _tree->Branch("mc_dx",&_mc_dx,"mc_dx/D");
     _tree->Branch("score",&_score,"score/D");
 
+    _match_tree = new TTree("match_tree","");
+    _match_tree->Branch("dz",&_dz,"dz/D");
+    _match_tree->Branch("dy",&_dy,"dy/D");
+    _match_tree->Branch("muon_t",&_muon_t,"muon_t/D");
+    _match_tree->Branch("mimchel_t",&_michel_t,"michel_t/D");
+    _match_tree->Branch("muon_pe",&_muon_pe,"muon_pe/D");
+    _match_tree->Branch("mimchel_pe",&_michel_pe,"michel_pe/D");
+
     return true;
   }
   
@@ -72,7 +81,7 @@ namespace larlite {
     // grab Cluster data-product
     auto ev_clus = storage->get_data<event_cluster>(_clusProducer);
     if(!ev_clus || ev_clus->empty()) {
-      std::cout<<"No cluster found. Skipping event: "<<storage->event_id()<<std::endl;
+      //std::cout<<"No cluster found. Skipping event: "<<storage->event_id()<<std::endl;
       return false;
     }
 
@@ -188,6 +197,29 @@ namespace larlite {
       _flash_time = flash.Time();
       _flash_x = (_flash_time/0.5)*_t2cm; // 0.5 is sampling time
       _flash_y = flash.YCenter();
+      
+      // if the z-distance is not too large -> assume good match
+      // now try and find the michel
+      auto matched_flash = _FindOpMichel.FindMichelMatch(*ev_flash,flash);
+      std::cout << "matched flash is : " << matched_flash << std::endl;
+      if (matched_flash >= 0){
+	auto michel_flash = (*ev_flash)[matched_flash];
+	_muon_t    = flash.Time();
+	_muon_pe   = flash.TotalPE();
+	_michel_t  = michel_flash.Time();
+	_michel_pe = michel_flash.TotalPE();
+	_dz        = fabs(flash.ZCenter() - michel_flash.ZCenter());
+	_dy        = fabs(flash.YCenter() - michel_flash.YCenter());
+	std::cout << "muon T    = " << _muon_t << std::endl
+		  << "michel T  = " << _michel_t << std::endl
+		  << "delta T   = " << fabs(_muon_t-_michel_t) << std::endl
+		  << "delta Z   = " << _dz << std::endl
+		  << "delta Y   = " << _dy << std::endl
+		  << "muon PE   = " << _muon_pe << std::endl
+		  << "michel PE = " << _michel_pe << std::endl << std::endl;
+	_match_tree->Fill();
+      }
+
       _mc_time = _mc_x = _mc_y = _mc_z = -1;
       if(_use_mc) {
 	auto const& mct = (*ev_mctrack)[match.tpc_id];
@@ -216,7 +248,7 @@ namespace larlite {
 	  if(step1.X() > max_x) max_x = step1.X();
 	}
 	_mc_dx = max_x - min_x;
-      }
+      }// if we are using mc info
       _tree->Fill();
     }
 
@@ -229,6 +261,8 @@ namespace larlite {
       _fout->cd();
       if (_tree)
 	_tree->Write();
+      if (_match_tree)
+	_match_tree->Write();
     }
 
     return true;

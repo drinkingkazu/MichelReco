@@ -26,7 +26,7 @@ from ROOT import flashana
 
 # Create ana_processor instance
 my_proc = fmwk.ana_processor()
-#my_proc.enable_event_alignment(False)
+my_proc.enable_event_alignment(False)
 
 # Set input root file
 for x in xrange(len(sys.argv)-1):
@@ -45,6 +45,10 @@ tagger = fmwk.MuonClusterTagger()
 tagger.UseMC(False)
 tagger.UseY(True)
 tagger.SetEfield(0.5)
+# michel optical flash finder
+michel_finder = fmwk.FindOpMichel()
+michel_finder.SetTimeWindow(5) # in micro-seconds
+tagger.AddMichelFinder(michel_finder)
 #tagger.SetClusterProducer("cccluster")
 #tagger.SetClusterProducer("rawcluster")
 tagger.SetClusterProducer("muon")

@@ -10,6 +10,9 @@
 #pragma link off all functions;
 
 #pragma link C++ class larlite::MuonClusterTagger+;
+#pragma link C++ class larlite::FindOpMichel+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
+
 
