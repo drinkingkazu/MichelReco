@@ -30,7 +30,6 @@ my_proc.enable_event_alignment(False)
 
 # Set input root file
 for x in xrange(len(sys.argv)-1):
-    print sys.argv[x+1]
     my_proc.add_input_file(sys.argv[x+1])
 
 # Specify IO mode
@@ -45,6 +44,7 @@ tagger = fmwk.MuonClusterTagger()
 tagger.UseMC(False)
 tagger.UseY(True)
 tagger.SetEfield(0.5)
+tagger.SetVerbose(False)
 # michel optical flash finder
 michel_finder = fmwk.FindOpMichel()
 michel_finder.SetTimeWindow(5) # in micro-seconds

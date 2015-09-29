@@ -54,7 +54,13 @@ namespace larlite {
     /// add michel finding algorithm
     void AddMichelFinder(larlite::FindOpMichel algo) { _FindOpMichel = algo; }
 
+    /// verbosity flag setter
+    void SetVerbose(bool on) { _verbose = on; _FindOpMichel.SetVerbose(on); }
+
   protected:
+
+    /// verbosity flag
+    bool _verbose;
 
     std::string _clusProducer;
     
@@ -86,6 +92,7 @@ namespace larlite {
 
     // tree containing muon->michel optical match info
     TTree* _match_tree;
+    double _tpc_flash_dz; // distance in z between matched tpc track and pmt flash
     double _dy, _dz;
     double _muon_t, _michel_t;
     double _muon_pe, _michel_pe;

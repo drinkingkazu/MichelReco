@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include "DataFormat/opflash.h"
+#include "TTree.h"
 
 namespace larlite {
   /**
@@ -39,7 +40,7 @@ namespace larlite {
      * @return position of flash for candidate michel in input vector. If none found returns -1
      */
     int FindMichelMatch(const std::vector<larlite::opflash>& flashes,
-			const opflash& muon) const;
+			const opflash& muon);
 
     /**
      * @brief get the compatibility for two flashes being muon-michel
@@ -55,13 +56,38 @@ namespace larlite {
      */
     void SetTimeWindow(double t) { _time_window = t; }
 
+    /**
+     * @brief verobisty flag setter
+     */
+    void SetVerbose(bool on) { _verbose = on; }
+
+    /**
+     * @brief return tree filled by algorithm
+     */
+    TTree* GetTree() { return _tree; }
+
+    /**
+     * @brief initialize algorithm
+     */
+    void initialize();
+
   protected:
+
+    /// verbosity flag
+    bool _verbose;
 
     /// algorithm name
     std::string _name;
 
     /// search-time : how far in time search for the michel
     double _time_window;
+
+    TTree* _tree;
+    int _n_compat;    // number of flashes within time allowed time-window
+    double _max_PE;   // max. num of PE for all flahsed in the time-window
+    double _min_d;    // min. distance for all flashes in the time-window;
+    double _match_PE; // PE for matched flash (michel candidate)
+    double _match_d;  // distance for matched flash (michel candidate)
     
   };
 }

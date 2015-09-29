@@ -24,6 +24,8 @@ namespace larlite {
     _use_y  = true;
     _name = "MuonClusterTagger";
     _fout = 0;
+    _verbose = false;
+
     return;
   }
   
@@ -56,12 +58,15 @@ namespace larlite {
     _tree->Branch("score",&_score,"score/D");
 
     _match_tree = new TTree("match_tree","");
+    _match_tree->Branch("tpc_flash_dz",&_tpc_flash_dz,"tpc_flash_dz/D");
     _match_tree->Branch("dz",&_dz,"dz/D");
     _match_tree->Branch("dy",&_dy,"dy/D");
     _match_tree->Branch("muon_t",&_muon_t,"muon_t/D");
     _match_tree->Branch("mimchel_t",&_michel_t,"michel_t/D");
     _match_tree->Branch("muon_pe",&_muon_pe,"muon_pe/D");
     _match_tree->Branch("mimchel_pe",&_michel_pe,"michel_pe/D");
+
+    _FindOpMichel.initialize();
 
     return true;
   }
@@ -181,7 +186,8 @@ namespace larlite {
     }// for all optical flashes
       
     auto const res = _mgr.Match();
-    std::cout << "number of matches found: " << res.size() << std::endl;
+    if (_verbose)
+      std::cout << "number of matches found: " << res.size() << std::endl;
     ::geoalgo::LineSegment line;
     ::geoalgo::Point_t pt(0,0,0);
     ::geoalgo::GeoAlgo geoalg;
@@ -199,9 +205,11 @@ namespace larlite {
       _flash_y = flash.YCenter();
       
       // if the z-distance is not too large -> assume good match
+      _tpc_flash_dz = fabs(_flash_z-_tpc_z);
       // now try and find the michel
       auto matched_flash = _FindOpMichel.FindMichelMatch(*ev_flash,flash);
-      std::cout << "matched flash is : " << matched_flash << std::endl;
+      if (_verbose)
+	std::cout << "matched flash is : " << matched_flash << std::endl;
       if (matched_flash >= 0){
 	auto michel_flash = (*ev_flash)[matched_flash];
 	_muon_t    = flash.Time();
@@ -210,17 +218,20 @@ namespace larlite {
 	_michel_pe = michel_flash.TotalPE();
 	_dz        = fabs(flash.ZCenter() - michel_flash.ZCenter());
 	_dy        = fabs(flash.YCenter() - michel_flash.YCenter());
-	std::cout << "muon T    = " << _muon_t << std::endl
-		  << "michel T  = " << _michel_t << std::endl
-		  << "delta T   = " << fabs(_muon_t-_michel_t) << std::endl
-		  << "delta Z   = " << _dz << std::endl
-		  << "delta Y   = " << _dy << std::endl
-		  << "muon PE   = " << _muon_pe << std::endl
-		  << "michel PE = " << _michel_pe << std::endl << std::endl;
+	if (_verbose){
+	  std::cout << "muon T    = " << _muon_t << std::endl
+		    << "michel T  = " << _michel_t << std::endl
+		    << "delta T   = " << fabs(_muon_t-_michel_t) << std::endl
+		    << "delta Z   = " << _dz << std::endl
+		    << "delta Y   = " << _dy << std::endl
+		    << "muon PE   = " << _muon_pe << std::endl
+		    << "michel PE = " << _michel_pe << std::endl << std::endl;
+	}
 	_match_tree->Fill();
       }
 
       _mc_time = _mc_x = _mc_y = _mc_z = -1;
+
       if(_use_mc) {
 	auto const& mct = (*ev_mctrack)[match.tpc_id];
 	_mc_time = mct[0].T() * 1.e-3;
@@ -259,6 +270,7 @@ namespace larlite {
 
     if (_fout){
       _fout->cd();
+      _FindOpMichel.GetTree()->Write();
       if (_tree)
 	_tree->Write();
       if (_match_tree)
