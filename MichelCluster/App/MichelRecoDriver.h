@@ -107,6 +107,7 @@ namespace larlite {
     double _reco_energy;
     std::vector<double> _michel_hit_frac;
     std::vector<double> _michel_hit_Qtot;
+    double _QMichelMC; // michel charge from MCShower Charge() function
     double _QMichel; // sum of Q from hits > 10% michel in EDep (only Michel contribution to charge)
     double _QMichelTot; // sum of Q from all hits in EDep (only Michel contribution to charge)
     double _QMichelReco; // sum of Q from hits that have been reco'd as michel
