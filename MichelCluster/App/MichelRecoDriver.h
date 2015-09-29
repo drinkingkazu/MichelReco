@@ -108,9 +108,12 @@ namespace larlite {
     std::vector<double> _michel_hit_frac;
     std::vector<double> _michel_hit_Qtot;
     double _QMichel; // sum of Q from hits > 10% michel in EDep (only Michel contribution to charge)
+    double _QMichelTot; // sum of Q from all hits in EDep (only Michel contribution to charge)
     double _QMichelReco; // sum of Q from hits that have been reco'd as michel
     double _totQHits; // sum of Q from hits > 10% michel in EDep
-    
+    double _lifetimeCorr; // factor by which charge needs to be corrected to get an accurate lifetime
+    double _mc_x; // x-position where michel starts
+
     /// boolean to select if to save Michel Clusters or not
     bool _save_clusters;
 

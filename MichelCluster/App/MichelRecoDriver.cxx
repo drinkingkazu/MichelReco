@@ -56,9 +56,10 @@ namespace larlite {
     _mc_tree->Branch("_michel_hit_frac", "std::vector<double>" , &_michel_hit_frac);
     _mc_tree->Branch("_michel_hit_Qtot", "std::vector<double>" , &_michel_hit_Qtot);
     _mc_tree->Branch("_QMichel", &_QMichel, "QMichel/D");
+    _mc_tree->Branch("_QMichelTot", &_QMichelTot, "QMichelTot/D");
     _mc_tree->Branch("_QMichelReco", &_QMichelReco, "QMichelReco/D");
     _mc_tree->Branch("_totQHits", &_totQHits, "totQHits/D");
-
+    _mc_tree->Branch("_lifetimeCorr", &_lifetimeCorr, "lifetimeCorr/D");
     _mgr.Initialize();
 
     return true;
@@ -300,7 +301,10 @@ namespace larlite {
 	    (mcs.DetProfile().E()/mcs.Start().E()  > 0.5
 	     || mcs.DetProfile().E() >= 15) ) {
 	  _mc_energy = mcs.DetProfile().E();
-	    shower_exists = true;
+	  // calculate lifetime correction
+	  _mc_x = mcs.DetProfile().X();
+	  _lifetimeCorr = exp(_mc_x/160./3.);
+	  shower_exists = true;
 	}
       }
 
@@ -373,6 +377,7 @@ namespace larlite {
 	  auto parts = btalgo.MCQ(wire_hit);
 	  
 	  double michel_part = parts.at(0);
+	  _QMichelTot += michel_part;
 	  double other_part  = parts.at(1);
 	  double hit_frac    = michel_part / ( michel_part + other_part );
 	  hit_Qtot_michel.push_back(michel_part);
