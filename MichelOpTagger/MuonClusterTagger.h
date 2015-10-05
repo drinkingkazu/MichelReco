@@ -17,7 +17,7 @@
 
 #include "Analysis/ana_base.h"
 #include "OpT0Finder/Base/FlashMatchManager.h"
-#include "FindOpMichel.h"
+#include "FindFlashMichel.h"
 #include <TTree.h>
 
 namespace larlite {
@@ -52,10 +52,10 @@ namespace larlite {
     void SetEfield(double efield) { _Efield = efield; }
 
     /// add michel finding algorithm
-    void AddMichelFinder(larlite::FindOpMichel algo) { _FindOpMichel = algo; }
+    void AddMichelFinder(larlite::FindFlashMichel algo) { _FindFlashMichel = algo; }
 
     /// verbosity flag setter
-    void SetVerbose(bool on) { _verbose = on; _FindOpMichel.SetVerbose(on); }
+    void SetVerbose(bool on) { _verbose = on; _FindFlashMichel.SetVerbose(on); }
 
   protected:
 
@@ -84,6 +84,9 @@ namespace larlite {
     double _tpc_z;
     double _score;
     double _flash_time;
+    // _t_drift : time the track actually drifted in the TPC
+    // this is = ( RO time ) - ( matched PMT time )
+    double _t_drift;
     double _mc_time;
     double _mc_x;
     double _mc_y;
@@ -98,7 +101,7 @@ namespace larlite {
     double _muon_pe, _michel_pe;
 
     // FindOpMichel algorithm
-    FindOpMichel _FindOpMichel;
+    FindFlashMichel _FindFlashMichel;
     
   };
 }

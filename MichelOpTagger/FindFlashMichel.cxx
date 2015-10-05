@@ -1,20 +1,20 @@
-#ifndef LARLITE_FINDOPMICHEL_CXX
-#define LARLITE_FINDOPMICHEL_CXX
+#ifndef LARLITE_FINDFLASHMICHEL_CXX
+#define LARLITE_FINDFLASHMICHEL_CXX
 
-#include "FindOpMichel.h"
+#include "FindFlashMichel.h"
 #include <cmath>
 
 namespace larlite {
 
-  FindOpMichel::FindOpMichel()
+  FindFlashMichel::FindFlashMichel()
     : _tree(nullptr)
   {
-    _name = "FindOpMichel";
+    _name = "FindFlashMichel";
     _time_window = 5; // usec
     _verbose = false;
   }
 
-  void FindOpMichel::initialize()
+  void FindFlashMichel::initialize()
   {
     if (_tree) delete _tree;
     _tree = new TTree("_tree","op match tree");
@@ -27,7 +27,7 @@ namespace larlite {
     return;
   }
 
-  int FindOpMichel::FindMichelMatch(const std::vector<larlite::opflash>& flashes,
+  int FindFlashMichel::FindMichelMatch(const std::vector<larlite::opflash>& flashes,
 				    const opflash& muon)
   {
 
@@ -59,7 +59,7 @@ namespace larlite {
       if (flash.TotalPE() > _max_PE)
 	_max_PE = flash.TotalPE();
 
-      auto score = MatchScore(muon,flash);
+      auto score = MatchScoreNPE(flash);
       if (score > max_score) { 
 	_min_d = 1./score;
 	_match_d = _min_d;
@@ -79,7 +79,7 @@ namespace larlite {
     return best_match;
   }
 
-  double FindOpMichel::MatchScore(const opflash& muon, const opflash& michel) const
+  double FindFlashMichel::MatchScoreDistance(const opflash& muon, const opflash& michel) const
   {
 
     // return distance in y-z space between flashes
@@ -87,6 +87,12 @@ namespace larlite {
 			 ( (muon.ZCenter() - michel.ZCenter()) * (muon.ZCenter() - michel.ZCenter()) ) );
 
     return 1./dist;
+  }
+
+  double FindFlashMichel::MatchScoreNPE(const opflash& michel) const
+  {
+
+    return michel.TotalPE();
   }
 
 }

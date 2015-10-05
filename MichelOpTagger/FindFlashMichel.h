@@ -1,9 +1,9 @@
 /**
- * \file FindOpMichel.h
+ * \file FindFlashMichel.h
  *
  * \ingroup MichelOpTagger
  * 
- * \brief Class def header for a class FindOpMichel
+ * \brief Class def header for a class FindFlashMichel
  *
  * @author david caratelli
  */
@@ -12,8 +12,8 @@
 
     @{*/
 
-#ifndef LARLITE_FINDOPMICHEL_H
-#define LARLITE_FINDOPMICHEL_H
+#ifndef LARLITE_FINDFLASHMICHEL_H
+#define LARLITE_FINDFLASHMICHEL_H
 
 #include <iostream>
 #include "DataFormat/opflash.h"
@@ -21,17 +21,17 @@
 
 namespace larlite {
   /**
-     \class FindOpMichel
+     \class FindFlashMichel
    */
-  class FindOpMichel {
+  class FindFlashMichel {
   
   public:
 
     /// Default constructor
-    FindOpMichel();
+    FindFlashMichel();
 
     /// Default destructor
-    virtual ~FindOpMichel(){}
+    virtual ~FindFlashMichel(){}
 
     /**
      * @brief find candidate michel flash that matches a candidate decaying muon flash
@@ -44,11 +44,22 @@ namespace larlite {
 
     /**
      * @brief get the compatibility for two flashes being muon-michel
+     * @detail this function uses the distance between the two
+     * as the metric to score a match (closer -> higher match)
      * @inpiut opflash muon   -> candidate muon flash
      * @inpiut opflash michel -> candidate michel flash
      * @return double -> score of flash compatibility
      */
-    double MatchScore(const opflash& muon, const opflash& michel) const;
+    double MatchScoreDistance(const opflash& muon, const opflash& michel) const;
+
+    /**
+     * @brief get the compatibility for two flashes being muon-michel
+     * @detail michel candidate w/ highest PE count has highest score
+     * @inpiut opflash muon   -> candidate muon flash
+     * @inpiut opflash michel -> candidate michel flash
+     * @return double -> score of flash compatibility
+     */
+    double MatchScoreNPE(const opflash& michel) const;
 
     /**
      * @brief set time-window in which to search for michel

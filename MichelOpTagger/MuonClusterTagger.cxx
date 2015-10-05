@@ -50,6 +50,7 @@ namespace larlite {
     _tree->Branch("ty",&_tpc_y,"ty/D");
     _tree->Branch("tz",&_tpc_z,"tz/D");
     _tree->Branch("ft",&_flash_time,"ft/D");
+    _tree->Branch("t_drift",&_t_drift,"d_drift/D");
     _tree->Branch("mct",&_mc_time,"mct/D");
     _tree->Branch("mcx",&_mc_x,"mcx/D");
     _tree->Branch("mcy",&_mc_y,"mcy/D");
@@ -66,7 +67,7 @@ namespace larlite {
     _match_tree->Branch("muon_pe",&_muon_pe,"muon_pe/D");
     _match_tree->Branch("mimchel_pe",&_michel_pe,"michel_pe/D");
 
-    _FindOpMichel.initialize();
+    _FindFlashMichel.initialize();
 
     return true;
   }
@@ -109,6 +110,9 @@ namespace larlite {
 
 	// QCluster object
 	::flashana::QCluster_t tpc_obj;
+
+	// keep track of the average x-position of the cluster
+	double x_avg = 0.;
 	
 	// Loop over hits and fill
 	for (size_t i=0; i < hit_ass.size(); i++){
@@ -117,13 +121,17 @@ namespace larlite {
 	  
 	  ::flashana::QPoint_t pt;
 	  
-	  pt.x = h.WireID().Wire * _w2cm;
+	  pt.z = h.WireID().Wire * _w2cm;
 	  pt.y = 0;
-	  pt.z = h.PeakTime() * _t2cm;
+	  pt.x = h.PeakTime() * _t2cm;
+	  x_avg += pt.x;
 	  pt.q = h.Integral();
 	  
 	  tpc_obj.emplace_back(pt);
 	}// for all hits in the cluster
+	
+	x_avg /= hit_ass.size();
+
 	// add the QCluster to the manager
 	_mgr.Emplace(std::move(tpc_obj));
       }// for all clusters
@@ -203,11 +211,14 @@ namespace larlite {
       _flash_time = flash.Time();
       _flash_x = (_flash_time/0.5)*_t2cm; // 0.5 is sampling time
       _flash_y = flash.YCenter();
-      
+      // calculate the actual drift time for this object
+      // take the tpc time and subtract the flash time for the matched
+      // flash (all converted to usec)
+      _t_drift = (_tpc_x/_t2cm)*0.5 - _flash_time;
       // if the z-distance is not too large -> assume good match
       _tpc_flash_dz = fabs(_flash_z-_tpc_z);
       // now try and find the michel
-      auto matched_flash = _FindOpMichel.FindMichelMatch(*ev_flash,flash);
+      auto matched_flash = _FindFlashMichel.FindMichelMatch(*ev_flash,flash);
       if (_verbose)
 	std::cout << "matched flash is : " << matched_flash << std::endl;
       if (matched_flash >= 0){
@@ -270,7 +281,7 @@ namespace larlite {
 
     if (_fout){
       _fout->cd();
-      _FindOpMichel.GetTree()->Write();
+      _FindFlashMichel.GetTree()->Write();
       if (_tree)
 	_tree->Write();
       if (_match_tree)
