@@ -33,7 +33,7 @@ my_unit.SetClusterProducer("rawcluster")
 my_unit.saveMichelClusters(True)
 #my_unit.SetClusterProducer("linecluster")
 my_unit.SetUseMC(False)
-my_unit.SetEField(0.27)
+my_unit.SetEField(0.5)
 my_unit.SetMinClusSize(15)
 
 ###########################################################

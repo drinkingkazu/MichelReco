@@ -79,6 +79,9 @@ namespace larlite {
     // grab OpFlash data-product
     auto ev_flash = storage->get_data<event_opflash>("opflash");
 
+    auto michel_opflash = storage->get_data<event_opflash>("michel");
+    storage->set_id(ev_flash->run(),ev_flash->subrun(),ev_flash->event_id());
+
     if(!ev_flash || ev_flash->empty()) {
       std::cout<<"No opflash found. Skipping event: "<<storage->event_id()<<std::endl;
       return false;
@@ -189,6 +192,9 @@ namespace larlite {
       for(unsigned int i=0; i<32; i++)
 	f.pe_v.push_back(flash.PE(i));
       f.time = flash.Time();
+
+      if (flash.TotalPE() < 10)
+	continue;
       
       _mgr.Emplace(std::move(f));
     }// for all optical flashes
@@ -220,9 +226,17 @@ namespace larlite {
       // now try and find the michel
       auto matched_flash = _FindFlashMichel.FindMichelMatch(*ev_flash,flash);
       if (_verbose)
-	std::cout << "matched flash is : " << matched_flash << std::endl;
       if (matched_flash >= 0){
+	std::cout << "matched flash is : " << matched_flash << std::endl;
+	std::cout << "event : " << ev_flash->event_id() << std::endl;
 	auto michel_flash = (*ev_flash)[matched_flash];
+	
+	// if we are to save data, save both flashes to the output
+	if (_save_michel_flash){
+	  michel_opflash->push_back(flash);
+	  michel_opflash->push_back(michel_flash);
+	}
+
 	_muon_t    = flash.Time();
 	_muon_pe   = flash.TotalPE();
 	_michel_t  = michel_flash.Time();

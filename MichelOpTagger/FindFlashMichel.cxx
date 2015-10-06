@@ -11,6 +11,7 @@ namespace larlite {
   {
     _name = "FindFlashMichel";
     _time_window = 5; // usec
+    _PEmin = 10;
     _verbose = false;
   }
 
@@ -52,6 +53,10 @@ namespace larlite {
       // first check that the two flashes are within the allowed
       // time-window
       if ( (flash.Time() - muon.Time() > _time_window) or (flash.Time() < muon.Time()) )
+	continue;
+
+      // then check that the PE of the candidate michel is large neough
+      if ( flash.TotalPE() < _PEmin)
 	continue;
 
       _n_compat += 1;

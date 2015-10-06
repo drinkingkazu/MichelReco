@@ -26,17 +26,18 @@ from ROOT import flashana
 
 # Create ana_processor instance
 my_proc = fmwk.ana_processor()
-my_proc.enable_event_alignment(False)
+my_proc.enable_event_alignment(True)
+
+# Specify IO mode
+my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 # Set input root file
 for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(sys.argv[x+1])
 
-# Specify IO mode
-my_proc.set_io_mode(fmwk.storage_manager.kREAD)
-
 # Specify output root file name
 my_proc.set_ana_output_file("ana.root")
+my_proc.set_output_file("michel_flash.root")
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
@@ -44,10 +45,12 @@ tagger = fmwk.MuonClusterTagger()
 tagger.UseMC(False)
 tagger.UseY(True)
 tagger.SetEfield(0.5)
-tagger.SetVerbose(False)
+tagger.SetVerbose(True)
+tagger.SetSaveMichelFlash(True)
 # michel optical flash finder
-michel_finder = fmwk.FindOpMichel()
+michel_finder = fmwk.FindFlashMichel()
 michel_finder.SetTimeWindow(5) # in micro-seconds
+michel_finder.SetPEMin(10) # in PE
 tagger.AddMichelFinder(michel_finder)
 #tagger.SetClusterProducer("cccluster")
 #tagger.SetClusterProducer("rawcluster")

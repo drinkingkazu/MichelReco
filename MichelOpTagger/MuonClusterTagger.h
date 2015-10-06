@@ -56,8 +56,14 @@ namespace larlite {
 
     /// verbosity flag setter
     void SetVerbose(bool on) { _verbose = on; _FindFlashMichel.SetVerbose(on); }
+    
+    /// decide if to save the michel flashes or not
+    void SetSaveMichelFlash(bool on) { _save_michel_flash = on; }
 
   protected:
+
+    /// boolean to decide if to save michels or not
+    bool _save_michel_flash;
 
     /// verbosity flag
     bool _verbose;

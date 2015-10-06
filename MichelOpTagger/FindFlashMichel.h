@@ -68,6 +68,12 @@ namespace larlite {
     void SetTimeWindow(double t) { _time_window = t; }
 
     /**
+     * @brief set minimum num of PE for michel to be a match
+     * @input pe -> photo electrons (PE)
+     */
+    void SetPEMin(double pe) { _PEmin = pe; }
+
+    /**
      * @brief verobisty flag setter
      */
     void SetVerbose(bool on) { _verbose = on; }
@@ -92,6 +98,9 @@ namespace larlite {
 
     /// search-time : how far in time search for the michel
     double _time_window;
+
+    /// minimum number of PE allowed for match
+    double _PEmin;
 
     TTree* _tree;
     int _n_compat;    // number of flashes within time allowed time-window
