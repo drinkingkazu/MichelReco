@@ -26,10 +26,10 @@ from ROOT import flashana
 
 # Create ana_processor instance
 my_proc = fmwk.ana_processor()
-my_proc.enable_event_alignment(True)
+#my_proc.enable_event_alignment(True)
 
 # Specify IO mode
-my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
+my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
 # Set input root file
 for x in xrange(len(sys.argv)-1):
@@ -37,47 +37,33 @@ for x in xrange(len(sys.argv)-1):
 
 # Specify output root file name
 my_proc.set_ana_output_file("ana.root")
-my_proc.set_output_file("michel_flash.root")
+#my_proc.set_output_file("michel_flash.root")
+my_proc.set_output_file("")
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
 tagger = fmwk.MuonClusterTagger()
 tagger.UseMC(False)
-tagger.UseY(True)
+tagger.UseY(False)
 tagger.SetEfield(0.5)
 tagger.SetVerbose(True)
-tagger.SetSaveMichelFlash(True)
+tagger.SetSaveMichelFlash(False)
 # michel optical flash finder
 michel_finder = fmwk.FindFlashMichel()
 michel_finder.SetTimeWindow(5) # in micro-seconds
-michel_finder.SetPEMin(10) # in PE
+michel_finder.SetPEMin(2) # in PE
 tagger.AddMichelFinder(michel_finder)
 #tagger.SetClusterProducer("cccluster")
 #tagger.SetClusterProducer("rawcluster")
 tagger.SetClusterProducer("muon")
-minPointFilter = flashana.NPtFilter()
-minPointFilter.SetMinNumPoints(30)
-tagger.Manager().SetAlgo(minPointFilter)
+
+match_algo = flashana.QWeightPoint(5)
+tagger.Manager().SetAlgo(match_algo)
+tagger.Manager().SetAlgo(flashana.NPtFilter())
 tagger.Manager().SetAlgo(flashana.MaxNPEWindow())
-tagger.Manager().SetVerbosity(0)
+
+tagger.Manager().SetVerbosity(3)
 my_proc.add_process(tagger)
-
-
-
-
-xv,yv,zv = pmt_pos()
-
-#match_alg = flashana.QWeightPoint(int(sys.argv[-1]))
-
-#match_alg = flashana.QWeightPoint(xv,yv,zv,int(sys.argv[-1]))
-#match_alg.UsePhotonLibrary(True)
-
-#match_alg = flashana.QLLMatch.GetME()
-match_alg = flashana.QWeightPoint(5)#.GetME()
-#match_alg.SetOpDetPositions(xv,yv,zv)
-#match_alg.UsePhotonLibrary(True)
-
-tagger.Manager().SetAlgo(match_alg)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"

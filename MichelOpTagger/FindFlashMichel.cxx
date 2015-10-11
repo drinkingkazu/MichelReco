@@ -77,8 +77,11 @@ namespace larlite {
 
     _tree->Fill();
 
-    if (_verbose)
-      std::cout << "num candidates : " << _n_compat << std::endl;
+    if (_verbose){
+      std::cout << "\tnum candidates : " << _n_compat << std::endl;
+      std::cout << "\tbest score     : " << max_score << std::endl;
+      std::cout << std::endl;
+    }
     
     // return the best match (defaults to -1 if none found)
     return best_match;
