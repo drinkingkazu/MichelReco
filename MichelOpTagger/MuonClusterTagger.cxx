@@ -20,6 +20,7 @@ namespace larlite {
   {
     _Efield = 0.5; // kV/cm
     _clusProducer = "muon";
+    _flashProducer = "opFlash";
     _use_mc = false;
     _use_y  = true;
     _name = "MuonClusterTagger";
@@ -77,7 +78,7 @@ namespace larlite {
     _mgr.Reset();
 
     // grab OpFlash data-product
-    auto ev_flash = storage->get_data<event_opflash>("opflash");
+    auto ev_flash = storage->get_data<event_opflash>(_flashProducer);
 
     auto michel_opflash = storage->get_data<event_opflash>("michel");
     storage->set_id(ev_flash->run(),ev_flash->subrun(),ev_flash->event_id());
@@ -209,6 +210,12 @@ namespace larlite {
     ::geoalgo::GeoAlgo geoalg;
     for(auto const& match : res) {
       auto const& flash = (*ev_flash)[match.flash_id];
+
+      // if we are to save data, save flash for muon
+      if (_save_michel_flash){
+	michel_opflash->push_back(flash);
+      }
+
       _flash_y = flash.YCenter();
       _flash_z = flash.ZCenter();
       _tpc_x   = match.tpc_point.x;
@@ -229,35 +236,35 @@ namespace larlite {
       auto matched_flash = _FindFlashMichel.FindMichelMatch(*ev_flash,flash);
       if (matched_flash >= 0){
 	
-      if (_verbose){
-	std::cout << "matched flash is : " << matched_flash << std::endl;
-	std::cout << "event : " << ev_flash->event_id() << std::endl;
-      }
-      auto michel_flash = (*ev_flash)[matched_flash];
-      
-      // if we are to save data, save both flashes to the output
-      if (_save_michel_flash){
-	michel_opflash->push_back(flash);
-       	michel_opflash->push_back(michel_flash);
-      }
-      
-      _muon_t    = flash.Time();
-      _muon_pe   = flash.TotalPE();
-      _michel_t  = michel_flash.Time();
-      _michel_pe = michel_flash.TotalPE();
-      _dz        = fabs(flash.ZCenter() - michel_flash.ZCenter());
-      _dy        = fabs(flash.YCenter() - michel_flash.YCenter());
-      if (_verbose){
-	std::cout << "muon T    = " << _muon_t << std::endl
-		  << "michel T  = " << _michel_t << std::endl
-		  << "delta T   = " << fabs(_muon_t-_michel_t) << std::endl
-		  << "delta Z   = " << _dz << std::endl
-		  << "delta Y   = " << _dy << std::endl
-		  << "muon PE   = " << _muon_pe << std::endl
-		  << "michel PE = " << _michel_pe << std::endl << std::endl;
-      }
-      _match_tree->Fill();
-      }
+	if (_verbose){
+	  std::cout << "matched flash is : " << matched_flash << std::endl;
+	  std::cout << "event : " << ev_flash->event_id() << std::endl;
+	}
+	auto michel_flash = (*ev_flash)[matched_flash];
+	
+	// if we are to save data, save both flashes to the output
+	if (_save_michel_flash){
+	  michel_opflash->push_back(michel_flash);
+	}
+	
+	_muon_t    = flash.Time();
+	_muon_pe   = flash.TotalPE();
+	_michel_t  = michel_flash.Time();
+	_michel_pe = michel_flash.TotalPE();
+	_dz        = fabs(flash.ZCenter() - michel_flash.ZCenter());
+	_dy        = fabs(flash.YCenter() - michel_flash.YCenter());
+	if (_verbose){
+	  std::cout << "muon T    = " << _muon_t << std::endl
+		    << "michel T  = " << _michel_t << std::endl
+		    << "delta T   = " << fabs(_muon_t-_michel_t) << std::endl
+		    << "delta Z   = " << _dz << std::endl
+		    << "delta Y   = " << _dy << std::endl
+		    << "muon PE   = " << _muon_pe << std::endl
+		    << "michel PE = " << _michel_pe << std::endl << std::endl;
+	}
+	_match_tree->Fill();
+
+      }// if a matching flash was found for the michel
       
       _mc_time = _mc_x = _mc_y = _mc_z = -1;
       

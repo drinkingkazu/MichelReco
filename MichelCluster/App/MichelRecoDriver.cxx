@@ -86,6 +86,11 @@ namespace larlite {
     // Get data products
     auto ev_cluster = storage->get_data<event_cluster>(_producer);
 
+    if(!ev_cluster || ev_cluster->empty()) {
+      std::cout<<"No cluster found. Skipping event: "<<storage->event_id()<<std::endl;
+      return false;
+    }
+
     // get ID information
     _run = storage->get_data<event_cluster>(_producer)->run();
     _subrun = storage->get_data<event_cluster>(_producer)->subrun();
@@ -113,8 +118,11 @@ namespace larlite {
     auto const& hit_ass_set = storage->find_one_ass(ev_cluster->id(), ev_hit, ev_cluster->name());
 
     // If ev_hit is null, failed to find data or assocaition (shouldn't happen)
-    if(!ev_hit || ev_hit->empty()) return false;
-
+    if(!ev_hit || ev_hit->empty()) {
+      std::cout << "No hit found. Skipping event: "<<storage->event_id()<<std::endl;
+      return false;
+    }
+    
     _q_v.clear();
     _w_v.clear();
     _t_v.clear();
@@ -419,6 +427,8 @@ namespace larlite {
   }
 
   bool MichelRecoDriver::finalize() {
+
+    _fout->cd();
     _mgr.Finalize(_fout);
     if (_hit_tree)            _hit_tree->Write();
     if (_mc_tree && _use_mc)  _mc_tree ->Write();

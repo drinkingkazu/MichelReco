@@ -48,6 +48,8 @@ namespace larlite {
     void UseY(bool on) { _use_y = on; }
 
     void SetClusterProducer(std::string s) { _clusProducer = s; }
+
+    void SetFlashProducer(std::string s) { _flashProducer = s; }
     
     void SetEfield(double efield) { _Efield = efield; }
 
@@ -69,6 +71,8 @@ namespace larlite {
     bool _verbose;
 
     std::string _clusProducer;
+
+    std::string _flashProducer;
     
     double _Efield; // kV/cm
 
