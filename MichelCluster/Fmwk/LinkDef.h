@@ -22,6 +22,7 @@
 #pragma link C++ class michel::MichelAnaBase+;
 #pragma link C++ class michel::BaseMichelAlgo+;
 #pragma link C++ class michel::BaseAlgMerger+;
+#pragma link C++ class michel::BaseAlgFilter+;
 #pragma link C++ class michel::BaseAlgBinaryMerger+;
 
 #pragma link C++ class michel::CMergeBookKeeper+;

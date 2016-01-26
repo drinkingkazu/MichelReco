@@ -9,7 +9,8 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-
+/// Cluster filter
+#pragma link C++ class michel::FilterStraightLineClusters+;
 
 /// ClusterMerger
 #pragma link C++ class michel::EdgeMerger+;
