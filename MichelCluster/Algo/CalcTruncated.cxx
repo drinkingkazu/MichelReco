@@ -26,12 +26,7 @@ namespace michel {
   
   void CalcTruncated::EventReset()
   {
-    /*
-    std::cout << "T0/clus = " << 1e6*_t0/(double)_n0 << std::endl
-	      << "T1/clus = " << 1e6*_t1/(double)_n1 << std::endl
-	      << "T2/clus = " << 1e6*_t2/(double)_n2 << std::endl
-	      << "T3/clus = " << 1e6*_t3/(double)_n3 << std::endl;
-    */
+
   }
   
   bool CalcTruncated::ProcessCluster(MichelCluster& cluster,
@@ -113,6 +108,15 @@ namespace michel {
     std::swap(cluster._dirs_v  ,slope);
 
     return true;
+  }
+
+  void CalcTruncated::Report(){
+
+    std::cout << "T0/clus = " << 1e6*_t0/(double)_n0 << std::endl
+	      << "T1/clus = " << 1e6*_t1/(double)_n1 << std::endl
+	      << "T2/clus = " << 1e6*_t2/(double)_n2 << std::endl
+	      << "T3/clus = " << 1e6*_t3/(double)_n3 << std::endl;
+
   }
   
 

@@ -56,6 +56,9 @@ namespace michel {
     /// setter function for mitigating edge effect, this number of points on the
     /// edge set equal to truncatedQ[_edgefix], maybe 0 is best I don't know
     void SetEdgeEffectFix(int e)             { _edgefix = e; }
+
+    /// report resource usage
+    void Report();
     
   private:
 

@@ -34,7 +34,7 @@ namespace michel {
     void EventReset();
 
     /// Merge function to assign a pair-wise score for a decision making
-    bool FilterCluster(MichelCluster& cluster);
+    bool FilterCluster(const MichelCluster& cluster);
 
     /// set minimum RMS allowed for a cluster (to avoid straight lines)
     void setMinRMS(double m) { _min_rms = m; }

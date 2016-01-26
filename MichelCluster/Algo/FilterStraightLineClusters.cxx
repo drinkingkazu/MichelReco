@@ -3,6 +3,8 @@
 
 #include "FilterStraightLineClusters.h"
 #include <sstream>
+#include <math.h>
+
 namespace michel{
 
   FilterStraightLineClusters::FilterStraightLineClusters(){
@@ -15,7 +17,7 @@ namespace michel{
   void FilterStraightLineClusters::EventReset()
   {}
 
-  bool FilterStraightLineClusters::FilterCluster(MichelCluster& cluster){
+  bool FilterStraightLineClusters::FilterCluster(const MichelCluster& cluster){
 
     // calculate the RMS for all hits in time / wire separately
     double avg_time = 0;
@@ -26,7 +28,7 @@ namespace michel{
     // calculate average
     for (auto const& h : cluster._all_hits){
       avg_time += h._t;
-      avg_wire += h._t;
+      avg_wire += h._w;
     }
     avg_time /= cluster._all_hits.size();
     avg_wire /= cluster._all_hits.size();
@@ -40,11 +42,19 @@ namespace michel{
     rms_time = rms_time/(cluster._all_hits.size()+1);
     rms_wire = rms_wire/(cluster._all_hits.size()+1);
 
+    if (_verbosity == msg::kDEBUG){
+      std::stringstream ss;
+      ss << "\t wire rms = " << sqrt(rms_wire)
+	 << "\t time rms = " << sqrt(rms_time)
+	 << std::endl;
+      Print(msg::kDEBUG,__FUNCTION__,ss.str());
+    }
+
     if ( (rms_time < (_min_rms*_min_rms)) or
 	 (rms_wire < (_min_rms*_min_rms)) )
 	 return false;
     
-    return false;
+    return true;
   }
   
 }

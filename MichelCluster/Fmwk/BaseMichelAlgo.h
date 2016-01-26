@@ -51,6 +51,8 @@ namespace michel {
      */
     const std::string Name() const { return _name.c_str(); }
 
+    virtual void Report(){}
+
   protected:
 
     /// Name for algorithm

@@ -43,7 +43,7 @@ namespace michel {
     */
     
     /// Function to be implemented by children classes
-    virtual bool FilterCluster(MichelCluster& cluster) = 0;
+    virtual bool FilterCluster(const MichelCluster& cluster) = 0;
 
     /**
      * @brief Return name of algorithm

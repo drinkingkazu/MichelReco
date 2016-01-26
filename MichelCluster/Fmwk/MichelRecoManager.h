@@ -17,6 +17,7 @@
 #include <iostream>
 #include "MichelCluster.h"
 #include "BaseAlgMerger.h"
+#include "BaseAlgFilter.h"
 #include "BaseMichelAlgo.h"
 #include "MichelAnaBase.h"
 #include "ColorPrint.h"
@@ -58,6 +59,9 @@ public:
 
     /// Add Merging ALgo
     void AddMergingAlgo(BaseAlgMerger *algo);
+
+    /// Add Filtering ALgo
+    void AddFilteringAlgo(BaseAlgFilter *algo);
 
     /// Reco algorithm setter
     void AddAlgo(BaseMichelAlgo *algo);
@@ -117,6 +121,10 @@ public:
     MichelClusterArray GetMergedClusters()
     { return _merged_v; }
 
+    /// Getter for input clusters (before merging)
+    MichelClusterArray GetInputClusters()
+    { return _input_v; }
+
     /// Get algorithm vector
     std::vector< michel::BaseMichelAlgo* > GetAlgoVector()
       { return _alg_v; }    
@@ -156,7 +164,10 @@ protected:
     //
     // Algorithms
     //
-    BaseAlgMerger*        _alg_merge;          ///< Merging algorithm
+    ///< Merging algorithm
+    BaseAlgMerger*        _alg_merge;
+    ///< Filtering algorithm
+    BaseAlgFilter*        _alg_filter; 
     /// Algorithms to be executed
     std::vector< michel::BaseMichelAlgo* > _alg_v;
     /// Analysis to be executed

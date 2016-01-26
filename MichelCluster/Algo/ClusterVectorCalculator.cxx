@@ -72,9 +72,9 @@ namespace michel {
   }
   
   std::vector<double> ClusterVectorCalculator::calc_smooth_mean(const MichelCluster& cluster,
-							   const double _n_window_size,
-							   const int window_cutoff,
-							   const double p_above) const
+								const double _n_window_size,
+								const int window_cutoff,
+								const double p_above) const
   {
     
     std::vector<double> charge;
