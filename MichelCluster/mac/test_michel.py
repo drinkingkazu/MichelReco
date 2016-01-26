@@ -29,7 +29,8 @@ my_proc.set_output_file    ("michel_clusters.root")
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
 #my_unit.SetClusterProducer("fuzzycluster")
-my_unit.SetClusterProducer("rawcluster")
+#my_unit.SetClusterProducer("rawcluster")
+my_unit.SetClusterProducer("pandoraCosmic")
 my_unit.saveMichelClusters(True)
 #my_unit.SetClusterProducer("linecluster")
 my_unit.SetUseMC(False)
@@ -51,7 +52,7 @@ mgr = my_unit.GetManager()
 
 ##############################
 # Attach algorithm for merging
-#mgr.AddMergingAlgo(michel.EdgeMerger())
+mgr.AddMergingAlgo(michel.EdgeMerger())
 
 
 algoList = PrepareMichelAlgo()
