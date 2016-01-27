@@ -18,6 +18,7 @@
 #include "Analysis/ana_base.h"
 #include "Fmwk/MichelRecoManager.h"
 #include "Fmwk/MichelTypes.h"
+#include <TStopwatch.h>
 #include <TTree.h>
 //Backtracker
 #include "MCComp/MCMatchAlg.h"
@@ -75,6 +76,11 @@ namespace larlite {
 
   protected:
 
+/// Stopwatch for event time profiling
+TStopwatch _event_watch; ///< For profiling
+double _event_time;
+size_t _event_ctr;
+
     /// Reco manager
     ::michel::MichelRecoManager _mgr;
 
@@ -100,6 +106,10 @@ namespace larlite {
     int _event;
 
     std::vector<michel::EventID> _events_info;
+
+    // Tree to store the amplitude of all hits
+    TTree* _MIP_tree;
+    double _hit_charge;
 
     // mc tree
     TTree* _mc_tree;

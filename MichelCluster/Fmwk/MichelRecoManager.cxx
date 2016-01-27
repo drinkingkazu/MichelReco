@@ -17,7 +17,10 @@ namespace michel {
       //, _algo_verbosity     ( msg::kNORMAL )
     , _alg_merge          ( nullptr )
     , _alg_v              ( )
-  {}
+  {
+    _event_time = 0;
+    _event_ctr  = 0;
+  }
   
   //-----------------------------------------------------------------
   void MichelRecoManager::Append(const std::vector<michel::HitPt>& hit_v)
@@ -79,6 +82,8 @@ namespace michel {
   //-----------------------------------------------------------------
   {
     _alg_merge = algo;
+    _merge_time = 0;
+    _merge_ctr  = 0;
   }
 
   //-----------------------------------------------------------------
@@ -114,10 +119,9 @@ namespace michel {
     }
   }
   
-  //-----------------------------------------------------------------
-  void MichelRecoManager::Process()
-  //-----------------------------------------------------------------
-  {
+  void MichelRecoManager::Process() {
+
+    _event_watch.Start();
     
     if (_verbosity <= msg::kDEBUG)
       Print(msg::kDEBUG, __FUNCTION__, "start!");
@@ -160,8 +164,8 @@ namespace michel {
     else {
       _watch.Start();
       _output_v = _alg_merge->Merge(_input_v);
-      _alg_time_v [kClusterMerger] += _watch.RealTime();
-      _alg_ctr_v  [kClusterMerger] += _input_v.size();
+      _merge_time += _watch.RealTime();
+      _merge_ctr  += _input_v.size();
     }
     
     // save merged clusters
@@ -185,7 +189,8 @@ namespace michel {
     
     std::vector<MichelCluster> processed_cluster_v;
     processed_cluster_v.reserve(_output_v.size());
-    
+
+    // loop through the various clusters
     for (auto& cluster : _output_v ) {
       // start going through algorithms and executing
       // them consecutively
@@ -245,8 +250,13 @@ namespace michel {
     
     if (_verbosity <= msg::kDEBUG)
       Print(msg::kDEBUG, __FUNCTION__, "end!");
-    
-  }
+
+
+    _event_time += _event_watch.RealTime();    
+    _event_ctr  += 1;
+
+    return;
+  }// end Process function
   
   //-----------------------------------------------------------------
   void MichelRecoManager::EventReset()
@@ -268,6 +278,13 @@ namespace michel {
     // loop through algos and evaluate time-performance
     std::cout << std::endl
 	      << "========================================= Time Report =========================================" << std::endl;
+    if (_alg_merge){
+      double merge_time = _merge_time / _merge_ctr;
+      std::cout <<  std::setw(25) << _alg_merge->Name() << "\t Merge Time: " 
+		<< std::setw(10) << merge_time * 1.e6  << " [us/cluster]"
+		<< "\t Clusters Scanned: " << _merge_ctr << std::endl
+		<< "===============================================================================================" << std::endl;
+    }
     for (size_t n = 0; n < _alg_v.size(); n++) {
       double alg_time = _alg_time_v[n] / ((double)_alg_ctr_v[n]);
       std::cout <<  std::setw(25) << _alg_v[n]->Name() << "\t Algo Time: " 
@@ -276,9 +293,13 @@ namespace michel {
       if (_alg_v[n]->Name() == "CalcTruncated")
 	_alg_v[n]->EventReset();
       _alg_v[n]->Report();
-      std::cout << "===============================================================================================" << std::endl
-		<< std::endl;
-    }
+      std::cout << "===============================================================================================" << std::endl;
+    }// for all algorithms
+    double event_time = _event_time/_event_ctr;
+    std::cout <<  std::setw(37) << "\t Full Event Time: " 
+	      << std::setw(12) << event_time * 1.e6  << " [us/event]"
+	      << "\t Events Scanned: " << _event_ctr << std::endl;
+    std::cout << "===============================================================================================" << std::endl;
     
   }
 }

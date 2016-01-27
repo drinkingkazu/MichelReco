@@ -15,6 +15,7 @@ namespace larlite {
 
   MichelRecoDriver::MichelRecoDriver()
     : _hit_tree(nullptr)
+    , _MIP_tree(nullptr)
     , _mc_tree(nullptr)
   {
     _name="MichelRecoDriver";
@@ -63,10 +64,20 @@ namespace larlite {
     _mc_tree->Branch("_lifetimeCorr", &_lifetimeCorr, "lifetimeCorr/D");
     _mgr.Initialize();
 
+    // write a tree that stores the hit charge for every hit in the event
+    _MIP_tree = new TTree("_MIP_tree","MIP Tree");
+    _MIP_tree->Branch("_hit_charge",&_hit_charge,"hit_charge/D");
+    
+
+    _event_time = 0;
+    _event_ctr  = 0;
+
     return true;
   }
   
   bool MichelRecoDriver::analyze(storage_manager* storage) {
+
+    _event_watch.Start();
 
     _QMichelReco = 0.;
     _QMichel = 0.;
@@ -136,6 +147,8 @@ namespace larlite {
       auto const& h = (*ev_hit)[hit_index];
       // chrage :
       double q = h.Integral();
+      _hit_charge = q;
+      _MIP_tree->Fill();
       double w = h.WireID().Wire * w2cm;
       double t = (h.PeakTime()-3200) * t2cm;
 
@@ -421,17 +434,25 @@ namespace larlite {
       _michel_hit_frac.clear();
       _michel_hit_Qtot.clear();
     }
-  
+
+    _event_time += _event_watch.RealTime();    
+    _event_ctr  += 1;  
 
   return true;
   }
 
   bool MichelRecoDriver::finalize() {
 
+    std::cout << "time/event = " << _event_time/_event_ctr * 1.e6 << std::endl;
+
     _fout->cd();
     _mgr.Finalize(_fout);
-    if (_hit_tree)            _hit_tree->Write();
-    if (_mc_tree && _use_mc)  _mc_tree ->Write();
+    if (_hit_tree)
+      _hit_tree->Write();
+    if (_mc_tree && _use_mc)
+      _mc_tree ->Write();
+    if (_MIP_tree)
+      _MIP_tree->Write();
     return true;
   }
 

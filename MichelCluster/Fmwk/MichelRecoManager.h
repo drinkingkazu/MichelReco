@@ -179,6 +179,11 @@ protected:
     TStopwatch _watch; ///< For profiling
     std::vector<double> _alg_time_v; ///< Overall time for processing
     std::vector<size_t> _alg_ctr_v;  ///< Overall number of clusters processed by algo
+    double _merge_time; ///< Overall time for processing cluster merging
+    size_t _merge_ctr;  ///< number of clusters processed by merging
+    TStopwatch _event_watch;
+    double _event_time; ///< overall time for the entire event processing
+    size_t _event_ctr;  ///< number of events scanned
 
     /// Event information
     EventID _id;

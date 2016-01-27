@@ -39,6 +39,7 @@
 #pragma link C++ class michel::CutOnMuonLength+;
 #pragma link C++ class michel::CutOnMuonLinearity+;
 #pragma link C++ class michel::CutOnMichelNumHits+;
+#pragma link C++ class michel::CutOnTotNumHits+;
 #pragma link C++ class michel::RequireLargeAngle+;
 #pragma link C++ class michel::CutOnFiducialVolume+;
 #pragma link C++ class michel::RemoveFakePMTSignals+;

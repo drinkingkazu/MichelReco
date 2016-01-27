@@ -5,6 +5,15 @@ import parse_fiducial_volume_definitions as fidparser
 def PrepareMichelAlgo():
 
     algoList = []
+
+
+    ########################################
+    # remove clusters w/ less than some #
+    # of hits
+    minclushits = michel.CutOnTotNumHits()
+    minclushits.SetMinTotHits(25)
+    algoList.append(minclushits)
+
     #########################################
     # calculate various cluster parameters...
     ctrunk = michel.CalcTruncated()
