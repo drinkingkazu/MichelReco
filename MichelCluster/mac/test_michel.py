@@ -50,6 +50,12 @@ mgr = my_unit.GetManager()
 # mgr.SetVerbosity(michel.msg.kDEBUG)
 # mgr.SetDebug(True)
 
+#############################
+# Attach cluster filter algo
+filterAlgo =  michel.FilterStraightLineClusters()
+filterAlgo.setMinRMS(0.5)
+mgr.AddFilteringAlgo(filterAlgo)
+
 ##############################
 # Attach algorithm for merging
 mgr.AddMergingAlgo(michel.EdgeMerger())
@@ -66,7 +72,7 @@ mgr.AddAna(michel.CosmicAna())
 # add process
 my_proc.add_process(my_unit)
 
-my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
+#my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
 #my_proc.set_data_to_write(fmwk.data.kHit,'linecluster')
 #my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
 my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
