@@ -93,7 +93,7 @@ namespace michel {
 
       if (_verbosity <= msg::kINFO){
 	std::stringstream ss;
-	ss << "merging step " << step;
+	ss << "merging step " << step << "\t nearbyHits size : " << nearbyHits.size();
 	Print(msg::kINFO,this->Name(),ss.str());
       }
       
@@ -108,6 +108,7 @@ namespace michel {
 	there = false;
 	
 	for (auto& mh : michel) { if(mh._id == h._id) { there = true; break;} }
+	if(there) continue;
 	for (auto& ch : cluster._hits) { if(ch._id == h._id) { there = true; break;} }
 	if(there) continue;
 	
@@ -126,25 +127,27 @@ namespace michel {
       // the specific michel hit we are at, include them
       // have a vector where additional hits are temporarily stored
       std::vector<michel::HitPt> newHits;
-      for (auto& mh : michel){
-	// if we should use a fixed hit radius
-	if (_use_hit_radius){
-	  for (auto& h : nearbyHits){
-	    if (mh.SqDist(h) < _hit_radius)
+      for (auto& h : nearbyHits){
+	for (auto& mh : michel){
+	  // if we should use a fixed hit radius
+	  if (_use_hit_radius){
+	    if (mh.SqDist(h) < _hit_radius){
 	      newHits.push_back(h);
+	      break;
+	    }
 	  }
-	}
-	// else, if we use the distance to the start
-	else{
-	  // distance to start:
-	  auto dstart = start.SqDist(mh);
-	  for (auto& h : nearbyHits){
-	    if (mh.SqDist(h) < dstart)
+	  // else, if we use the distance to the start
+	  else{
+	    // distance to start:
+	    auto dstart = start.SqDist(mh);
+	    if (mh.SqDist(h) < dstart){
 	      newHits.push_back(h);
-	  }
-	}// if we should use distance to start
-      }// for all michel hits
-      
+	      break;
+	    }
+	  }// if we should use distance to start
+	}// for all michel hits
+      }// for all nearby hits
+
       if (_verbosity <= msg::kINFO){
 	std::stringstream ss;
 	ss << "added " << newHits.size() << " hits";
@@ -163,11 +166,6 @@ namespace michel {
     
       // if we should merge-till-converge -> keep merge true
       // if we have not added any new hits -> turn merge off
-      if (_verbosity <= msg::kINFO){
-	std::stringstream ss;
-	ss << "added " << newHits.size() << " hits";
-	Print(msg::kINFO,this->Name(),ss.str());
-      }
       if ( (newHits.size() == 0) or (!_merge_till_converge) )
 	merge = false;
       

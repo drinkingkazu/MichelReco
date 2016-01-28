@@ -451,8 +451,8 @@ namespace larlite {
       _hit_tree->Write();
     if (_mc_tree && _use_mc)
       _mc_tree ->Write();
-    if (_MIP_tree)
-      _MIP_tree->Write();
+    //if (_MIP_tree)
+    //  _MIP_tree->Write();
     return true;
   }
 
