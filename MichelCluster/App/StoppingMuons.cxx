@@ -1,7 +1,7 @@
-#ifndef LARLITE_MICHELFILTER_CXX
-#define LARLITE_MICHELFILTER_CXX
+#ifndef LARLITE_STOPPINGMUONS_CXX
+#define LARLITE_STOPPINGMUONS_CXX
 
-#include "MichelFilter.h"
+#include "StoppingMuons.h"
 #include "DataFormat/mcshower.h"
 #include "DataFormat/mctrack.h"
 
@@ -9,18 +9,14 @@
 
 namespace larlite {
 
-  bool MichelFilter::initialize() {
+  bool StoppingMuons::initialize() {
     
     michel_filter_tree = new TTree("michel_filter_tree","michel_filter_tree");
     michel_filter_tree->Branch("_michel_x",&_michel_x,"michel_x/D");
-    michel_filter_tree->Branch("_michel_y",&_michel_y,"michel_y/D");
-    michel_filter_tree->Branch("_michel_z",&_michel_z,"michel_z/D");
     michel_filter_tree->Branch("_michel_energy",&_michel_energy,"michel_energy/D");
-    michel_filter_tree->Branch("_michel_charge",&_michel_charge,"michel_charge/D");
-    michel_filter_tree->Branch("_michel_det",&_michel_det,"michel_det/D");
-    michel_filter_tree->Branch("_lifetime_correction",&_lifetime_correction,"lifetime_correction/D");
-    michel_filter_tree->Branch("_michel_process",&_michel_process);
-    michel_filter_tree->Branch("_contained",&_contained,"contained/I");
+    michel_filter_tree->Branch("_michel_charge",&_michel_charge,"_michel_charge/D");
+    michel_filter_tree->Branch("_michel_det",&_michel_det,"_michel_det/D");
+    michel_filter_tree->Branch("_lifetime_correction",&_lifetime_correction,"_lifetime_correction/D");
 
     event_filter_tree = new TTree("event_filter_tree","Event Filter Tree");
     event_filter_tree->Branch("_run",&_run,"run/I");    
@@ -34,7 +30,7 @@ namespace larlite {
     return true;
   }
   
-  bool MichelFilter::analyze(storage_manager* storage) {
+  bool StoppingMuons::analyze(storage_manager* storage) {
 
     total_evts++;
 
@@ -42,9 +38,9 @@ namespace larlite {
     _n_michel = 0;
 
     //Grab the MCShowers
-    auto ev_mcshower = storage->get_data<event_mcshower>("mcreco");    
-    if(!ev_mcshower) {
-      print(larlite::msg::kERROR,__FUNCTION__,Form("Did not find specified data product, mcshower!"));
+    auto ev_mctrack = storage->get_data<event_mctrack>("mcreco");    
+    if(!ev_mctrack) {
+      print(larlite::msg::kERROR,__FUNCTION__,Form("Did not find specified data product, mctrack!"));
       return false;
     }  
 
@@ -52,36 +48,29 @@ namespace larlite {
     _subrun = storage->subrun_id();
     _event  = storage->event_id();
     
-    //If no MCShowers in event, no michels for sure
-    if(!ev_mcshower->size()){
+    //If no MCTracks in event, no michels for sure
+    if(!ev_mctrack->size()){
       if(_flip) { kept_evts++; return true; }
     }
 
     bool there_is_michel = false;
 
     //Loop over MCShowers, ask if they came from a muon decay
-    for(auto const& mcs : *ev_mcshower){
+    for(auto const& mct : *ev_mctrack){
 
-      if( ((mcs.MotherPdgCode() == 13) or (mcs.MotherPdgCode() == -13) ) &&
-	  ( mcs.Process() != "muIoni" ) ) {
-	//( (mcs.Process() == "Decay") ) ) { //or (mcs.Process() == "muMinusCaptureAtRest") ) ) {
-	
-	_michel_process   = mcs.Process();
+      if (mct.size() < 2)
+	continue;
+
+      //    if ( (mct[mct.size()-1].X() > 0) &&  
+      /*
+
+      if( ((mct.MotherPdgCode() == 13) or (mcs.MotherPdgCode() == -13) ) &&
+	  ( (mct.Process() == "Decay") ) ) { //or (mcs.Process() == "muMinusCaptureAtRest") ) ) {
+
 	_michel_energy = mcs.Start().E();
 	_michel_charge = mcs.Charge(2);
 	_michel_det    = mcs.DetProfile().E();
 	_michel_x      = mcs.DetProfile().X();
-	_michel_y      = mcs.DetProfile().Y();
-	_michel_z      = mcs.DetProfile().Z();
-	_contained     = 0;
-
-	// make sure the MCShower is in the detector
-	if ( (_michel_x > 0)    && (_michel_x < 256)  &&
-	     (_michel_x > -116) && (_michel_y < 116)  &&
-	     (_michel_z > 0)    && (_michel_z < 1036) )
-	  _contained = 1;
-	     
-
 	auto t         =  _michel_x/160.;
 	_lifetime_correction = exp(t/3.0);
 
@@ -90,6 +79,7 @@ namespace larlite {
 	_n_michel += 1;
 
       }
+      */
     } // for all mc showers
 
     event_filter_tree->Fill();
@@ -109,12 +99,12 @@ namespace larlite {
     return false;
   }
 
-  bool MichelFilter::finalize() {
+  bool StoppingMuons::finalize() {
 
     michel_filter_tree->Write();
     event_filter_tree->Write();
     
-    print(larlite::msg::kNORMAL,__FUNCTION__,Form("~~~~MichelFiltering~~~~"));
+    print(larlite::msg::kNORMAL,__FUNCTION__,Form("~~~~StoppingMuonsing~~~~"));
     print(larlite::msg::kNORMAL,__FUNCTION__,Form("Total events considered = %zu, kept events = %zu.",total_evts,kept_evts));
     print(larlite::msg::kNORMAL,__FUNCTION__,Form("Total events considered = %zu, kept events = %zu.",total_evts,kept_evts));
     print(larlite::msg::kNORMAL,__FUNCTION__,Form("Total events considered = %zu, kept events = %zu.",total_evts,kept_evts));

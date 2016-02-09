@@ -1,9 +1,9 @@
 /**
- * \file MichelFilter.h
+ * \file StoppingMuons.h
  *
  * \ingroup MichelElectron
  * 
- * \brief Class def header for a class MichelFilter
+ * \brief Class def header for a class StoppingMuons
  *
  * @author kathrynsutton
  */
@@ -12,8 +12,8 @@
 
     @{*/
 
-#ifndef LARLITE_MICHELFILTER_H
-#define LARLITE_MICHELFILTER_H
+#ifndef LARLITE_STOPPINGMUONS_H
+#define LARLITE_STOPPINGMUONS_H
 
 #include "Analysis/ana_base.h"
 
@@ -21,30 +21,30 @@
 
 namespace larlite {
   /**
-     \class MichelFilter
+     \class StoppingMuons
      User custom analysis class made by SHELL_USER_NAME
    */
-  class MichelFilter : public ana_base{
+  class StoppingMuons : public ana_base{
   
   public:
 
     /// Default constructor
-    MichelFilter(){ _name="MichelFilter"; _fout=0; _flip=false;}
+    StoppingMuons(){ _name="StoppingMuons"; _fout=0; _flip=false;}
 
     /// Default destructor
-    virtual ~MichelFilter(){}
+    virtual ~StoppingMuons(){}
 
-    /** IMPLEMENT in MichelFilter.cc!
+    /** IMPLEMENT in StoppingMuons.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in MichelFilter.cc! 
+    /** IMPLEMENT in StoppingMuons.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in MichelFilter.cc! 
+    /** IMPLEMENT in StoppingMuons.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
@@ -66,11 +66,9 @@ namespace larlite {
     
     double _michel_energy;
     double _michel_charge;
-    double _michel_x, _michel_y, _michel_z;
+    double _michel_x;
     double _michel_det;
-    int _contained;
     double _lifetime_correction;
-    std::string _michel_process;
 
     TTree* event_filter_tree;
     
