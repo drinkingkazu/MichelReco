@@ -128,13 +128,6 @@ namespace michel {
 	  in_index < (_out_cluster_count - index - 1);
 	  ++in_index) {
 
-	/*
-	if(in_index >= (_out_cluster_count - 1 - index)) 
-
-	  _prohibit_merge.at(index).at(in_index) = false;
-
-	else
-	*/	  
 	_prohibit_merge.at(index).at(in_index) = _prohibit_merge.at(index).at(in_index+1);
       }
 
@@ -145,33 +138,18 @@ namespace michel {
 
     // (2) handle index == out_index1
     for(size_t in_index = 1; 
-	//in_index < _prohibit_merge.at(out_index1).size() - 1; 
+
 	in_index < (_out_cluster_count - out_index1 - 1);
 	++in_index) {
       if( (in_index + out_index1) < out_index2 ) {
-	/*
-	std::cout<<Form("Inspecting1 : (%d,%zu) to (%zu,%zu)",
-			out_index1,in_index,
-			(in_index + out_index1),(out_index2 - (in_index+out_index1)))
-		 << std::endl;
-	*/
+
 	_prohibit_merge.at(out_index1).at(in_index) = ( _prohibit_merge.at(out_index1).at(in_index)
 							||
 							_prohibit_merge.at(in_index + out_index1).at(out_index2 - (in_index+out_index1))
 							);
       }
       else {
-	/*
-	std::cout<<Form("Inspecting2 : (%d,%zu) to (%d,%zu) ...",
-			out_index1,in_index+1,
-			out_index2,(in_index+out_index1-out_index2));
-	if(_prohibit_merge.at(out_index1).at(in_index+1)) std::cout<<"T";
-	else std::cout<<"F";
-	std::cout<<",";
-	if(_prohibit_merge.at(out_index2).at(in_index+out_index1-out_index2)) std::cout<<"T";
-	else std::cout<<"F";
-	std::cout<<std::endl;
-	*/
+
 	_prohibit_merge.at(out_index1).at(in_index) = ( _prohibit_merge.at(out_index1).at(in_index+1)
 							||
 							_prohibit_merge.at(out_index2).at(in_index+1+out_index1-out_index2)
@@ -193,12 +171,11 @@ namespace michel {
 
 	_prohibit_merge.at(index).at(in_index) = _prohibit_merge.at(index).at(in_index+1);
       
-      //(*_prohibit_merge.at(index).rbegin()) = false;
       _prohibit_merge.at(index).at(_out_cluster_count - index - 1) = false;
     }
     // (4) handle out_index2 <= index
     for(size_t index = out_index2;
-	//index < (_prohibit_merge.size() - 1);
+
 	index < (_out_cluster_count - 1);
 	++index) {
       

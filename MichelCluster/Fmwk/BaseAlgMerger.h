@@ -42,6 +42,7 @@ namespace michel {
      */
     std::string Name() { return _name; }
 
+
   protected:
 
     /// Name for algorithm

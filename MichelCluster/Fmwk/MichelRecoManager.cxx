@@ -21,7 +21,7 @@ namespace michel {
     _event_time = 0;
     _event_ctr  = 0;
   }
-  
+  /*
   //-----------------------------------------------------------------
   void MichelRecoManager::Append(const std::vector<michel::HitPt>& hit_v)
   //-----------------------------------------------------------------
@@ -37,20 +37,22 @@ namespace michel {
     _input_v.emplace_back(cluster);
     _input_v.back()._id = (_input_v.size() - 1);
   }
-  
+  */
   //---------------------------------------------------------
-  void MichelRecoManager::Append(std::vector<michel::HitPt>&& hit_v)
+  bool MichelRecoManager::Append(std::vector<michel::HitPt>&& hit_v,const size_t& idx)
   //---------------------------------------------------------
   {
-    if (hit_v.size() < _min_nhits) return;
+    if (hit_v.size() < _min_nhits) return false;
     MichelCluster cluster(std::move(hit_v), _min_nhits, _d_cutoff);
+    cluster.setInputCluster(std::make_pair((unsigned short)idx,cluster._hits.size()));
     // if the cluster has no hits -> do not append
     if (cluster._hits.size() == 0)
-      return;
+      return false;
     cluster.SetVerbosity(_verbosity);
-    if (cluster._hits.size() < _min_nhits) return;
+    if (cluster._hits.size() < _min_nhits) return false;
     _input_v.emplace_back(cluster);
     _input_v.back()._id = (_input_v.size() - 1);
+    return true;
   }
   
   //---------------------------------------------------------------------------
@@ -158,7 +160,6 @@ namespace michel {
     // Step 1 ... merge clusters
     //
     if (!_alg_merge)
-      
       _output_v = _input_v;
     
     else {
@@ -166,8 +167,9 @@ namespace michel {
       _output_v = _alg_merge->Merge(_input_v);
       _merge_time += _watch.RealTime();
       _merge_ctr  += _input_v.size();
+
     }
-    
+
     // save merged clusters
     _merged_v = _output_v;
     

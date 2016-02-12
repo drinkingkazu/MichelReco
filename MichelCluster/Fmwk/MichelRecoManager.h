@@ -77,12 +77,12 @@ public:
     // Data register functions
     //
     /// cluster register function
-    void Append(const std::vector<michel::HitPt>& hit_v);
+    //void Append(const std::vector<michel::HitPt>& hit_v);
     /// all-hit register function
     void RegisterAllHits(const std::vector<michel::HitPt>& all_hit_v);
 #ifndef __CINT__
-    /// cluster register function w/ std::move
-    void Append(std::vector<michel::HitPt>&& hit_v);
+    /// cluster register function w/ std::move (return false if no cluser added, true if yes)
+    bool Append(std::vector<michel::HitPt>&& hit_v, const size_t& idx);
     /// all-hit register function w/ std::move
     void RegisterAllHits(std::vector<michel::HitPt>&& all_hit_v);
 #endif
@@ -187,6 +187,9 @@ protected:
 
     /// Event information
     EventID _id;
+
+    /// merged cluster indices
+    std::vector<std::vector<unsigned short> > _merged_clus_idx_v;
 
 };
 }

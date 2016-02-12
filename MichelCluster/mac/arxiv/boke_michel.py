@@ -27,7 +27,9 @@ my_proc.set_output_file    ("michel_clusters.root")
 #########################
 # Michel reco driver code
 my_unit = fmwk.MichelRecoDriver()
-my_unit.SetClusterProducer("fuzzycluster")
+#my_unit.SetClusterProducer("fuzzycluster")
+#my_unit.SetClusterProducer("linecluster")
+my_unit.SetClusterProducer("rawcluster")
 my_unit.SetUseMC(False)
 my_unit.SetEField(0.5)
 
@@ -134,7 +136,7 @@ mgr.AddAlgo(supersonic)
 conefinder = michel.ConeHitFinder()
 conefinder.SetMaxRadius               ( 20 )
 conefinder.SetMaxPerpendicularDistance(  3 )
-mgr.AddAlgo(conefinder)
+#mgr.AddAlgo(conefinder)
 
 ##############################################
 # final mid algo cutting on num of michel hits
@@ -162,8 +164,8 @@ mgr.AddAna(michel.CosmicAna())
 # add process
 my_proc.add_process(my_unit)
 
-my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
-#my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
+#my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
+my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
 my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
 #my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
 my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')

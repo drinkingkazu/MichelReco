@@ -18,12 +18,13 @@ namespace larlite {
     , _MIP_tree(nullptr)
     , _mc_tree(nullptr)
   {
+    //std::cout << "constructing" << std::endl;
     _name="MichelRecoDriver";
     _fout=0;
     _save_clusters=false;
     _Efield=0.5;
     _use_mc = false;
-    
+    _out_txt_file.open("input_cluster_info_file.txt");
     // FIX ME: currently set only plane 2 reconstruction
     SetPlane(2);
   }
@@ -77,11 +78,12 @@ namespace larlite {
   
   bool MichelRecoDriver::analyze(storage_manager* storage) {
 
+
     _event_watch.Start();
 
     _QMichelReco = 0.;
-    _QMichel = 0.;
-    _totQHits = 0.;
+    _QMichel     = 0.;
+    _totQHits    = 0.;
 
     // use instances of LArUtil and GeometryUtilities
     // for (w,t) -> (cm, cm) conversion
@@ -138,6 +140,9 @@ namespace larlite {
     _w_v.clear();
     _t_v.clear();
     _p_v.clear();
+
+    // Reaching this point means we have something to process. Prepare.
+    _mgr.EventReset();
     
     // Tracker for used-hit index
     std::vector< ::michel::HitPt > all_hits_v;
@@ -148,7 +153,7 @@ namespace larlite {
       // chrage :
       double q = h.Integral();
       _hit_charge = q;
-      _MIP_tree->Fill();
+      //_MIP_tree->Fill();
       double w = h.WireID().Wire * w2cm;
       double t = (h.PeakTime()-3200) * t2cm;
 
@@ -161,23 +166,19 @@ namespace larlite {
 	_p_v.push_back(p);
       }
 
-      all_hits_v.emplace_back( h.Integral(),
-			       w,
-			       t,
-			       hit_index,
-			       p );
+      all_hits_v.emplace_back( h.Integral(), w, t, hit_index, p );
     }
-
-
     
-    // Reaching this point means we have something to process. Prepare.
-    _mgr.EventReset();
+    // all hits vector is registered to the manager for future use (search for local hits not clustered)
+    _mgr.RegisterAllHits( std::move(all_hits_v) );
 
     /// set event info
     _mgr.SetEventInfo(id);
-        
+
     // Loop over clusters & add them to our algorithm manager
-    for(auto const& hit_ass : hit_ass_set) {
+    for ( size_t idx=0; idx < hit_ass_set.size(); idx++){
+
+      auto const& hit_ass = hit_ass_set.at(idx);
 
       // Prepare our hit-list representation    
       std::vector< ::michel::HitPt > michel_cluster;
@@ -198,18 +199,43 @@ namespace larlite {
       }
       
       // Append a hit-list (cluster) to a manager if not empty
-      if(michel_cluster.size() > _minClusSize)
-	_mgr.Append(std::move(michel_cluster));
-    }
+      if(michel_cluster.size() > _minClusSize){
+	bool added = _mgr.Append(std::move(michel_cluster),idx);
+      }// if above the hit number threshold
+    }// for all clusters
 
-    _mgr.RegisterAllHits( std::move(all_hits_v) );
-    
     // Now process
     _mgr.Process();
 
     auto const& michels = _mgr.GetResult();
     if (michels.size() > 0)
       _hit_tree->Fill();
+    
+    // loop through michels
+    for (auto const& michel : michels){
+      if (michel._has_michel){
+	// find index with largest number of hits
+	size_t max_hits = 0;
+	unsigned short largest_clus_idx = 0;
+	auto input_clusters = michel.getInputClusterIndex_v();
+	std::cout << "reco'd michel from input clusters [ ";
+	for (auto idx : input_clusters){
+	  std::cout << idx << " ";
+	  if (hit_ass_set[idx].size() > max_hits) { 
+	    max_hits = hit_ass_set[idx].size();
+	    largest_clus_idx = idx;
+	  }
+	}
+	std::cout << "]. Largest cluster index is " << michel.getLargestCluster().first
+		  << " with " << michel.getLargestCluster().second << " hits "
+		  << " and matches the expected "<< largest_clus_idx << std::endl;
+
+	_out_txt_file << _run << " " << _subrun << " " << _event << " " << largest_clus_idx << "\n";
+	
+      }// if there is a michel
+    }// for all output MichelClsuters
+
+    // save [run,subrun,event,clus idx] to an output file for saved michels
 
     // We may want to save the michels we found as clusters
     // if this option is selected, take the michel hits
@@ -290,13 +316,13 @@ namespace larlite {
     // if we want to compare with mcshowers, we also add feature to backtrack
     if (_use_mc){
 
-      auto ev_mcshower = storage->get_data<event_mcshower>( "mcreco"  );
-      auto ev_simch    = storage->get_data<event_simch>   ( "largeant");      
+      auto ev_mcshower = storage->get_data<event_mcshower>( "mcreco"   );
+      auto ev_simch    = storage->get_data<event_simch>   ( "largeant" );
 
       //not required, you can send in MC background w/ no MC showers!
       //if(ev_mcshower->size() == 0) { std::cout << "No mc shower  found " << "\n"; throw std::exception(); }
       
-      if(ev_simch->size()    == 0) { std::cout << "No Simchannel found " << "\n"; throw std::exception(); }
+      if(ev_simch->size() == 0) { std::cout << "No Simchannel found " << "\n"; throw std::exception(); }
  
       bool shower_exists = false;
 
@@ -442,6 +468,8 @@ namespace larlite {
   }
 
   bool MichelRecoDriver::finalize() {
+
+    _out_txt_file.close();
 
     std::cout << "time/event = " << _event_time/_event_ctr * 1.e6 << std::endl;
 

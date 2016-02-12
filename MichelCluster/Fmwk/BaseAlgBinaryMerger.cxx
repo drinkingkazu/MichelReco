@@ -4,6 +4,7 @@
 #include "BaseAlgBinaryMerger.h"
 #include "CMergeBookKeeper.h"
 #include <map>
+
 namespace michel {
 
   MichelClusterArray BaseAlgBinaryMerger::Merge(const MichelClusterArray& input_v)
@@ -57,6 +58,7 @@ namespace michel {
       
       // If nothing merged, break
       auto const& bk_result = bk.GetResult();
+
       if(bk_result.size() == result_v.size()) break;
       else {
 	// Merge ... prepare a temporary vector container
@@ -70,6 +72,11 @@ namespace michel {
 	  std::vector<HitPt> hits;
 	  double d_cutoff=0;
 	  size_t min_nhits=0;
+	  // prepare list of cluster indices that are being merged together
+	  std::vector<unsigned short> input_clus_idx_v;
+	  // also keep track of the cluster with the largest number of hits
+	  std::pair<unsigned short, size_t> largest_cluster;
+	  size_t max_num_hits = 0;
 	  // Loop over index numbers of associated hits
 	  for(auto const& index : index_set) {
 	    auto const& cluster = result_v[index];
@@ -80,16 +87,32 @@ namespace michel {
 	    hits.reserve(hits.size() + cluster._hits.size());
 	    for(auto const& h : cluster._hits)
 	      hits.push_back(h);
+	    // get input cluster index list from this MichelCluster
+	    auto clus_idx_v = result_v[index].getInputClusterIndex_v();
+	    for (auto& clus : clus_idx_v)
+	      input_clus_idx_v.push_back(clus);
+	    // get the largest cluster information for this cluster
+	    auto clus_info = result_v[index].getLargestCluster();
+	    if (clus_info.second > max_num_hits){
+	      max_num_hits = clus_info.second;
+	      largest_cluster = clus_info;
+	    }// if this is the largest cluster
 	  }
 	  //MichelCluster merged(std::move(hits), min_nhits,d_cutoff);
 	  if (hits.size() >= 3){
 	    MichelCluster merged(std::move(hits), 3, d_cutoff);
+	    // save the index set as this MichelCluster's list of input clusters
+	    merged.setInputClusterIndex_v(input_clus_idx_v);
+	    merged.setLargestCluster(largest_cluster);
 	    tmp_result_v.emplace_back(merged);
 	  }
 	}
 	result_v = tmp_result_v;
       }
     }
+
+
+
     return result_v;
   }
 

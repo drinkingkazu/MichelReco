@@ -20,6 +20,7 @@
 #include "Fmwk/MichelTypes.h"
 #include <TStopwatch.h>
 #include <TTree.h>
+#include <fstream>
 //Backtracker
 #include "MCComp/MCMatchAlg.h"
 
@@ -76,11 +77,11 @@ namespace larlite {
 
   protected:
 
-/// Stopwatch for event time profiling
-TStopwatch _event_watch; ///< For profiling
-double _event_time;
-size_t _event_ctr;
-
+    /// Stopwatch for event time profiling
+    TStopwatch _event_watch; ///< For profiling
+    double _event_time;
+    size_t _event_ctr;
+    
     /// Reco manager
     ::michel::MichelRecoManager _mgr;
 
@@ -136,6 +137,9 @@ size_t _event_ctr;
 
   private:
     ::btutil::MCMatchAlg _BTAlg;
+
+    // text file where to dump input clsuter information
+    ofstream _out_txt_file;
 
 
   };

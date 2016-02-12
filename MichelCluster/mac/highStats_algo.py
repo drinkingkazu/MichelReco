@@ -12,7 +12,7 @@ def PrepareMichelAlgo():
     # of hits
     minclushits = michel.CutOnTotNumHits()
     minclushits.SetMinTotHits(25)
-    algoList.append(minclushits)
+    #!algoList.append(minclushits)
 
     #########################################
     # calculate various cluster parameters...
@@ -96,6 +96,7 @@ def PrepareMichelAlgo():
     supersonic.SetUseHitRadius     (True)
     supersonic.SetMaxRadius( 15 )
     supersonic.SetHitRadius(  3 )
+    #supersonic.SetVerbosity(michel.msg.kDEBUG)
     algoList.append(supersonic)
 
     #########################
