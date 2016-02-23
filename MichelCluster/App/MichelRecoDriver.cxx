@@ -7,6 +7,8 @@
 #include "DataFormat/hit.h"
 #include "DataFormat/mcshower.h"
 #include "DataFormat/simch.h"
+#include "DataFormat/pfpart.h"
+#include "DataFormat/track.h"
 
 #include "LArUtil/GeometryUtilities.h"
 #include "LArUtil/LArProperties.h"
@@ -95,7 +97,6 @@ namespace larlite {
     double tickWidth = 0.5; // [us]
     double t2cm = tickWidth*driftVel;
 
-
     // Get data products
     auto ev_cluster = storage->get_data<event_cluster>(_producer);
 
@@ -130,6 +131,10 @@ namespace larlite {
     event_hit* ev_hit = nullptr;
     auto const& hit_ass_set = storage->find_one_ass(ev_cluster->id(), ev_hit, ev_cluster->name());
 
+    // get the tracks associated to the hits
+    event_track* ev_track = nullptr;
+    auto const& track_ass_set = storage->find_one_ass(ev_hit->id(), ev_track, "pandoraCosmicKHit");
+    
     // If ev_hit is null, failed to find data or assocaition (shouldn't happen)
     if(!ev_hit || ev_hit->empty()) {
       std::cout << "No hit found. Skipping event: "<<storage->event_id()<<std::endl;
@@ -230,8 +235,11 @@ namespace larlite {
 		  << " with " << michel.getLargestCluster().second << " hits "
 		  << " and matches the expected "<< largest_clus_idx << std::endl;
 
-	_out_txt_file << _run << " " << _subrun << " " << _event << " " << largest_clus_idx << "\n";
-	
+	int startwire = ev_cluster->at(largest_clus_idx).StartWire();
+	int endwire   = ev_cluster->at(largest_clus_idx).EndWire();
+
+	_out_txt_file << _run << " " << _subrun << " " << _event << " " << largest_clus_idx << " " << startwire << " " << endwire << "\n";
+
       }// if there is a michel
     }// for all output MichelClsuters
 
@@ -243,30 +251,41 @@ namespace larlite {
     if (_save_clusters){
 
       // create michel cluster object
-      auto michel_cluster = storage->get_data<event_cluster>("michel");
+      auto michel_cluster_v = storage->get_data<event_cluster>("michel");
       // create association object for clusters
-      auto michel_cluster_ass_v = storage->get_data<event_ass>(michel_cluster->name());
+      auto michel_cluster_ass_v = storage->get_data<event_ass>(michel_cluster_v->name());
       // create muon cluster object
-      auto muon_cluster = storage->get_data<event_cluster>("muon");
+      auto muon_cluster_v = storage->get_data<event_cluster>("muon");
       // create association object for clusters
-      auto muon_cluster_ass_v = storage->get_data<event_ass>(muon_cluster->name());
+      auto muon_cluster_ass_v = storage->get_data<event_ass>(muon_cluster_v->name());
+      // create michel particle object
+      auto michel_particle_v = storage->get_data<event_pfpart>("michel");
+      // create association object for pfpart
+      auto michel_particle_michel_clus_ass_v = storage->get_data<event_ass>("michelkClustermichel");
+      auto michel_particle_input_clus_ass_v = storage->get_data<event_ass>("michelkClusterinput");
+      auto michel_particle_input_track_ass_v = storage->get_data<event_ass>("michelkTrackinput");
+
       // set event ID through storage manager
       storage->set_id(storage->get_data<event_cluster>(_producer)->run(),
 		      storage->get_data<event_cluster>(_producer)->subrun(),
 		      storage->get_data<event_cluster>(_producer)->event_id()); 
 
       // create a vector where to store the cluster -> hit association
-      std::vector<std::vector<unsigned int> > michel_clus_hit_ass_v;
-      std::vector<std::vector<unsigned int> > muon_clus_hit_ass_v;
+      std::vector<std::vector<unsigned int> > michel_clus_hit_ass_v; // michel cluster -> hit
+      std::vector<std::vector<unsigned int> > muon_clus_hit_ass_v;   // muon cluster -> hit
+      std::vector<std::vector<unsigned int> > michel_part_michel_clus_ass_v; // michel pfpart -> michel cluster
+      std::vector<std::vector<unsigned int> > michel_part_input_clus_ass_v;  // michel pfpart -> input cluster
+      std::vector<std::vector<unsigned int> > michel_part_input_track_ass_v; // michel pfpart -> input track
       // we need to loop over the michel hits and add them to new clusters
 
       // get the vector of MichelCluster objects
       auto const& michels = _mgr.GetResult();
       // for each get the hits associated
       for (auto const& michelClus : michels){
+
 	// prepare an empty cluster
 	larlite::cluster clus_michel;
-	michel_cluster->push_back(clus_michel);
+	michel_cluster_v->push_back(clus_michel);
 	// get the hits (in "michel" notation) for this cluster
 	auto const& michel = michelClus._michel; // this is a vector of HitPt
 	// michel is a list of HitPt
@@ -287,7 +306,7 @@ namespace larlite {
 	  // do the same for the muon hits
 	  // prepare an empty cluster
 	  larlite::cluster clus_muon;
-	  muon_cluster->push_back(clus_muon);
+	  muon_cluster_v->push_back(clus_muon);
 	  auto const& muon = michelClus._hits;
 	  // empty vector where to store hits associated for this specific muon cluster
 	  std::vector<unsigned int> muon_clus_hits;
@@ -305,12 +324,57 @@ namespace larlite {
 	  } 
 	  // add the association information
 	  muon_clus_hit_ass_v.push_back(muon_clus_hits);
+
+	  // create a PFParticle for the michel
+	  larlite::pfpart michel_part(11,0,0,std::vector<size_t>());
+	  michel_particle_v->push_back(michel_part);
+
+	  // find the 3dtrack associated to the input cluster
+	  // 1) hits associated to input cluster
+	  auto hits_associated_to_input_cluster = hit_ass_set[ michelClus.getLargestCluster().first ];
+	  // 2) track associated to these hits
+	  unsigned int trk_idx = 0;
+	  bool found = false;
+	  for (auto const& hit_idx : hits_associated_to_input_cluster){
+	    for (size_t h_idx = 0; h_idx < track_ass_set.size(); h_idx++){
+	      if (hit_idx == h_idx){
+		if (track_ass_set[h_idx].size() == 0) continue;
+		trk_idx = track_ass_set[h_idx][0];
+		found = true;
+		break;
+	      }
+	    }
+	    if (found) { break; }
+	  }
+	    
+	  
+	  // keep track of the association to the input cluster
+	  michel_part_input_clus_ass_v.push_back( std::vector<unsigned int>(1, michelClus.getLargestCluster().first) );
+	  // keep track of the association to the michel cluster
+	  michel_part_michel_clus_ass_v.push_back( std::vector<unsigned int>(1, ((unsigned int)michel_cluster_v->size()) - 1) );
+	  // keep track of the association to the input track
+	  if (found){
+	    michel_part_input_track_ass_v.push_back( std::vector<unsigned int>(1, trk_idx ) );
+	  }
+
 	}// if there are at least 3 hits in the michel cluster
 	
       }// loop over all found michels
       // now save the association information
-      michel_cluster_ass_v->set_association(michel_cluster->id(),product_id(data::kHit,ev_hit->name()),michel_clus_hit_ass_v);
-      muon_cluster_ass_v->set_association(muon_cluster->id(),product_id(data::kHit,ev_hit->name()),muon_clus_hit_ass_v);
+      michel_cluster_ass_v->set_association(michel_cluster_v->id(),product_id(data::kHit,ev_hit->name()),michel_clus_hit_ass_v);
+      muon_cluster_ass_v->set_association(muon_cluster_v->id(),product_id(data::kHit,ev_hit->name()),muon_clus_hit_ass_v);
+      michel_particle_michel_clus_ass_v->set_association( michel_particle_v->id(),
+							  product_id(data::kCluster,michel_cluster_v->name()),
+							  michel_part_michel_clus_ass_v);
+      michel_particle_input_clus_ass_v->set_association ( michel_particle_v->id(),
+							  product_id(data::kCluster,ev_cluster->name()),
+							  michel_part_input_clus_ass_v);
+      std::cout << "ev track name : " << ev_track->name() << std::endl;
+      std::cout << "ass vector size : " << michel_part_input_track_ass_v.size() << std::endl;
+      std::cout << "event : " << _event << "\t subrun : " << _subrun << "\t run : " << _run << std::endl;
+      michel_particle_input_track_ass_v->set_association( michel_particle_v->id(),
+							  product_id(data::kTrack,ev_track->name()),
+							  michel_part_input_track_ass_v);
     }// if we should save cluster
 
     // if we want to compare with mcshowers, we also add feature to backtrack

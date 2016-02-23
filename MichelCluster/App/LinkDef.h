@@ -13,6 +13,8 @@
 #pragma link C++ class larlite::StoppingMuons+;
 #pragma link C++ class larlite::RemoveMichel+;
 #pragma link C++ class larlite::MichelRecoDriver+;
+#pragma link C++ class larlite::MichelOutputFilter+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 

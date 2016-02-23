@@ -141,7 +141,6 @@ namespace larlite {
     // text file where to dump input clsuter information
     ofstream _out_txt_file;
 
-
   };
 }
 #endif
