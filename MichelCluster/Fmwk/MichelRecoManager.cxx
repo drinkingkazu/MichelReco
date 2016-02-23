@@ -16,6 +16,7 @@ namespace michel {
     , _debug              ( false )
       //, _algo_verbosity     ( msg::kNORMAL )
     , _alg_merge          ( nullptr )
+    , _alg_filter         ( nullptr )
     , _alg_v              ( )
   {
     _event_time = 0;
