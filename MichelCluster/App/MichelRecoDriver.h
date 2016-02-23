@@ -139,7 +139,7 @@ namespace larlite {
     ::btutil::MCMatchAlg _BTAlg;
 
     // text file where to dump input clsuter information
-    ofstream _out_txt_file;
+    std::ofstream _out_txt_file;
 
   };
 }
