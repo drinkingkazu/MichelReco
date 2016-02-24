@@ -82,9 +82,6 @@ namespace michel {
     electron._length = length;
     electron._start  = cluster._hits[cluster._ordered_pts[the_michel_start]];
     
-    //loop over the ordered points, add hits to the electron that are NOT in orderedpts
-    //BUT append new hits found in the vicinity of the vertex
-    //this now goes into "reclustering"
     return true;
   }
 

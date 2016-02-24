@@ -17,7 +17,7 @@ namespace michel {
     if (k == 0) return 1;
   
     int result = n;
-    for( int i = 2; i <= k; ++i ) {
+    for( unsigned int i = 2; i <= k; ++i ) {
       result *= (n-i+1);
       result /= i;
     }
@@ -43,7 +43,7 @@ namespace michel {
     for(int o = 0; o < s; ++o) tdqds.push_back(0.0);
     
     //do smooth differentiation
-    for(int i = s; i < tmeans.size() - s + 1; ++i) {
+    for(int i = s; i < (int)tmeans.size() - s + 1; ++i) {
       std::vector<double> f(tmeans.begin() + i - s, tmeans.begin() + i + s);
       std::vector<double> x(_dist.begin() + i - s , _dist.begin() + i + s );
       tdqds.push_back(do_smooth_derive(f,x,2*s+1));
@@ -85,7 +85,7 @@ namespace michel {
       charge.push_back(cluster._hits[o]._q);
 
     for(auto window : get_windows(charge,_n_window_size) ) {
-      if(window.size() > window_cutoff) 
+      if(window.size() > (size_t)window_cutoff) 
 	cut(window,p_above);
       truncatedQ.push_back(calc_mean(window));
     }
@@ -109,16 +109,21 @@ namespace michel {
   {
     
     auto size   = data.size();
+    // calcualte number of elements to be kept
     int to_stay = floor(frac*size);
   
-    //sort the array based on charge
+    // sort the array based on charge
+    // so that high-charge hits are removed
     std::sort(data.begin(),data.end(),
 	      [](const W& a, const W& b) -> bool
 	      {
 		return a < b;	      
 	      });
-    
-    data.erase(data.begin() + to_stay, data.end());
+
+    // erase all elements after the last one to be kept
+    data.erase(data.begin(), data.begin() + to_stay);
+    data.erase(data.end() - to_stay, data.end());
+    //data.erase(data.begin() + to_stay, data.end());
   }
   
   
@@ -128,6 +133,16 @@ namespace michel {
   std::vector<std::vector<T> > ClusterVectorCalculator::get_windows(const std::vector<T>& the_thing,
 							       const int window_size) const
   {
+
+    // given a vector of values return a vector of the same length
+    // with each element being a vector of the values of the local neighbors
+    // of the element at position i in the original vector
+    // input  : [0,1,2,3,4,5,6,...,...,N-3,N-2,N-1] (input vector of size N)
+    // output  (assuming a value of 'w' below == 3):
+    // 0th element: [0]
+    // 1st element: [0,1,2]
+    // 2nd element: [0,1,2,3,4]
+    // jth element: [j-w,j-w+1,..,j+w-2,j+w-1]
     
     std::vector<std::vector<T> > data;
     
@@ -140,16 +155,24 @@ namespace michel {
     for(int i = 1; i <= num; ++i) {
       std::vector<T> inner;
       inner.reserve(20);
-      if(i < w) {
-	for(int j = 0; j < 2 * (i%w) - 1; ++j)
-	  inner.push_back(the_thing[j]);
-      }else if (i > num - w + 1){
-	for(int j = num - 2*((num - i)%w)-1 ; j < num; ++j)
-	  inner.push_back(the_thing[j]);
-      }else{
-	for(int j = i - w; j < i + w - 1; ++j)
-	  inner.push_back(the_thing[j]);
-      }
+      // if we are at the beginning of the vector (and risk accessing -1 elements)
+      if(i < w)
+	{
+	  for(int j = 0; j < 2 * (i%w) - 1; ++j)
+	    inner.push_back(the_thing[j]);
+	}
+      // if we are at the end of the vector (and risk going past it)
+      else if (i > num - w + 1)
+	{
+	  for(int j = num - 2*((num - i)%w)-1 ; j < num; ++j)
+	    inner.push_back(the_thing[j]);
+	}
+      // if we are in the middle of the waveform
+      else
+	{
+	  for(int j = i - w; j < i + w - 1; ++j)
+	    inner.push_back(the_thing[j]);
+	}
       data.emplace_back(inner);
     }
 
@@ -277,7 +300,7 @@ namespace michel {
     auto   mean1  = mean(data1);
     auto   mean2  = mean(data2);
     
-    for(int i = 0; i < data1.size(); ++i)
+    for(size_t i = 0; i < data1.size(); ++i)
       result += (data1[i] - mean1)*(data2[i] - mean2);
     
     return result/((double)data1.size());
