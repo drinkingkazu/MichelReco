@@ -18,7 +18,6 @@ namespace larlite {
     michel_filter_tree->Branch("_michel_energy",&_michel_energy,"michel_energy/D");
     michel_filter_tree->Branch("_michel_charge",&_michel_charge,"michel_charge/D");
     michel_filter_tree->Branch("_michel_det",&_michel_det,"michel_det/D");
-    michel_filter_tree->Branch("_lifetime_correction",&_lifetime_correction,"lifetime_correction/D");
     michel_filter_tree->Branch("_michel_process",&_michel_process);
     michel_filter_tree->Branch("_contained",&_contained,"contained/I");
 
@@ -63,7 +62,7 @@ namespace larlite {
     for(auto const& mcs : *ev_mcshower){
 
       if( ((mcs.MotherPdgCode() == 13) or (mcs.MotherPdgCode() == -13) ) &&
-	  ( mcs.Process() != "muIoni" ) ) {
+	  ( mcs.Process() == "Decay" ) ) {
 	//( (mcs.Process() == "Decay") ) ) { //or (mcs.Process() == "muMinusCaptureAtRest") ) ) {
 	
 	_michel_process   = mcs.Process();
@@ -78,17 +77,14 @@ namespace larlite {
 	// make sure the MCShower is in the detector
 	if ( (_michel_x > 0)    && (_michel_x < 256)  &&
 	     (_michel_x > -116) && (_michel_y < 116)  &&
-	     (_michel_z > 0)    && (_michel_z < 1036) )
+	     (_michel_z > 0)    && (_michel_z < 1036) ){
 	  _contained = 1;
-	     
-
-	auto t         =  _michel_x/160.;
-	_lifetime_correction = exp(t/3.0);
-
-	michel_filter_tree->Fill();
-	there_is_michel = true;
-	_n_michel += 1;
-
+	  
+	  michel_filter_tree->Fill();
+	  there_is_michel = true;
+	  _n_michel += 1;
+	}// if in FV
+	  
       }
     } // for all mc showers
 
