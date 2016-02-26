@@ -33,6 +33,7 @@ void CosmicAna::Initialize()
 
   _out_tree->Branch("_michel_Z", "std::vector<double>" , &_michel_Z);
   _out_tree->Branch("_michel_X", "std::vector<double>" , &_michel_X);
+  _out_tree->Branch("_michel_Q", "std::vector<double>" , &_michel_Q);
 
   _out_tree->Branch("_michel_start_Z",&_michel_start_Z,"michel_start_Z/D");
   _out_tree->Branch("_michel_start_X",&_michel_start_X,"michel_start_X/D");
@@ -207,6 +208,7 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
       for (const auto& mhit : out._michel) {
         _michel_Z.push_back(mhit._w);
         _michel_X.push_back(mhit._t);
+	_michel_Q.push_back(mhit._q)
         total_charge += mhit._q;
         _michel_hit_qs->Fill(mhit._q);
         if (mhit._t < _lowest_hit_t)
@@ -222,6 +224,7 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
       _michel_n_hits           = -1;
       _michel_Z                = EMPTYVEC;
       _michel_X                = EMPTYVEC;
+      _michel_Q                = EMPTYVEC;
       _has_michel              = false;
     }
 
