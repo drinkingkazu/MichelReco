@@ -75,6 +75,9 @@ namespace larlite {
     /// be considered as a candidate MichelCluster
     void SetMinClusSize(int n) { _minClusSize = n; }
 
+    /// set debugger for mcq
+    void SetDebugMCQ(bool on) { _debug_mcq = on; }
+
   protected:
 
     /// Stopwatch for event time profiling
@@ -90,7 +93,9 @@ namespace larlite {
 
     /// boolean. Use MC info?
     bool _use_mc;
-
+    /// boolean -> debug mc charge collection info
+    bool _debug_mcq;
+    
     /// Option to set specific-plane-only reco
     std::vector<bool> _reco_plane;
 
@@ -118,28 +123,44 @@ namespace larlite {
     double _reco_energy;
     std::vector<double> _michel_hit_frac;
     std::vector<double> _michel_hit_Qtot;
-    double _QMichelMC; // michel charge from MCShower Charge() function
-    double _QMichel; // sum of Q from hits > 10% michel in EDep (only Michel contribution to charge)
-    double _QMichelTot; // sum of Q from all hits in EDep (only Michel contribution to charge)
-    double _QMichelReco; // sum of Q from hits that have been reco'd as michel
-    double _totQHits; // sum of Q from hits > 10% michel in EDep
-    double _lifetimeCorr; // factor by which charge needs to be corrected to get an accurate lifetime
+    double _QMichelMC;            // michel charge from MCShower Charge() function
+    double _QMichelRecoSimch_all; // sum of Q from hits that have been reco'd as michel (entire hit contribution)
+    double _QMichelRecoSimch_shr; // sum of Q from hits that have been reco'd as michel (only component from Michel IDEs)
+    double _QMichelShowerMCSimch_all; // sum of simch contribution from hits to full MCShower (entire hit contribution)
+    double _QMichelShowerMCSimch_shr; // sum of simch contribution from hits to full MCShower (only component from Michel IDEs)
+    double _QMichelPartMCSimch_all;   // sum of simch contribution from hits to michel part only (entire hit contribution)
+    double _QMichelPartMCSimch_shr;   // sum of simch contribution from hits to michel part only (only component from Michel IDEs)
     double _mc_x; // x-position where michel starts
+    double _f_RecoHitsQ_fromMichelSimch; // fraction of charge collected in reco'd michel hits actually from michel
+
+    // mc hit tree
+    TTree* _mc_hit_tree;
+    double _hit_integral;
+    double _hit_mc_q;
 
     /// boolean to select if to save Michel Clusters or not
     bool _save_clusters;
 
-    /// electric field strength [ kV/cm]
+    /// electric field strength [kV/cm]
     double _Efield;
 
     /// minimum cluster size for an input cluster to be considered
     int _minClusSize;
 
   private:
-    ::btutil::MCMatchAlg _BTAlg;
+    // btalg instance for the entire Michel shower
+    ::btutil::MCMatchAlg _BTAlgShower;
+    // btalg instance for only the michel electron particle
+    ::btutil::MCMatchAlg _BTAlgPart;
 
     // text file where to dump input clsuter information
     std::ofstream _out_txt_file;
+
+    // map to inform of wire-coverage from hit ranges
+    std::map< unsigned int, std::vector< std::pair<double,double> > > _wiremap;
+
+    // check if wire range was already used
+    std::vector<btutil::WireRange_t> getUnUsedWireRange(const btutil::WireRange_t& wirerange);
 
   };
 }
