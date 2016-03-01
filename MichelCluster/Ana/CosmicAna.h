@@ -85,6 +85,7 @@ protected:
 
     std::vector<double> _michel_Z;
     std::vector<double> _michel_X;
+    std::vector<double> _michel_Q;
 
     // which part of the hit-list is the michel?
     int _forward;
