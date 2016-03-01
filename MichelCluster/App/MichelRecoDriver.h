@@ -121,8 +121,10 @@ namespace larlite {
     TTree* _mc_tree;
     double _mc_energy;
     double _reco_energy;
-    std::vector<double> _michel_hit_frac;
-    std::vector<double> _michel_hit_Qtot;
+    std::vector<double> _michel_hit_fracReco;
+    std::vector<double> _michel_hit_QtotReco;
+    std::vector<double> _michel_hit_fracMC;
+    std::vector<double> _michel_hit_QtotMC;
     double _QMichelMC;            // michel charge from MCShower Charge() function
     double _QMichelRecoSimch_all; // sum of Q from hits that have been reco'd as michel (entire hit contribution)
     double _QMichelRecoSimch_shr; // sum of Q from hits that have been reco'd as michel (only component from Michel IDEs)

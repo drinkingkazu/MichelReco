@@ -63,8 +63,10 @@ namespace larlite {
     
     _mc_tree->Branch("_mc_energy"      , &_mc_energy           , "mc_energy/D");
     _mc_tree->Branch("_reco_energy"    , &_reco_energy         , "reco_energy/D");
-    _mc_tree->Branch("_michel_hit_frac", "std::vector<double>" , &_michel_hit_frac);
-    _mc_tree->Branch("_michel_hit_Qtot", "std::vector<double>" , &_michel_hit_Qtot);
+    _mc_tree->Branch("_michel_hit_fracReco", "std::vector<double>" , &_michel_hit_fracReco);
+    _mc_tree->Branch("_michel_hit_QtotReco", "std::vector<double>" , &_michel_hit_QtotReco);
+    _mc_tree->Branch("_michel_hit_fracMC", "std::vector<double>" , &_michel_hit_fracMC);
+    _mc_tree->Branch("_michel_hit_QtotMC", "std::vector<double>" , &_michel_hit_QtotMC);
     _mc_tree->Branch("_QMichelMC", &_QMichelMC, "QMichelMC/D");
     _mc_tree->Branch("_QMichelRecoSimch_all", &_QMichelRecoSimch_all, "QMichelRecoSimch_all/D");
     _mc_tree->Branch("_QMichelRecoSimch_shr", &_QMichelRecoSimch_shr, "QMichelRecoSimch_shr/D");
@@ -97,6 +99,11 @@ namespace larlite {
     _QMichelPartMCSimch_shr   = 0.;
     _QMichelShowerMCSimch_all = 0.;
     _QMichelShowerMCSimch_shr = 0.;
+    _michel_hit_fracReco.clear();
+    _michel_hit_QtotReco.clear();
+    _michel_hit_fracMC.clear();
+    _michel_hit_QtotMC.clear();
+
 
     _wiremap.clear();
 
@@ -546,6 +553,8 @@ namespace larlite {
 	    if (hit_frac > 0.01){
 	      _QMichelShowerMCSimch_shr += michel_part;
 	      _QMichelShowerMCSimch_all += (michel_part+other_part);
+		_michel_hit_QtotMC.push_back(michel_part);
+		_michel_hit_fracMC.push_back(hit_frac);
 	    }
 	    
 	    // check if this hit has been added to the michel cluster...
@@ -558,8 +567,8 @@ namespace larlite {
 		michel_hits += 1;
 		_QMichelRecoSimch_all += (michel_part+other_part);
 		_QMichelRecoSimch_shr += michel_part;
-		hit_Qtot_michel.push_back(michel_part);
-		hit_frac_michel.push_back(hit_frac);
+		_michel_hit_QtotReco.push_back(michel_part);
+		_michel_hit_fracReco.push_back(hit_frac);
 	      }
 	    }// for all michel hits
 	    
@@ -597,14 +606,10 @@ namespace larlite {
 	// number of electrons from michel than "not", go ahead and swap for writeout, if this vector
 	// is empty in TTree then there was no MC shower
 	
-	std::swap(_michel_hit_frac,hit_frac_michel);
-	std::swap(_michel_hit_Qtot,hit_Qtot_michel);
 	
       } // if we found an mcshower
 
       _mc_tree->Fill();
-      _michel_hit_frac.clear();
-      _michel_hit_Qtot.clear();
     }
 
     _event_time += _event_watch.RealTime();    
