@@ -135,6 +135,7 @@ namespace larlite {
     id.subrun = _subrun;
     id.event  = _event;
     
+    /*
     for (size_t i=0; i < _events_info.size(); i++){
       auto past_event = _events_info[i];
       if ( (past_event.run == id.run) and (past_event.subrun == id.subrun) and (past_event.event == id.event) ){
@@ -142,6 +143,7 @@ namespace larlite {
 	return true;
       }
     }
+    */
 
     _events_info.push_back(id);  
     
@@ -493,7 +495,6 @@ namespace larlite {
 	      std::vector<unsigned int> id_v_part = {mcs.TrackID()};
 	      g4_trackid_v_part.push_back(id_v_part);
 	    }
-	    
 	  }
 	}
 
@@ -550,11 +551,11 @@ namespace larlite {
 	    double hit_frac    = michel_part / ( michel_part + other_part );
 	    if (_debug_mcq)
 	      std::cout << "hit " << hit_index << " has " << michel_part+other_part << " and " << hit_frac << " michel contribution..." << std::endl;
-	    if (hit_frac > 0.01){
+	    if (hit_frac > 0.1){
 	      _QMichelShowerMCSimch_shr += michel_part;
 	      _QMichelShowerMCSimch_all += (michel_part+other_part);
-		_michel_hit_QtotMC.push_back(michel_part);
-		_michel_hit_fracMC.push_back(hit_frac);
+	      _michel_hit_QtotMC.push_back(michel_part);
+	      _michel_hit_fracMC.push_back(hit_frac);
 	    }
 	    
 	    // check if this hit has been added to the michel cluster...
@@ -576,7 +577,7 @@ namespace larlite {
 	    michel_part = partsPart.at(0);
 	    other_part  = partsPart.at(1);
 	    hit_frac    = michel_part / ( michel_part + other_part );
-	    if (hit_frac > 0.01){
+	    if (hit_frac > 0.1){
 	      _QMichelPartMCSimch_shr += michel_part;
 	      _QMichelPartMCSimch_all += michel_part + other_part;
 	    }

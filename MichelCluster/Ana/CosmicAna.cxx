@@ -208,8 +208,8 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
       for (const auto& mhit : out._michel) {
         _michel_Z.push_back(mhit._w);
         _michel_X.push_back(mhit._t);
-	_michel_Q.push_back(mhit._q)
-        total_charge += mhit._q;
+	_michel_Q.push_back(mhit._q);
+	total_charge += mhit._q;
         _michel_hit_qs->Fill(mhit._q);
         if (mhit._t < _lowest_hit_t)
           _lowest_hit_t = mhit._t;
@@ -345,6 +345,7 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
     
     _michel_Z.clear();
     _michel_X.clear();
+    _michel_Q.clear();
     
     _q_v.clear();
     _t_q_v.clear();
