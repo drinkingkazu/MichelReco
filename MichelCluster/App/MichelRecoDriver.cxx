@@ -47,7 +47,7 @@ namespace larlite {
     _hit_tree->Branch("_run"   , &_run    , "run/I");
     _hit_tree->Branch("_subrun", &_subrun , "subrun/I");
     _hit_tree->Branch("_event" , &_event  , "event/I");
-        _hit_tree->Branch("_q_v" , "std::vector<double>" , &_q_v);
+    _hit_tree->Branch("_q_v" , "std::vector<double>" , &_q_v);
     _hit_tree->Branch("_w_v" , "std::vector<double>" , &_w_v);
     _hit_tree->Branch("_t_v" , "std::vector<double>" , &_t_v);
     _hit_tree->Branch("_p_v" , "std::vector<double>" , &_p_v);
@@ -60,7 +60,8 @@ namespace larlite {
     _mc_hit_tree = new TTree("_mc_hit_tree","MC Hit Information");
     _mc_hit_tree->Branch("_hit_integral",&_hit_integral,"hit_integral/D");
     _mc_hit_tree->Branch("_hit_mc_q",&_hit_mc_q,"hit_mc_q/D");
-    
+
+    _mc_tree->Branch("_mc_x", &_mc_x, "mc_x/D");
     _mc_tree->Branch("_mc_energy"      , &_mc_energy           , "mc_energy/D");
     _mc_tree->Branch("_reco_energy"    , &_reco_energy         , "reco_energy/D");
     _mc_tree->Branch("_michel_hit_fracReco", "std::vector<double>" , &_michel_hit_fracReco);
@@ -135,15 +136,14 @@ namespace larlite {
     id.subrun = _subrun;
     id.event  = _event;
     
-    /*
     for (size_t i=0; i < _events_info.size(); i++){
       auto past_event = _events_info[i];
       if ( (past_event.run == id.run) and (past_event.subrun == id.subrun) and (past_event.event == id.event) ){
 	std::cout << "We have already scanned this event...skipping..." << std::endl;
+	std::cout << "skipping run : " << id.run << "\t subrun : " << id.subrun << "\t event : " << id.event << std::endl;
 	return true;
       }
     }
-    */
 
     _events_info.push_back(id);  
     
@@ -179,8 +179,7 @@ namespace larlite {
       auto const& h = (*ev_hit)[hit_index];
       // chrage :
       double q = h.Integral();
-      _hit_charge = q;
-      //_MIP_tree->Fill();
+
       double w = h.WireID().Wire * w2cm;
       double t = (h.PeakTime()-3200) * t2cm;
 
@@ -391,9 +390,9 @@ namespace larlite {
       michel_particle_input_clus_ass_v->set_association ( michel_particle_v->id(),
 							  product_id(data::kCluster,ev_cluster->name()),
 							  michel_part_input_clus_ass_v);
-      std::cout << "ev track name : " << ev_track->name() << std::endl;
-      std::cout << "ass vector size : " << michel_part_input_track_ass_v.size() << std::endl;
-      std::cout << "event : " << _event << "\t subrun : " << _subrun << "\t run : " << _run << std::endl;
+      //std::cout << "ev track name : " << ev_track->name() << std::endl;
+      //std::cout << "ass vector size : " << michel_part_input_track_ass_v.size() << std::endl;
+      //std::cout << "event : " << _event << "\t subrun : " << _subrun << "\t run : " << _run << std::endl;
       michel_particle_input_track_ass_v->set_association( michel_particle_v->id(),
 							  product_id(data::kTrack,ev_track->name()),
 							  michel_part_input_track_ass_v);
@@ -407,7 +406,7 @@ namespace larlite {
       auto ev_mcshower = storage->get_data<event_mcshower>( "mcreco"   );
       auto ev_simch    = storage->get_data<event_simch>   ( "largeant" );
 
-      if(ev_simch->size() == 0) { std::cout << "No Simchannel found " << "\n"; throw std::exception(); }
+      //if(ev_simch->size() == 0) { std::cout << "No Simchannel found " << "\n"; throw std::exception(); }
  
       bool shower_exists = false;
 
@@ -452,7 +451,7 @@ namespace larlite {
       }
 	  
       
-      if(shower_exists && reco_michel_exists ) { 
+      if(shower_exists){// && reco_michel_exists ) { 
 	
 	//********************************
 	// You will probably complain about this but I need to use backtracker
@@ -477,7 +476,7 @@ namespace larlite {
 	    _mc_energy = mcs.DetProfile().E();
 	    _QMichelMC = mcs.Charge(2);
 	    // calculate lifetime correction
-	    _mc_x = mcs.DetProfile().X();
+	    _mc_x = mcs.Start().X();
 	    
 	    double energy = mcs.DetProfile().E();
 	    
@@ -497,111 +496,118 @@ namespace larlite {
 	    }
 	  }
 	}
-
-	if(g4_trackid_v_shr.size() == 0) { std::cout << "No tracks found!!! \n"; throw std::exception(); } 
 	
-        try { _BTAlgShower.BuildMap(g4_trackid_v_shr, *ev_simch, *ev_hit, hit_ass_set); }
-	catch(...) { std::cout << "\n Exception at building BTAlg map...\n"; }
-        try { _BTAlgPart.BuildMap(g4_trackid_v_part, *ev_simch, *ev_hit, hit_ass_set); }
-	catch(...) { std::cout << "\n Exception at building BTAlg map...\n"; }
+	if(g4_trackid_v_shr.size() == 0)
+	  std::cout << "No track IDs found for backtracker !!!" << std::endl;
 	
-	auto btalgoShower = _BTAlgShower.BTAlg();
-	auto btalgoPart   = _BTAlgPart.BTAlg();
-
-	std::vector<double> hit_frac_michel;
-	std::vector<double> hit_Qtot_michel;
-	
-	// hits used for michel
-	int michel_hits = 0;
-
-	for (size_t hit_index = 0; hit_index < ev_hit->size(); hit_index++){
-
-	  const auto& h = ev_hit->at(hit_index);
-
-	  if(h.WireID().Plane != 2)
-	    continue;
-
-	  ::btutil::WireRange_t wire_hit(h.Channel(),h.StartTick()+3050,h.EndTick()+3050);
-
-	  // check if this wire-range has already been used
-	  auto wire_ranges = getUnUsedWireRange(wire_hit);
+	else{
 	  
-	  // loop through all output wire-ranges
-	  for (auto const& wire_range : wire_ranges){
-
-	    //if the wire-ranges are empty, continue
-	    if (wire_range.start == wire_range.end)
+	  try { _BTAlgShower.BuildMap(g4_trackid_v_shr, *ev_simch, *ev_hit, hit_ass_set); }
+	  catch(...) { std::cout << "\n Exception at building BTAlg map...\n"; }
+	  try { _BTAlgPart.BuildMap(g4_trackid_v_part, *ev_simch, *ev_hit, hit_ass_set); }
+	  catch(...) { std::cout << "\n Exception at building BTAlg map...\n"; }
+	  
+	  auto btalgoShower = _BTAlgShower.BTAlg();
+	  auto btalgoPart   = _BTAlgPart.BTAlg();
+	  
+	  std::vector<double> hit_frac_michel;
+	  std::vector<double> hit_Qtot_michel;
+	  
+	  // hits used for michel
+	  int michel_hits = 0;
+	  
+	  for (size_t hit_index = 0; hit_index < ev_hit->size(); hit_index++){
+	    
+	    const auto& h = ev_hit->at(hit_index);
+	    
+	    if(h.WireID().Plane != 2)
 	      continue;
-
-	    if (_debug_mcq)
-	      std::cout << "hit wire : " << h.Channel() << " w/ range [" << wire_range.start << ", " << wire_range.end << "]" << " with integral : " << h.Integral() << std::endl;
 	    
-	    // offending malloc if _BTAlg is not class member...
-	    auto partsShower = btalgoShower.MCQ(wire_range);
-	    auto partsPart   = btalgoPart.MCQ(wire_range);
+	    //::btutil::WireRange_t wire_hit(h.Channel(),h.StartTick()+3050,h.EndTick()+3050);
+	    ::btutil::WireRange_t wire_hit(h.Channel(),h.PeakTime()-h.RMS()+3050,h.PeakTime()+h.RMS()+3050);
 	    
-	    // calculate hit MC information
-	    _hit_integral = h.Integral();
-	    _hit_mc_q     = partsShower.at(0)+partsShower.at(1);
-	    _mc_hit_tree->Fill();
+	    // check if this wire-range has already been used
+	    auto wire_ranges = getUnUsedWireRange(wire_hit);
 	    
-	    
-	    double michel_part = partsShower.at(0);
-	    double other_part  = partsShower.at(1);
-	    double hit_frac    = michel_part / ( michel_part + other_part );
-	    if (_debug_mcq)
-	      std::cout << "hit " << hit_index << " has " << michel_part+other_part << " and " << hit_frac << " michel contribution..." << std::endl;
-	    if (hit_frac > 0.1){
-	      _QMichelShowerMCSimch_shr += michel_part;
-	      _QMichelShowerMCSimch_all += (michel_part+other_part);
-	      _michel_hit_QtotMC.push_back(michel_part);
-	      _michel_hit_fracMC.push_back(hit_frac);
-	    }
-	    
-	    // check if this hit has been added to the michel cluster...
-	    if (_mgr.GetResult().size() == 0) continue;
-	    auto michel = _mgr.GetResult()[0]._michel;
-	    for (auto const& h : michel){
-	      if (h._id == hit_index){
-		if (_debug_mcq)
-		  std::cout << "...this hit is michel" << std::endl;
-		michel_hits += 1;
-		_QMichelRecoSimch_all += (michel_part+other_part);
-		_QMichelRecoSimch_shr += michel_part;
-		_michel_hit_QtotReco.push_back(michel_part);
-		_michel_hit_fracReco.push_back(hit_frac);
+	    // loop through all output wire-ranges
+	    for (auto const& wire_range : wire_ranges){
+	      
+	      //if the wire-ranges are empty, continue
+	      if (wire_range.start == wire_range.end)
+		continue;
+	      
+	      if (_debug_mcq)
+		std::cout << "hit wire : " << h.Channel() << " w/ range [" << wire_range.start << ", " << wire_range.end << "]" << " with integral : " << h.Integral() << std::endl;
+	      
+	      // offending malloc if _BTAlg is not class member...
+	      auto partsShower = btalgoShower.MCQ(wire_range);
+	      auto partsPart   = btalgoPart.MCQ(wire_range);
+	      
+	      // calculate hit MC information
+	      _hit_integral = h.Integral();
+	      _hit_mc_q     = partsShower.at(0)+partsShower.at(1);
+	      _mc_hit_tree->Fill();
+	      
+	      
+	      double michel_part = partsShower.at(0);
+	      double other_part  = partsShower.at(1);
+	      double hit_frac    = michel_part / ( michel_part + other_part );
+	      if (_debug_mcq)
+		std::cout << "hit " << hit_index << " has " << michel_part+other_part << " and " << hit_frac << " michel contribution..." << std::endl;
+	      if (hit_frac > 0.1){
+		_QMichelShowerMCSimch_shr += michel_part;
+		_QMichelShowerMCSimch_all += (michel_part+other_part);
+		_michel_hit_QtotMC.push_back(michel_part);
+		_michel_hit_fracMC.push_back(hit_frac);
 	      }
-	    }// for all michel hits
-	    
-	    // now add charge from michel original electron only
-	    michel_part = partsPart.at(0);
-	    other_part  = partsPart.at(1);
-	    hit_frac    = michel_part / ( michel_part + other_part );
-	    if (hit_frac > 0.1){
-	      _QMichelPartMCSimch_shr += michel_part;
-	      _QMichelPartMCSimch_all += michel_part + other_part;
-	    }
-	    
-	  } // for all wire-ranges
-	} // for all hits
+	      
+	      // if no michel is reconstructed, skip this part
+	      if (reco_michel_exists){
+		// check if this hit has been added to the michel cluster...
+		if (_mgr.GetResult().size() == 0) continue;
+		auto michel = _mgr.GetResult()[0]._michel;
+		for (auto const& h : michel){
+		  if (h._id == hit_index){
+		    if (_debug_mcq)
+		      std::cout << "...this hit is michel" << std::endl;
+		    michel_hits += 1;
+		    _QMichelRecoSimch_all += (michel_part+other_part);
+		    _QMichelRecoSimch_shr += michel_part;
+		    _michel_hit_QtotReco.push_back(michel_part);
+		    _michel_hit_fracReco.push_back(hit_frac);
+		  }
+		}// for all michel hits
+	      }// if a reconstructed michel exists
+	      
+	      // now add charge from michel original electron only
+	      michel_part = partsPart.at(0);
+	      other_part  = partsPart.at(1);
+	      hit_frac    = michel_part / ( michel_part + other_part );
+	      if (hit_frac > 0.1){
+		_QMichelPartMCSimch_shr += michel_part;
+		_QMichelPartMCSimch_all += michel_part + other_part;
+	      }
+	      
+	    } // for all wire-ranges
+	  } // for all hits
 
-	_f_RecoHitsQ_fromMichelSimch = _QMichelRecoSimch_shr / _QMichelRecoSimch_all;
-	
-	if (_debug_mcq){
-	  std::cout << std::endl
-		    << "QMichel Reconstructed (all) (simch) : " << _QMichelRecoSimch_all << std::endl
-		    << "QMichel Reconstructed (shr) (simch) : " << _QMichelRecoSimch_shr << std::endl
-		    << "QMichel Shower MC (all) (simch)     : " << _QMichelShowerMCSimch_all << std::endl
-		    << "QMichel Shower MC (shr) (simch)     : " << _QMichelShowerMCSimch_shr << std::endl
-		    << "QMichel Part MC (all) (simch)       : " << _QMichelPartMCSimch_all << std::endl
-		    << "QMichel Part MC (shr) (simch)       : " << _QMichelPartMCSimch_shr << std::endl
-		    << "Frac of Q actually from the michel  : " << _f_RecoHitsQ_fromMichelSimch << std::endl
-		    << "Frac of  MC Shower reco'd in hits   : " << _QMichelRecoSimch_all/_QMichelShowerMCSimch_shr << std::endl
-		    << "Frac of  MC Part   reco'd in hits   : " << _QMichelRecoSimch_all/_QMichelPartMCSimch_shr << std::endl
-		    << std::endl << std::endl;
-	}
-
-
+	  _f_RecoHitsQ_fromMichelSimch = _QMichelRecoSimch_shr / _QMichelRecoSimch_all;
+	  
+	  if (_debug_mcq){
+	    std::cout << std::endl
+		      << "QMichel Reconstructed (all) (simch) : " << _QMichelRecoSimch_all << std::endl
+		      << "QMichel Reconstructed (shr) (simch) : " << _QMichelRecoSimch_shr << std::endl
+		      << "QMichel Shower MC (all) (simch)     : " << _QMichelShowerMCSimch_all << std::endl
+		      << "QMichel Shower MC (shr) (simch)     : " << _QMichelShowerMCSimch_shr << std::endl
+		      << "QMichel Part MC (all) (simch)       : " << _QMichelPartMCSimch_all << std::endl
+		      << "QMichel Part MC (shr) (simch)       : " << _QMichelPartMCSimch_shr << std::endl
+		      << "Frac of Q actually from the michel  : " << _f_RecoHitsQ_fromMichelSimch << std::endl
+		      << "Frac of  MC Shower reco'd in hits   : " << _QMichelRecoSimch_all/_QMichelShowerMCSimch_shr << std::endl
+		      << "Frac of  MC Part   reco'd in hits   : " << _QMichelRecoSimch_all/_QMichelPartMCSimch_shr << std::endl
+		      << std::endl << std::endl;
+	  }
+	  
+	}// if trackIDs are found for the back-tracker
 	//********************************
 	// How do we really know one of our hits is michel, well it has higher fraction of
 	// number of electrons from michel than "not", go ahead and swap for writeout, if this vector
