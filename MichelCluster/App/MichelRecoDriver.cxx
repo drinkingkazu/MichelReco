@@ -6,6 +6,7 @@
 #include "DataFormat/cluster.h"
 #include "DataFormat/hit.h"
 #include "DataFormat/mcshower.h"
+#include "DataFormat/mctrack.h"
 #include "DataFormat/simch.h"
 #include "DataFormat/pfpart.h"
 #include "DataFormat/track.h"
@@ -61,7 +62,26 @@ namespace larlite {
     _mc_hit_tree->Branch("_hit_integral",&_hit_integral,"hit_integral/D");
     _mc_hit_tree->Branch("_hit_mc_q",&_hit_mc_q,"hit_mc_q/D");
 
-    _mc_tree->Branch("_mc_x", &_mc_x, "mc_x/D");
+    // MC Michel & Muon Information (& Simchannel stuff)
+    // michel MC information
+    _mc_tree->Branch("_mc_x",  &_mc_x,  "mc_x/D" );
+    _mc_tree->Branch("_mc_y",  &_mc_y,  "mc_y/D" );
+    _mc_tree->Branch("_mc_z",  &_mc_z,  "mc_z/D" );
+    _mc_tree->Branch("_mc_px", &_mc_px, "mc_px/D");
+    _mc_tree->Branch("_mc_py", &_mc_py, "mc_py/D");
+    _mc_tree->Branch("_mc_pz", &_mc_pz, "mc_pz/D");
+    _mc_tree->Branch("_mc_yplane_angle",&_mc_yplane_angle,"mc_yplane_angle/D");
+    // muon MC information
+    _mc_tree->Branch("_mu_x",  &_mu_x,  "mu_x/D" );
+    _mc_tree->Branch("_mu_y",  &_mu_y,  "mu_y/D" );
+    _mc_tree->Branch("_mu_z",  &_mu_z,  "mu_z/D" );
+    _mc_tree->Branch("_mu_px", &_mu_px, "mu_px/D");
+    _mc_tree->Branch("_mu_py", &_mu_py, "mu_py/D");
+    _mc_tree->Branch("_mu_pz", &_mu_pz, "mu_pz/D");
+    _mc_tree->Branch("_mu_yplane_angle",&_mu_yplane_angle,"mu_yplane_angle/D");
+    // 3D dot product between michel and muon direction
+    _mc_tree->Branch("_mu_michel_3dangle",&_mu_michel_3dangle,"mu_michel_3dangle/D");
+    // Reconstructed energy & Simch stuff
     _mc_tree->Branch("_mc_energy"      , &_mc_energy           , "mc_energy/D");
     _mc_tree->Branch("_reco_energy"    , &_reco_energy         , "reco_energy/D");
     _mc_tree->Branch("_michel_hit_fracReco", "std::vector<double>" , &_michel_hit_fracReco);
@@ -404,6 +424,7 @@ namespace larlite {
 
 
       auto ev_mcshower = storage->get_data<event_mcshower>( "mcreco"   );
+      auto ev_mctrack  = storage->get_data<event_mctrack> ( "mcreco"   );
       auto ev_simch    = storage->get_data<event_simch>   ( "largeant" );
 
       //if(ev_simch->size() == 0) { std::cout << "No Simchannel found " << "\n"; throw std::exception(); }
@@ -476,7 +497,39 @@ namespace larlite {
 	    _mc_energy = mcs.DetProfile().E();
 	    _QMichelMC = mcs.Charge(2);
 	    // calculate lifetime correction
-	    _mc_x = mcs.Start().X();
+	    _mc_x  = mcs.Start().X();
+	    _mc_y  = mcs.Start().Y();
+	    _mc_z  = mcs.Start().Z();
+	    _mc_px = mcs.Start().Px();
+	    _mc_py = mcs.Start().Py();
+	    _mc_pz = mcs.Start().Pz();
+	    double mag = sqrt( (_mc_px*_mc_px) + (_mc_py*_mc_py) + (_mc_pz*_mc_pz) );	    
+	    _mc_px /= mag;
+	    _mc_py /= mag;
+	    _mc_pz /= mag;
+	    // 2D angle on Y plane view (in x-z space)
+	    _mc_yplane_angle = _mc_pz / sqrt ( _mc_px*_mc_px + _mc_pz*_mc_pz );
+
+	    // find the MCTrack that produced this Michel electron
+	    for (auto const& mct : *ev_mctrack){
+	      if ( (mcs.MotherTrackID() == mct.TrackID()) and ( abs(mct.PdgCode()) == 13 ) ){
+		// if only 1 step: continue
+		if (mct.size() < 2)
+		  continue;
+		_mu_energy  = mct[0].E();
+		_mu_px = mct[0].Px();
+		_mu_py = mct[0].Py();
+		_mu_pz = mct[0].Pz();
+		mag = sqrt( (_mu_px*_mu_px) + (_mu_py*_mu_py) + (_mu_pz*_mu_pz) );
+		_mu_px /= mag;
+		_mu_py /= mag;
+		_mu_pz /= mag;
+		// 2D angle on Y plane view (in x-z space)
+		_mu_yplane_angle = _mu_pz / sqrt ( _mu_px*_mu_px + _mu_pz*_mu_pz );
+		// muon - michel 3D angle
+		_mu_michel_3dangle = _mu_px*_mc_px + _mu_py*_mc_py + _mu_pz*_mc_pz;
+	      }// if we found the parent muon
+	    }// for all mctracks
 	    
 	    double energy = mcs.DetProfile().E();
 	    

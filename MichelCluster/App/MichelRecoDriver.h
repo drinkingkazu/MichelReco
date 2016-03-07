@@ -119,7 +119,16 @@ namespace larlite {
 
     // mc tree
     TTree* _mc_tree;
+    // MC information for Michel electron
     double _mc_energy;
+    double _mc_x, _mc_y, _mc_z, _mc_px, _mc_py, _mc_pz;
+    double _mc_yplane_angle;
+    double _mu_energy;
+    double _mu_x, _mu_y, _mu_z, _mu_px, _mu_py, _mu_pz;
+    double _mu_yplane_angle;
+    // muon-michel dot-product
+    double _mu_michel_3dangle;
+    // reconstruted energy information
     double _reco_energy;
     std::vector<double> _michel_hit_fracReco;
     std::vector<double> _michel_hit_QtotReco;
@@ -132,7 +141,6 @@ namespace larlite {
     double _QMichelShowerMCSimch_shr; // sum of simch contribution from hits to full MCShower (only component from Michel IDEs)
     double _QMichelPartMCSimch_all;   // sum of simch contribution from hits to michel part only (entire hit contribution)
     double _QMichelPartMCSimch_shr;   // sum of simch contribution from hits to michel part only (only component from Michel IDEs)
-    double _mc_x; // x-position where michel starts
     double _f_RecoHitsQ_fromMichelSimch; // fraction of charge collected in reco'd michel hits actually from michel
 
     // mc hit tree
