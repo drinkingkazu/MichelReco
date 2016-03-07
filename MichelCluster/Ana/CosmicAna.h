@@ -82,6 +82,7 @@ protected:
 
     std::vector<double> _Z;
     std::vector<double> _X;
+    std::vector<int>    _idx;
 
     std::vector<double> _michel_Z;
     std::vector<double> _michel_X;

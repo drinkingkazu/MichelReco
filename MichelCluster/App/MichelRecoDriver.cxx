@@ -53,16 +53,18 @@ namespace larlite {
     _hit_tree->Branch("_t_v" , "std::vector<double>" , &_t_v);
     _hit_tree->Branch("_p_v" , "std::vector<double>" , &_p_v);
 
-    _mc_tree = new TTree("_mc_tree","MC comparison TTree");
-    _mc_tree->Branch("_run"   , &_run    , "run/I");
-    _mc_tree->Branch("_subrun", &_subrun , "subrun/I");
-    _mc_tree->Branch("_event" , &_event  , "event/I");
+
 
     _mc_hit_tree = new TTree("_mc_hit_tree","MC Hit Information");
     _mc_hit_tree->Branch("_hit_integral",&_hit_integral,"hit_integral/D");
     _mc_hit_tree->Branch("_hit_mc_q",&_hit_mc_q,"hit_mc_q/D");
 
     // MC Michel & Muon Information (& Simchannel stuff)
+    _mc_tree = new TTree("_mc_tree","MC comparison TTree");
+    // event information
+    _mc_tree->Branch("_run"   , &_run    , "run/I");
+    _mc_tree->Branch("_subrun", &_subrun , "subrun/I");
+    _mc_tree->Branch("_event" , &_event  , "event/I");
     // michel MC information
     _mc_tree->Branch("_mc_x",  &_mc_x,  "mc_x/D" );
     _mc_tree->Branch("_mc_y",  &_mc_y,  "mc_y/D" );
@@ -86,6 +88,7 @@ namespace larlite {
     _mc_tree->Branch("_reco_energy"    , &_reco_energy         , "reco_energy/D");
     _mc_tree->Branch("_michel_hit_fracReco", "std::vector<double>" , &_michel_hit_fracReco);
     _mc_tree->Branch("_michel_hit_QtotReco", "std::vector<double>" , &_michel_hit_QtotReco);
+    _mc_tree->Branch("_michel_hit_idxReco",  "std::vector<double>" , &_michel_hit_idxReco );
     _mc_tree->Branch("_michel_hit_fracMC", "std::vector<double>" , &_michel_hit_fracMC);
     _mc_tree->Branch("_michel_hit_QtotMC", "std::vector<double>" , &_michel_hit_QtotMC);
     _mc_tree->Branch("_QMichelMC", &_QMichelMC, "QMichelMC/D");
@@ -122,6 +125,7 @@ namespace larlite {
     _QMichelShowerMCSimch_shr = 0.;
     _michel_hit_fracReco.clear();
     _michel_hit_QtotReco.clear();
+    _michel_hit_idxReco.clear();
     _michel_hit_fracMC.clear();
     _michel_hit_QtotMC.clear();
 
@@ -472,7 +476,7 @@ namespace larlite {
       }
 	  
       
-      if(shower_exists){// && reco_michel_exists ) { 
+      if(shower_exists && reco_michel_exists ) { 
 	
 	//********************************
 	// You will probably complain about this but I need to use backtracker
@@ -628,6 +632,7 @@ namespace larlite {
 		    _QMichelRecoSimch_shr += michel_part;
 		    _michel_hit_QtotReco.push_back(michel_part);
 		    _michel_hit_fracReco.push_back(hit_frac);
+		    _michel_hit_idxReco.push_back(h._id);
 		  }
 		}// for all michel hits
 	      }// if a reconstructed michel exists

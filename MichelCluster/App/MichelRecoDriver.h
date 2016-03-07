@@ -132,6 +132,7 @@ namespace larlite {
     double _reco_energy;
     std::vector<double> _michel_hit_fracReco;
     std::vector<double> _michel_hit_QtotReco;
+    std::vector<int>    _michel_hit_idxReco;
     std::vector<double> _michel_hit_fracMC;
     std::vector<double> _michel_hit_QtotMC;
     double _QMichelMC;            // michel charge from MCShower Charge() function
