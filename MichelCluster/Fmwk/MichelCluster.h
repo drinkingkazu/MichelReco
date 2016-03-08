@@ -180,11 +180,6 @@ protected:
     //
     /// Process set hits and do ordering
     void ProcessHits();
-    /// Construct ordered index vector for near-by neighbor hits
-    void OrderPoints(size_t start_index,
-                     std::vector<size_t>& ordered_index_v,
-                     std::vector<double>& ds_v,
-                     std::vector<double>& s_v);
 
 };
 

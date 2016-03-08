@@ -567,6 +567,93 @@ namespace michel {
     return area;
   }
 
+  
+  void ClusterVectorCalculator::OrderPoints(size_t start_index,
+					    const std::vector<michel::HitPt>& hits,
+					    const double& d_cutoff,
+					    std::vector<size_t>& ordered_index_v,
+					    std::vector<double>& ds_v,
+					    std::vector<double>& s_v)
+  {
+    // Clear result holder
+    ordered_index_v.clear();
+    s_v.clear();
+    
+    if(hits.empty()) return;
+
+    if(start_index >= hits.size()) {
+      std::stringstream ss;
+      ss << "Start index (" << start_index << ") is >= hit length "
+	 << "(" << hits.size() << ")";
+      Print(msg::kEXCEPTION,__FUNCTION__,ss.str());
+    }
+
+    // Result holder, reserve max possible entries
+    ordered_index_v.reserve(hits.size());
+    ordered_index_v.push_back(start_index);
+    s_v.reserve  ( hits.size() );
+    ds_v.reserve ( hits.size() );
+
+    // Distance vector has the same length as the points vector
+    s_v.push_back(0);
+    
+    // Marker vector to mark already-used-index
+    std::vector<bool> used_v(hits.size(),false);
+    used_v[start_index]=true;
+    while(ordered_index_v.size() < hits.size()) {
+
+      double min_dist  = kINVALID_DOUBLE;
+      size_t min_index = kINVALID_SIZE;
+      // Linear search: slow but robust ... think of a better robust way to replace
+      for(size_t h_index=0; h_index<hits.size(); ++h_index) {
+
+	// If used skip
+	if(used_v[h_index]) continue;
+
+	// Take a reference of this hit & last hit
+	auto const& this_step = hits[h_index];
+	auto const& last_step = hits[ordered_index_v.back()];
+
+	if( std::abs(this_step._w - last_step._w) > min_dist ) continue;
+	if( std::abs(this_step._t - last_step._t) > min_dist ) continue;
+	
+	// Compute distance
+	double sq_dist = (this_step._w - last_step._w) * (this_step._w - last_step._w) + (this_step._t - last_step._t) * (this_step._t - last_step._t);
+
+	// If bigger than min distance, ignore this
+	if(sq_dist > min_dist) continue;
+	// Else register as the local min point
+	min_dist  = sq_dist;
+	min_index = h_index;
+      }
+      // If min_dist is above the cut-off, break
+      if(min_dist > d_cutoff) break;
+
+      // Else this is a good index. Register and move on
+      ordered_index_v.push_back(min_index);
+      ds_v.push_back ( sqrt(min_dist)           );
+      s_v.push_back  ( s_v.back() + ds_v.back() );
+      used_v[min_index] = true;
+    }
+    // Verbosity report
+    if( _verbosity <= msg::kINFO ) {
+      // INFO level prints out where it starts & # points
+      std::stringstream ss;
+      ss << "Ordered from index " << start_index
+	 << " ... found " << ordered_index_v.size()
+	 << " points!" <<std::endl;
+      // DEBUG level prints out all indeces ... we never understand this anyway
+      if(_verbosity <= msg::kDEBUG ) {
+	for(size_t i=0; i<ordered_index_v.size(); ++i) {
+	  ss << ordered_index_v[i] << " ";
+	  if(i%8==0) ss << std::endl;
+	}
+	ss << std::endl;
+      }
+      Print(msg::kINFO,__FUNCTION__,ss.str());
+    }
+  }
+
 
 }
 #endif

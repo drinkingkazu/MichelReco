@@ -3,7 +3,7 @@
 
 #include "CalcTruncated.h"
 #include "Fmwk/MichelException.h"
-#include "ClusterVectorCalculator.h"
+#include "Fmwk/ClusterVectorCalculator.h"
 #include <cmath>
 #include <sstream>
 

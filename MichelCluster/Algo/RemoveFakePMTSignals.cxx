@@ -2,7 +2,7 @@
 #define REMOVEFAKEPMTSIGNALS_CXX
 
 #include "RemoveFakePMTSignals.h"
-#include "ClusterVectorCalculator.h"
+#include "Fmwk/ClusterVectorCalculator.h"
 
 #include <sstream>
 

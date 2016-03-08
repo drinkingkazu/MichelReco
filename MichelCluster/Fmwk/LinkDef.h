@@ -24,7 +24,7 @@
 #pragma link C++ class michel::BaseAlgMerger+;
 #pragma link C++ class michel::BaseAlgFilter+;
 #pragma link C++ class michel::BaseAlgBinaryMerger+;
-
+#pragma link C++ class michel::ClusterVectorCalculator+;
 #pragma link C++ class michel::CMergeBookKeeper+;
 
 //ADD_NEW_CLASS ... do not change this line

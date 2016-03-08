@@ -2,7 +2,7 @@
 #define FINDBRAGGPEAK_CXX
 
 #include "FindBraggPeak.h"
-#include "ClusterVectorCalculator.h"
+#include "Fmwk/ClusterVectorCalculator.h"
 #include <sstream>
 #include <cmath>
 #include <algorithm>

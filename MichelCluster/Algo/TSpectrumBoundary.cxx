@@ -315,7 +315,7 @@ namespace michel {
     TSpectrum ts;                                                                                                        
     TH1D th("charge",";;",X.size(),x);    
     
-    for(int i = 0; i < Y.size(); ++i) 
+    for(size_t i = 0; i < Y.size(); ++i) 
       th.SetBinContent(i+1,Y[i]); 
     
     ts.Search(&th,2,"nodraw");

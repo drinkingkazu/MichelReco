@@ -2,7 +2,7 @@
 #define REQUIRELARGEANGLE_CXX
 
 #include "RequireLargeAngle.h"
-#include "ClusterVectorCalculator.h"
+#include "Fmwk/ClusterVectorCalculator.h"
 #include <sstream>
 #include <cmath>
 

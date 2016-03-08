@@ -15,8 +15,9 @@
 #define MICHELCLUSTER_CLUSTERVECTORCALCULATOR_H
 
 #include <algorithm>
-#include "Fmwk/MichelCluster.h"
-#include "Fmwk/ColorPrint.h"
+#include "MichelCluster.h"
+#include "ColorPrint.h"
+
 namespace michel {
   /**
      \class ClusterVectorCalculator
@@ -126,6 +127,15 @@ namespace michel {
 			const size_t& MIPendIdx, const size_t& braggIdx,
 			const double& MIPm, const double& MIPs) const;
     
+    
+    // function to oder points based on position
+    void OrderPoints(size_t start_index,
+		     const std::vector<michel::HitPt>& hits,
+		     const double& d_cutoff,
+                     std::vector<size_t>& ordered_index_v,
+                     std::vector<double>& ds_v,
+                     std::vector<double>& s_v);
+
   };
 }
 

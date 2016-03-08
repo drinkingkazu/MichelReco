@@ -4,6 +4,7 @@
 #include "MichelConstants.h"
 #include "MichelCluster.h"
 #include "MichelException.h"
+#include "ClusterVectorCalculator.h"
 #include "UtilFunc.h"
 #include <cmath>
 #include <sstream>
@@ -174,13 +175,15 @@ namespace michel {
       Print(msg::kEXCEPTION,__FUNCTION__,ss.str());
     }
 
+    ClusterVectorCalculator _clusCalc;
+
     //order the points right => left
-    OrderPoints(min_index, _ordered_pts, _ds_v, _s_v);
+    _clusCalc.OrderPoints(min_index, _hits, _d_cutoff, _ordered_pts, _ds_v, _s_v);
 
     //order the points left => right
     std::vector<size_t> lr_ordered_pts;
     std::vector<double> lr_ds_v, lr_s_v;
-    OrderPoints(max_index, lr_ordered_pts, lr_ds_v, lr_s_v);
+    _clusCalc.OrderPoints(max_index, _hits, _d_cutoff, lr_ordered_pts, lr_ds_v, lr_s_v);
 
     // Make deciison: we take a longer cluster
     if(_ordered_pts.size() < lr_ordered_pts.size()) {
@@ -208,89 +211,7 @@ namespace michel {
     
   }
 
-  void MichelCluster::OrderPoints(size_t start_index,
-				  std::vector<size_t>& ordered_index_v,
-				  std::vector<double>& ds_v,
-				  std::vector<double>& s_v)
-  {
-    // Clear result holder
-    ordered_index_v.clear();
-    s_v.clear();
-    
-    if(_hits.empty()) return;
 
-    if(start_index >= _hits.size()) {
-      std::stringstream ss;
-      ss << "Start index (" << start_index << ") is >= hit length "
-	 << "(" << _hits.size() << ")";
-      Print(msg::kEXCEPTION,__FUNCTION__,ss.str());
-    }
-
-    // Result holder, reserve max possible entries
-    ordered_index_v.reserve(_hits.size());
-    ordered_index_v.push_back(start_index);
-    s_v.reserve  ( _hits.size() );
-    ds_v.reserve ( _hits.size() );
-
-    // Distance vector has the same length as the points vector
-    s_v.push_back(0);
-    
-    // Marker vector to mark already-used-index
-    std::vector<bool> used_v(_hits.size(),false);
-    used_v[start_index]=true;
-    while(ordered_index_v.size() < _hits.size()) {
-
-      double min_dist  = kINVALID_DOUBLE;
-      size_t min_index = kINVALID_SIZE;
-      // Linear search: slow but robust ... think of a better robust way to replace
-      for(size_t h_index=0; h_index<_hits.size(); ++h_index) {
-
-	// If used skip
-	if(used_v[h_index]) continue;
-
-	// Take a reference of this hit & last hit
-	auto const& this_step = _hits[h_index];
-	auto const& last_step = _hits[ordered_index_v.back()];
-
-	if( std::abs(this_step._w - last_step._w) > min_dist ) continue;
-	if( std::abs(this_step._t - last_step._t) > min_dist ) continue;
-	
-	// Compute distance
-	double sq_dist = pow(this_step._w - last_step._w,2) + pow(this_step._t - last_step._t,2);
-
-	// If bigger than min distance, ignore this
-	if(sq_dist > min_dist) continue;
-	// Else register as the local min point
-	min_dist  = sq_dist;
-	min_index = h_index;
-      }
-      // If min_dist is above the cut-off, break
-      if(min_dist > _d_cutoff) break;
-
-      // Else this is a good index. Register and move on
-      ordered_index_v.push_back(min_index);
-      ds_v.push_back ( sqrt(min_dist)           );
-      s_v.push_back  ( s_v.back() + ds_v.back() );
-      used_v[min_index] = true;
-    }
-    // Verbosity report
-    if( _verbosity <= msg::kINFO ) {
-      // INFO level prints out where it starts & # points
-      std::stringstream ss;
-      ss << "Ordered from index " << start_index
-	 << " ... found " << ordered_index_v.size()
-	 << " points!" <<std::endl;
-      // DEBUG level prints out all indeces ... we never understand this anyway
-      if(_verbosity <= msg::kDEBUG ) {
-	for(size_t i=0; i<ordered_index_v.size(); ++i) {
-	  ss << ordered_index_v[i] << " ";
-	  if(i%8==0) ss << std::endl;
-	}
-	ss << std::endl;
-      }
-      Print(msg::kINFO,__FUNCTION__,ss.str());
-    }
-  }
 
   MichelCluster MichelCluster::operator+(const MichelCluster& rhs) const
   {

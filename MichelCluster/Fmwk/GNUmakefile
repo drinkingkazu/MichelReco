@@ -12,11 +12,14 @@ OBJECTS = $(SOURCES:.cxx=.o)
 
 # include options for this package
 INCFLAGS  = -I.                       #Include itself
+INCFLAGS += -I..
 
 # platform-specific options
 OSNAME          = $(shell uname -s)
 HOST            = $(shell uname -n)
 OSNAMEMODE      = $(OSNAME)
+
+LDFLAGS += -L$(LARLITE_LIBDIR) -lMichelReco_MichelClusterBase
 
 # call kernel specific compiler setup
 include $(LARLITE_BASEDIR)/Makefile/Makefile.${OSNAME}
