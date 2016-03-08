@@ -49,7 +49,6 @@
 #pragma link C++ class michel::RequireBoundaryInLowCov+;
 
 /// Various method classes
-#pragma link C++ class michel::ClusterVectorCalculator+;
 #pragma link C++ class michel::CalcTruncated+;
 
 // #pragma link C++ class michel::ToyMerger+;
