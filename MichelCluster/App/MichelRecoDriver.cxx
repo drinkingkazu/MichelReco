@@ -476,7 +476,7 @@ namespace larlite {
       }
 	  
       
-      if(shower_exists && reco_michel_exists ) { 
+      if(shower_exists){// && reco_michel_exists ) { 
 	
 	//********************************
 	// You will probably complain about this but I need to use backtracker

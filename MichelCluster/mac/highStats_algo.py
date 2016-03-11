@@ -128,4 +128,11 @@ def PrepareMichelAlgo():
     #largeangle.SetVerbosity(michel.msg.kDEBUG)
     algoList.append(largeangle)
 
+    #############################################
+    # remove bragg peak hits
+    removeBragg = michel.RemoveBraggPeakHits()
+    removeBragg.SetMaxRadius(1.)
+    removeBragg.SetChargeFactor(2.)
+    algoList.append(removeBragg)
+
     return algoList

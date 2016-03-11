@@ -26,7 +26,7 @@ for x in xrange(len(sys.argv)-1):
 
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
-my_proc.set_ana_output_file(  "michel_tree.root"  )
+my_proc.set_ana_output_file("michel_tree_data.root")
 my_proc.set_output_file    ("michel_clusters.root")
 
 
@@ -39,7 +39,7 @@ my_unit.SetClusterProducer("pandoraCosmic")
 my_unit.saveMichelClusters(False)
 #my_unit.SetClusterProducer("linecluster")
 my_unit.SetUseMC(False)
-my_unit.SetEField(0.5)
+my_unit.SetEField(0.27)
 my_unit.SetMinClusSize(15)
 ###########################################################
 # set here if you want to save michels as an output cluster
@@ -76,17 +76,6 @@ mgr.AddAna(michel.CosmicAna())
 
 # add process
 my_proc.add_process(my_unit)
-
-#my_proc.set_data_to_write(fmwk.data.kHit,'cchit')
-#my_proc.set_data_to_write(fmwk.data.kHit,'linecluster')
-#my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
-#my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
-#my_proc.set_data_to_write(fmwk.data.kCluster,'muon')
-#my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
-#my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
-#my_proc.set_data_to_write(fmwk.data.kAssociation,'muon')
-#my_proc.set_data_to_write(fmwk.data.kAssociation,'rawclusters')
-
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
