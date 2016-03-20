@@ -63,6 +63,12 @@ def PrepareMichelAlgo():
     midalgo.SetMinBadHits ( 10  )
     algoList.append(midalgo)
 
+    #########################
+    # BraggArea filter algo
+    braggalgo = michel.FindBraggPeak()
+    braggalgo.SetMinBraggArea(1000.)
+    algoList.append(braggalgo)
+
     ############################
     # MINIMUM LENGTH REQUIREMENT
     minlength = michel.CutOnMuonLength()
@@ -87,7 +93,7 @@ def PrepareMichelAlgo():
     
     fidvolfilter.SetExcludedWireRanges(wires_to_exclude_min,wires_to_exclude_max)
     fidvolfilter.SetExcludedTimeRanges(times_to_exclude_min,times_to_exclude_max)
-    algoList.append(fidvolfilter)
+    #algoList.append(fidvolfilter)
 
     ######################################
     # Attach algorithm to recluster michel
@@ -134,5 +140,12 @@ def PrepareMichelAlgo():
     removeBragg.SetMaxRadius(1.)
     removeBragg.SetChargeFactor(2.)
     algoList.append(removeBragg)
+
+
+    #####################################
+    # cut on Michels with high avg. Q/hit
+    cutonavgq = michel.CutOnMeanHitCharge()
+    cutonavgq.SetMaxAvgQ(400.)
+    algoList.append(cutonavgq)
 
     return algoList

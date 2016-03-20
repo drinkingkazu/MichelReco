@@ -38,6 +38,7 @@
 /// MIDFilter
 #pragma link C++ class michel::DecideIfStoppingMuon+;
 #pragma link C++ class michel::CutOnMuonLength+;
+#pragma link C++ class michel::CutOnMeanHitCharge+;
 #pragma link C++ class michel::CutOnMuonLinearity+;
 #pragma link C++ class michel::CutOnMichelNumHits+;
 #pragma link C++ class michel::CutOnTotNumHits+;
