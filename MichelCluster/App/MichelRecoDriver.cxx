@@ -11,7 +11,7 @@
 #include "DataFormat/pfpart.h"
 #include "DataFormat/track.h"
 
-#include "LArUtil/GeometryUtilities.h"
+#include "LArUtil/GeometryHelper.h"
 #include "LArUtil/LArProperties.h"
 #include "LArUtil/TimeService.h"
 
@@ -132,10 +132,10 @@ namespace larlite {
 
     _wiremap.clear();
 
-    // use instances of LArUtil and GeometryUtilities
+    // use instances of LArUtil and GeometryHelper
     // for (w,t) -> (cm, cm) conversion
     // wire->cm
-    double w2cm = larutil::GeometryUtilities::GetME()->WireToCm();
+    double w2cm = larutil::GeometryHelper::GetME()->WireToCm();
     // time->cm (accounting for different operating voltages)
     double driftVel = larutil::LArProperties::GetME()->DriftVelocity(_Efield,87); // [cm/us]
     // tick width in time

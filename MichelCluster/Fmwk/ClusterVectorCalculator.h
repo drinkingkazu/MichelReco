@@ -42,6 +42,11 @@ namespace michel {
 					   const int window_cutoff,
 					   const double p_above) const;
     
+    std::vector<double> calc_smooth_mean  (const std::vector<double>& dq,
+					   const double _n_window_size,
+					   const int window_cutoff,
+					   const double p_above) const;
+    
     double do_smooth_derive(const std::vector<double>& f,
 			    const std::vector<double>& x,
 			    int N) const;
