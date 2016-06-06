@@ -11,7 +11,7 @@
 #include "DataFormat/pfpart.h"
 #include "DataFormat/track.h"
 
-#include "LArUtil/GeometryUtilities.h"
+#include "LArUtil/GeometryHelper.h"
 #include "LArUtil/LArProperties.h"
 #include "LArUtil/TimeService.h"
 
@@ -135,7 +135,7 @@ namespace larlite {
     // use instances of LArUtil and GeometryUtilities
     // for (w,t) -> (cm, cm) conversion
     // wire->cm
-    double w2cm = larutil::GeometryUtilities::GetME()->WireToCm();
+    double w2cm = larutil::GeometryHelper::GetME()->WireToCm();
     // time->cm (accounting for different operating voltages)
     double driftVel = larutil::LArProperties::GetME()->DriftVelocity(_Efield,87); // [cm/us]
     // tick width in time
@@ -581,7 +581,7 @@ namespace larlite {
 	      continue;
 	    
 	    //::btutil::WireRange_t wire_hit(h.Channel(),h.StartTick()+3050,h.EndTick()+3050);
-	    ::btutil::WireRange_t wire_hit(h.Channel(),h.PeakTime()-h.RMS()+3050,h.PeakTime()+h.RMS()+3050);
+	    ::btutil::WireRange_t wire_hit(h.Channel(),h.PeakTime()-3*h.RMS()+3050,h.PeakTime()+3*h.RMS()+3050);
 	    
 	    // check if this wire-range has already been used
 	    auto wire_ranges = getUnUsedWireRange(wire_hit);

@@ -2,7 +2,7 @@
 #define LARLITE_TAGSTOPPINGMUON_CXX
 
 #include "TagStoppingMuon.h"
-#include "LArUtil/GeometryUtilities.h"
+#include "LArUtil/GeometryHelper.h"
 #include "DataFormat/cluster.h"
 #include "DataFormat/hit.h"
 #include "DataFormat/mctrack.h"
@@ -52,8 +52,8 @@ namespace larlite {
   
   bool TagStoppingMuon::analyze(storage_manager* storage) {
 
-    double w2cm = larutil::GeometryUtilities::GetME()->WireToCm();
-    double t2cm = larutil::GeometryUtilities::GetME()->TimeToCm();
+    double w2cm = larutil::GeometryHelper::GetME()->WireToCm();
+    double t2cm = larutil::GeometryHelper::GetME()->TimeToCm();
 
     _dQ.clear();
     _dS.clear();

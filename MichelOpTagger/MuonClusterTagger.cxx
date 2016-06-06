@@ -9,7 +9,7 @@
 #include "DataFormat/hit.h"
 #include "DataFormat/calorimetry.h"
 #include "DataFormat/mctrack.h"
-#include "LArUtil/GeometryUtilities.h"
+#include "LArUtil/GeometryHelper.h"
 #include "LArUtil/LArProperties.h"
 
 namespace larlite {
@@ -35,7 +35,7 @@ namespace larlite {
     // use instances of LArUtil and GeometryUtilities
     // for (w,t) -> (cm, cm) conversion
     // wire->cm
-    _w2cm = larutil::GeometryUtilities::GetME()->WireToCm();
+    _w2cm = larutil::GeometryHelper::GetME()->WireToCm();
     // time->cm (accounting for different operating voltages)
     double driftVel = larutil::LArProperties::GetME()->DriftVelocity(_Efield,87); // [cm/us]
     // tick width in time
