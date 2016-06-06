@@ -320,6 +320,27 @@ namespace larlite {
   }
 
 
+  bool MichelRecoDriver::finalize() {
+
+    _out_txt_file.close();
+
+    std::cout << "time/event = " << _event_time/_event_ctr * 1.e6 << std::endl;
+
+
+    auto ts = ::larutil::TimeService::GetME();
+    std::cout << "TPCTick -> TDC: 1000 -> " << ts->TPCTick2TDC(1000) << std::endl;
+    std::cout << "TPCTick -> TDC: 2000 -> " << ts->TPCTick2TDC(2000) << std::endl;
+
+    _fout->cd();
+    _mgr.Finalize(_fout);
+    if (_hit_tree)
+      _hit_tree->Write();
+    return true;
+  }
+
+
+
+
 
 }
 #endif
