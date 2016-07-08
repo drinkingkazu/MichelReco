@@ -78,13 +78,25 @@ namespace michel {
   {
     
     std::vector<double> charge;
-    std::vector<double> truncatedQ;
+
     charge.reserve(cluster._ordered_pts.size());
 
     for(const auto& o : cluster._ordered_pts)
       charge.push_back(cluster._hits[o]._q);
 
-    for(auto window : get_windows(charge,_n_window_size) ) {
+    return calc_smooth_mean(charge,_n_window_size,window_cutoff,p_above);
+  }
+
+
+  std::vector<double> ClusterVectorCalculator::calc_smooth_mean(const std::vector<double>& dq,
+								const double _n_window_size,
+								const int window_cutoff,
+								const double p_above) const
+  {
+
+    std::vector<double> truncatedQ;
+    
+    for(auto window : get_windows(dq,_n_window_size) ) {
       if(window.size() > (size_t)window_cutoff) 
 	cut(window,p_above);
       truncatedQ.push_back(calc_mean(window));

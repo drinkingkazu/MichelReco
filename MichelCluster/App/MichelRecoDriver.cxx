@@ -24,7 +24,8 @@ namespace larlite {
     _fout=0;
     _save_clusters=false;
     _Efield=0.5;
-    _out_txt_file.open("input_cluster_info_file.txt");
+    _out_txt_file.open("michel_events.txt");
+    _out_txt_file_all.open("michel_events_all.txt");
     // FIX ME: currently set only plane 2 reconstruction
     SetPlane(2);
   }
@@ -211,7 +212,7 @@ namespace larlite {
 	int startwire = ev_cluster->at(largest_clus_idx).StartWire();
 	int endwire   = ev_cluster->at(largest_clus_idx).EndWire();
 
-	_out_txt_file << _run << " " << _subrun << " " << _event << " " << largest_clus_idx << " " << startwire << " " << endwire << "\n";
+
 
       }// if there is a michel
     }// for all output MichelClsuters
@@ -221,6 +222,7 @@ namespace larlite {
     // We may want to save the michels we found as clusters
     // if this option is selected, take the michel hits
     // and group them in "michel" clusters
+
     if (_save_clusters){
 
       // create michel cluster object
@@ -261,8 +263,32 @@ namespace larlite {
 
 	// empty vector where to store hits associated for this specific michel cluster
 	std::vector<unsigned int> michel_clus_hits;
-	for (auto const& michel_hit : michel)
+
+	// additionally get hit range in time/wire
+	int wire_min = 8256;
+	int wire_max = 0;
+	double tick_min = 9600;
+	double tick_max = 0;
+
+	for (auto const& michel_hit : michel){
 	  michel_clus_hits.push_back(michel_hit._id);
+	  auto const& hit = ev_hit->at(michel_hit._id);
+	  auto const& hit_tick = hit.PeakTime();
+	  if (hit_tick > tick_max) { tick_max = hit_tick; }
+	  if (hit_tick < tick_min) { tick_min = hit_tick; }
+	  auto const& hit_wire = hit.WireID().Wire;
+	  if (hit_wire > wire_max) { wire_max = hit_wire; }
+	  if (hit_wire < wire_min) { wire_min = hit_wire; }
+	}
+
+	std::cout << "Reconstructed Michel w/ " << michel.size() << " hits." << std::endl
+		  << "w/ tick-range [" << tick_min << ", " << tick_max << "]" << std::endl
+		  << "w/ wire-range [" << wire_min << ", " << wire_max << "]" << std::endl
+		  << std::endl;
+
+	_out_txt_file_all << _run << " " << _subrun << " " << _event << " " << tick_min << " " << tick_max << " " << wire_min << " " << wire_max << std::endl;
+	_out_txt_file     << _run << " " << _subrun << " " << _event << std::endl;
+
 	// add this vector to the associations
 	if (michel_clus_hits.size() > 3){
 	  michel_clus_hit_ass_v.push_back(michel_clus_hits);
@@ -288,7 +314,7 @@ namespace larlite {
 	  } 
 	  // add the association information
 	  muon_clus_hit_ass_v.push_back(muon_clus_hits);
-
+	  
 	  // find the 3dtrack associated to the input cluster
 	  // 1) hits associated to input cluster
 	  auto hits_associated_to_input_cluster = hit_ass_set[ michelClus.getLargestCluster().first ];
@@ -306,16 +332,19 @@ namespace larlite {
 	    }
 	    if (found) { break; }
 	  }
-	    
+	  
 	}// if there are at least 3 hits in the michel cluster
 	
       }// loop over all found michels
       // now save the association information
       michel_cluster_ass_v->set_association(michel_cluster_v->id(),product_id(data::kHit,ev_hit->name()),michel_clus_hit_ass_v);
       muon_cluster_ass_v->set_association(muon_cluster_v->id(),product_id(data::kHit,ev_hit->name()),muon_clus_hit_ass_v);
+      
     }// if we should save cluster
 
-    
+    if (_filter_events && (_mgr.GetResult().size() == 0) )
+      return false;
+
     return true;
   }
 
@@ -323,6 +352,7 @@ namespace larlite {
   bool MichelRecoDriver::finalize() {
 
     _out_txt_file.close();
+    _out_txt_file_all.close();
 
     std::cout << "time/event = " << _event_time/_event_ctr * 1.e6 << std::endl;
 
