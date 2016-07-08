@@ -71,6 +71,9 @@ namespace larlite {
     /// be considered as a candidate MichelCluster
     void SetMinClusSize(int n) { _minClusSize = n; }
 
+    /// filter events
+    void FilterEvents(bool on) { _filter_events = on; }
+
   protected:
 
     /// Stopwatch for event time profiling
@@ -101,7 +104,8 @@ namespace larlite {
 
     std::vector<michel::EventID> _events_info;
 
-
+    /// filter events
+    bool _filter_events;
 
     /// boolean to select if to save Michel Clusters or not
     bool _save_clusters;
@@ -116,6 +120,7 @@ namespace larlite {
 
     // text file where to dump input clsuter information
     std::ofstream _out_txt_file;
+    std::ofstream _out_txt_file_all;
 
   };
 }
