@@ -626,14 +626,14 @@ namespace michel {
 	auto const& this_step = hits[h_index];
 	auto const& last_step = hits[ordered_index_v.back()];
 
-	if( std::abs(this_step._w - last_step._w) > min_dist ) continue;
-	if( std::abs(this_step._t - last_step._t) > min_dist ) continue;
+	if( (this_step._w - last_step._w) * (this_step._w - last_step._w) > min_dist ) continue;
+	if( (this_step._t - last_step._t) * (this_step._t - last_step._t) > min_dist ) continue;
 	
 	// Compute distance
 	double sq_dist = (this_step._w - last_step._w) * (this_step._w - last_step._w) + (this_step._t - last_step._t) * (this_step._t - last_step._t);
 
 	// If bigger than min distance, ignore this
-	if(sq_dist > min_dist) continue;
+	if(sq_dist > min_dist ) continue;
 	// Else register as the local min point
 	min_dist  = sq_dist;
 	min_index = h_index;
