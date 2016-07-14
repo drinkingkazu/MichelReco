@@ -15,6 +15,7 @@ INCFLAGS  = -I.                       #Include itself
 INCFLAGS += -I../
 INCFLAGS += $(shell larlite-config --includes)
 INCFLAGS += $(shell recotool-config --includes)
+INCFLAGS += $(shell basictool-config --includes)
 
 # platform-specific options
 OSNAME          = $(shell uname -s)
@@ -24,6 +25,7 @@ OSNAMEMODE      = $(OSNAME)
 LDFLAGS += $(shell larlite-config --libs)
 LDFLAGS += -L$(LARLITE_LIBDIR) -lMichelReco_MichelClusterFmwk
 LDFLAGS += -L$(LARLITE_LIBDIR) -lRecoTool_MCComp
+LDFLAGS += -L$(LARLITE_LIBDIR) -lBasicTool_GeoAlgo
 LDFLAGS += $(shell root-config --libs)
 #LDFLAGS += -lSpectrum
 # call kernel specific compiler setup
