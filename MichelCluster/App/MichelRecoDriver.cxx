@@ -106,10 +106,6 @@ namespace larlite {
     event_hit* ev_hit = nullptr;
     auto const& hit_ass_set = storage->find_one_ass(ev_cluster->id(), ev_hit, ev_cluster->name());
 
-    // get the tracks associated to the hits
-    event_track* ev_track = nullptr;
-    auto const& track_ass_set = storage->find_one_ass(ev_hit->id(), ev_track, "pandoraCosmicKHit");
-    
     // If ev_hit is null, failed to find data or assocaition (shouldn't happen)
     if(!ev_hit || ev_hit->empty()) {
       std::cout << "No hit found. Skipping event: "<<storage->event_id()<<std::endl;
@@ -134,7 +130,7 @@ namespace larlite {
       double q = h.Integral();
 
       double w = h.WireID().Wire * w2cm;
-      double t = (h.PeakTime()-3200) * t2cm;
+      double t = h.PeakTime() * t2cm;
 
       unsigned int p = h.WireID().Plane;
 
@@ -172,7 +168,7 @@ namespace larlite {
 	
 	michel_cluster.emplace_back( h.Integral(),
 				     h.WireID().Wire * w2cm,
-				     (h.PeakTime() - 3200) * t2cm,
+				     h.PeakTime() * t2cm,
 				     hit_index,
 				     h.WireID().Plane);
       }
@@ -251,6 +247,8 @@ namespace larlite {
 
 	// prepare an empty cluster
 	larlite::cluster clus_michel;
+	clus_michel.set_start_wire( michelClus._michel._start._w / w2cm, 0. );
+	clus_michel.set_start_tick( michelClus._michel._start._t / t2cm, 0. );
 	michel_cluster_v->push_back(clus_michel);
 	// get the hits (in "michel" notation) for this cluster
 	auto const& michel = michelClus._michel; // this is a vector of HitPt
@@ -314,24 +312,6 @@ namespace larlite {
 	  } 
 	  // add the association information
 	  muon_clus_hit_ass_v.push_back(muon_clus_hits);
-	  
-	  // find the 3dtrack associated to the input cluster
-	  // 1) hits associated to input cluster
-	  auto hits_associated_to_input_cluster = hit_ass_set[ michelClus.getLargestCluster().first ];
-	  // 2) track associated to these hits
-	  unsigned int trk_idx = 0;
-	  bool found = false;
-	  for (auto const& hit_idx : hits_associated_to_input_cluster){
-	    for (size_t h_idx = 0; h_idx < track_ass_set.size(); h_idx++){
-	      if (hit_idx == h_idx){
-		if (track_ass_set[h_idx].size() == 0) continue;
-		trk_idx = track_ass_set[h_idx][0];
-		found = true;
-		break;
-	      }
-	    }
-	    if (found) { break; }
-	  }
 	  
 	}// if there are at least 3 hits in the michel cluster
 	
