@@ -52,16 +52,23 @@ namespace larlite {
     std::vector<int> _michel_idx_v;
     // vector cointaing Michel electron start point [wire,tick]
     std::vector< std::pair<double,double> > _michel_start_v;
+    // map linking _michel_start_v idx to [mu idx, michel idx];
+    std::map<int, std::pair<int,int> > _muon_michel_idx_map;
 
     TTree *_tree;
     double _mc_X, _mc_Y, _mc_Z, _mc_T;
-    int    _mc_wire, _rc_wire;
+    double _mc_wire, _rc_wire;
     double _mc_tick, _rc_tick;
+    double _mc_tick_muon;
+
+    double _trig_time;
 
     double _mc_muon_E, _mc_muon_px, _mc_muon_py, _mc_muon_pz;
     double _mc_michel_E, _mc_michel_px, _mc_michel_py, _mc_michel_pz;
 
     double _rc_michel_E;
+
+    double _mc_muon_decay_T, _mc_michel_creation_T;
 
     double _3Ddot, _2Ddot;
     

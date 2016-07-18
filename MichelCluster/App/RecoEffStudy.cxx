@@ -6,6 +6,7 @@
 #include "DataFormat/mcshower.h"
 #include "DataFormat/mctrack.h"
 #include "DataFormat/cluster.h"
+#include "DataFormat/trigger.h"
 
 #include "LArUtil/GeometryHelper.h"
 #include "LArUtil/LArProperties.h"
@@ -28,21 +29,28 @@ namespace larlite {
     _tree->Branch("_mc_Y",&_mc_Y,"mc_Y/D");
     _tree->Branch("_mc_Z",&_mc_Z,"mc_Z/D");
     _tree->Branch("_mc_T",&_mc_T,"mc_T/D");
-    _tree->Branch("_mc_wire",&_mc_wire,"mc_wire/I");
-    _tree->Branch("_rc_wire",&_rc_wire,"rc_wire/I");
+    _tree->Branch("_mc_wire",&_mc_wire,"mc_wire/D");
+    _tree->Branch("_rc_wire",&_rc_wire,"rc_wire/D");
     _tree->Branch("_mc_tick",&_mc_tick,"mc_tick/D");
+    _tree->Branch("_mc_tick_muon",&_mc_tick_muon,"mc_tick_muon/D");
     _tree->Branch("_rc_tick",&_rc_tick,"rc_tick/D");
 
     _tree->Branch("_mc_muon_E",&_mc_muon_E,"mc_muon_E/D");
     _tree->Branch("_mc_muon_px",&_mc_muon_px,"mc_muon_px/D");
     _tree->Branch("_mc_muon_py",&_mc_muon_py,"mc_muon_py/D");
     _tree->Branch("_mc_muon_pz",&_mc_muon_pz,"mc_muon_pz/D");
+
     _tree->Branch("_mc_michel_E",&_mc_michel_E,"mc_michel_E/D");
     _tree->Branch("_mc_michel_px",&_mc_michel_px,"mc_michel_px/D");
     _tree->Branch("_mc_michel_py",&_mc_michel_py,"mc_michel_py/D");
     _tree->Branch("_mc_michel_pz",&_mc_michel_pz,"mc_michel_pz/D");
 
+    _tree->Branch("_mc_muon_decay_T",&_mc_muon_decay_T,"mc_muon_decay_T/D");
+    _tree->Branch("_mc_michel_creation_T",&_mc_michel_creation_T,"mc_michel_creation_T/D");
+
     _tree->Branch("_rc_michel_E",&_rc_michel_E,"rc_michel_E/D");
+
+    _tree->Branch("_trig_time",&_trig_time,"trig_time/D");
 
     _tree->Branch("_3Ddot",&_3Ddot,"3Ddot/D");
     _tree->Branch("_2Ddot",&_2Ddot,"2Ddot/D"); // w.r.t. collection plane
@@ -56,14 +64,16 @@ namespace larlite {
     // for (w,t) -> (cm, cm) conversion
     // wire->cm
     double w2cm = larutil::GeometryHelper::GetME()->WireToCm();
+    double t2cm = larutil::GeometryHelper::GetME()->TimeToCm();
     // time->cm (accounting for different operating voltages)
-    double driftVel = larutil::LArProperties::GetME()->DriftVelocity(0.273,87); // [cm/us]
+    //double driftVel = larutil::LArProperties::GetME()->DriftVelocity(0.273,87); // [cm/us]
     // tick width in time
-    double tickWidth = 0.5; // [us]
-    double t2cm = tickWidth*driftVel;
+    //double tickWidth = 0.5; // [us]
+    //double t2cm = tickWidth*driftVel;
 
     _trackIDMap.clear();
     _michel_start_v.clear();
+    _muon_michel_idx_map.clear();
 
     // load MCShower / MCTracks
     auto ev_mcshower = storage->get_data<event_mcshower>("mcreco");
@@ -71,6 +81,15 @@ namespace larlite {
 
     // load Michel clusters
     auto ev_cluster  = storage->get_data<event_cluster>("michel");
+
+    /*
+    // grab trigger
+    auto trigger = storage->get_data<larlite::trigger>("detsim");
+    std::cout << "trig time is" << trigger->TriggerTime() << std::endl;
+    std::cout << "beamgate time is" << trigger->BeamGateTime() << std::endl;
+    std::cout << "trig number is" << trigger->TriggerNumber() << std::endl;
+    _trig_time = trigger->TriggerTime();
+    */
 
     if (_debug)
       std::cout << "found " << ev_cluster->size() << " michels" << std::endl;
@@ -104,25 +123,12 @@ namespace larlite {
       if (muon.size() < 2)
 	continue;
 
-      auto const& mu_end = muon.at( muon.size() - 1 );
-
-      // if distance between muon and mcshower is to large -> ignore as muon decay
-      //if ( sqrt ( pow(mu_end.X() - e_strt.X(),2) + pow(mu_end.Y() - e_strt.Y(),2) + pow(mu_end.Z() - e_strt.Z(),2) )  > 1 )
-      //continue;
-
-      // finally, we have a Michel electron!
-
-      _mc_X = e_strt.X();
-      _mc_Y = e_strt.Y();
-      _mc_Z = e_strt.Z();
-      _mc_T = e_strt.T();
-
       // project the Michel's start point onto the collection plane
-      double start_w = _mc_Z / w2cm;
-      double start_t = _mc_X / t2cm;
+      double start_w = e_strt.Z() / w2cm;
+      double start_t = e_strt.X() / t2cm;
       // account for offset in trigger [T0]
       // get time in us and get distance w/ drift-velocity
-      start_t += (_mc_T / 1000.) * 0.11 / t2cm;
+      start_t += ( e_strt.T() / 1000.) * 0.11 / t2cm;
 
       if (_debug)
 	std::cout << "Found Michel starting @ [X,Z,T] -> [" << _mc_X << ", " << _mc_Z
@@ -134,6 +140,8 @@ namespace larlite {
       _michel_idx_v.push_back( i );
       // save start point info
       _michel_start_v.push_back( std::make_pair(start_w,start_t) );
+
+      _muon_michel_idx_map[ _michel_start_v.size() - 1 ] = std::make_pair( _trackIDMap[ mcsh.MotherTrackID() ], i );
       
     }// for all mcshowers
     
@@ -142,7 +150,7 @@ namespace larlite {
       
       auto const& clus = ev_cluster->at(j);
 
-      _rc_wire = (int)clus.StartWire();
+      _rc_wire = (double)clus.StartWire();
       _rc_tick = clus.StartTick();
 
       if (_debug)
@@ -151,17 +159,50 @@ namespace larlite {
 
       // find closest michel
       double d_min = 10000.;
+      // closest michel index
+      int idx = 0;
       
       // loop through MC michels and find the one that best matches
-      for (auto const& mc_michel : _michel_start_v){
+      for (size_t k=0; k < _michel_start_v.size(); k++){
 
+	auto const& mc_michel = _michel_start_v[k];
+	
 	if ( (mc_michel.first - _rc_wire) * (mc_michel.first - _rc_wire)  < d_min){
+	  
 	  d_min = (mc_michel.first - _rc_wire) * (mc_michel.first - _rc_wire);
-	  _mc_wire = (int)mc_michel.first;
-	  _mc_tick = mc_michel.second;
-	}
+	  idx = (int)k;
+	  
+	}// if closest michel so far...
 
       }// for all MC michels
+
+      // grab MC michel information
+      auto const& mc_michel = _michel_start_v[idx];
+      _mc_wire = (double)mc_michel.first;
+      _mc_tick = mc_michel.second;
+      // grab Michel MCShower
+      auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ idx ].second );
+      auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ idx ].first  );
+
+      if (muon_MCTrack.size() < 2)
+	continue;
+
+      auto const& e_strt = michel_MCShower.Start();
+      auto const& mu_end = muon_MCTrack.at( muon_MCTrack.size() - 2 );
+
+      _mc_muon_decay_T = mu_end.T();
+
+      _mc_tick_muon = mu_end.X() / t2cm + (mu_end.T() / 1000.) * (0.11 / t2cm) ;
+
+      // finally, we have a Michel electron!
+
+      _mc_X = e_strt.X();
+      _mc_Y = e_strt.Y();
+      _mc_Z = e_strt.Z();
+      _mc_T = e_strt.T();
+      _mc_E = e_strt.E();
+
+      _mc_michel_creation_T = michel_MCShower.DetProfile().T();
 
       _tree->Fill();
       
