@@ -200,7 +200,7 @@ namespace larlite {
       _mc_Y = e_strt.Y();
       _mc_Z = e_strt.Z();
       _mc_T = e_strt.T();
-      _mc_E = e_strt.E();
+      _mc_michel_E = e_strt.E();
 
       _mc_michel_creation_T = michel_MCShower.DetProfile().T();
 
