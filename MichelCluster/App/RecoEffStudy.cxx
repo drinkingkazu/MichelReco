@@ -3,8 +3,7 @@
 
 #include "RecoEffStudy.h"
 
-#include "DataFormat/mcshower.h"
-#include "DataFormat/mctrack.h"
+
 #include "DataFormat/cluster.h"
 #include "DataFormat/trigger.h"
 
@@ -16,14 +15,23 @@ namespace larlite {
   RecoEffStudy::RecoEffStudy()
     : _tree(nullptr)
   {
-    _debug = false;
-    _name  = "RecoEffStudy";
-    _fout  = 0;
+    _debug  = false;
+    _name   = "RecoEffStudy";
+    _all_mc = true;
+    _fout   = 0;
+    _distance = 3;
   }
 
   bool RecoEffStudy::initialize() {
 
+    // use instances of LArUtil and GeometryUtilities
+    // for (w,t) -> (cm, cm) conversion
+    // wire->cm
+    _w2cm = larutil::GeometryHelper::GetME()->WireToCm();
+    _t2cm = larutil::GeometryHelper::GetME()->TimeToCm();
+
     if (_tree) delete _tree;
+
     _tree = new TTree("_tree","tree");
     _tree->Branch("_mc_X",&_mc_X,"mc_X/D");
     _tree->Branch("_mc_Y",&_mc_Y,"mc_Y/D");
@@ -52,6 +60,8 @@ namespace larlite {
 
     _tree->Branch("_trig_time",&_trig_time,"trig_time/D");
 
+    _tree->Branch("_matched",&_matched,"matched/D");
+
     _tree->Branch("_3Ddot",&_3Ddot,"3Ddot/D");
     _tree->Branch("_2Ddot",&_2Ddot,"2Ddot/D"); // w.r.t. collection plane
 
@@ -60,11 +70,7 @@ namespace larlite {
   
   bool RecoEffStudy::analyze(storage_manager* storage) {
     
-    // use instances of LArUtil and GeometryUtilities
-    // for (w,t) -> (cm, cm) conversion
-    // wire->cm
-    double w2cm = larutil::GeometryHelper::GetME()->WireToCm();
-    double t2cm = larutil::GeometryHelper::GetME()->TimeToCm();
+
     // time->cm (accounting for different operating voltages)
     //double driftVel = larutil::LArProperties::GetME()->DriftVelocity(0.273,87); // [cm/us]
     // tick width in time
@@ -72,7 +78,8 @@ namespace larlite {
     //double t2cm = tickWidth*driftVel;
 
     _trackIDMap.clear();
-    _michel_start_v.clear();
+    _mc_michel_start_v.clear();
+    _rc_michel_start_v.clear();
     _muon_michel_idx_map.clear();
 
     // load MCShower / MCTracks
@@ -124,91 +131,76 @@ namespace larlite {
 	continue;
 
       // project the Michel's start point onto the collection plane
-      double start_w = e_strt.Z() / w2cm;
-      double start_t = e_strt.X() / t2cm;
+      double start_w = e_strt.Z() / _w2cm;
+      double start_t = e_strt.X() / _t2cm;
       // account for offset in trigger [T0]
       // get time in us and get distance w/ drift-velocity
-      start_t += ( e_strt.T() / 1000.) * 0.11 / t2cm;
+      start_t += ( e_strt.T() / 1000.) * 0.11 / _t2cm;
 
       if (_debug)
 	std::cout << "Found Michel starting @ [X,Z,T] -> [" << _mc_X << ", " << _mc_Z
 		  << ", "<<  (double)_mc_T / 1000. << "]" << std::endl
 		  << "Corresponding to [W,T] -> [" << start_w <<  ", " << start_t << "]" << std::endl
-		  << "With w2cm = " << w2cm << " and t2cm " << t2cm << std::endl << std::endl;
+		  << "With w2cm = " << _w2cm << " and t2cm " << _t2cm << std::endl << std::endl;
       
       // save it's index
       _michel_idx_v.push_back( i );
       // save start point info
-      _michel_start_v.push_back( std::make_pair(start_w,start_t) );
+      _mc_michel_start_v.push_back( std::make_pair(start_w,start_t) );
 
-      _muon_michel_idx_map[ _michel_start_v.size() - 1 ] = std::make_pair( _trackIDMap[ mcsh.MotherTrackID() ], i );
+      _muon_michel_idx_map[ _mc_michel_start_v.size() - 1 ] = std::make_pair( _trackIDMap[ mcsh.MotherTrackID() ], i );
       
     }// for all mcshowers
-    
-    // load through Michel clusters and find the closest truth Michel to it
-    for (size_t j=0; j < ev_cluster->size(); j++){
+
+    //  save information on reconstructed michels
+    if (ev_cluster){
+      for (auto const& clus : *ev_cluster)
+	_rc_michel_start_v.push_back( std::make_pair( (double)clus.StartWire(), clus.StartTick() ) );
+    }
+
+    // **************************
+    // SAVE ENTRY PER TRUE MICHEL
+    // **************************
+    if (_all_mc){
+
+      ResetTTree();
       
-      auto const& clus = ev_cluster->at(j);
+      for (size_t i=0; i < _mc_michel_start_v.size(); i++){
 
-      _rc_wire = (double)clus.StartWire();
-      _rc_tick = clus.StartTick();
-
-      if (_debug)
-	std::cout << "Michel cluster w/ [W,T] -> [" << _rc_wire
-		  << ", " << _rc_tick << "]" << std::endl << std::endl;
-
-      // find closest michel
-      double d_min = 10000.;
-      // closest michel index
-      int idx = 0;
-      
-      // loop through MC michels and find the one that best matches
-      for (size_t k=0; k < _michel_start_v.size(); k++){
-
-	auto const& mc_michel = _michel_start_v[k];
-	
-	if ( (mc_michel.first - _rc_wire) * (mc_michel.first - _rc_wire)  < d_min){
-	  
-	  d_min = (mc_michel.first - _rc_wire) * (mc_michel.first - _rc_wire);
-	  idx = (int)k;
-	  
-	}// if closest michel so far...
-
-      }// for all MC michels
-
-      // grab MC michel information
-      auto const& mc_michel = _michel_start_v[idx];
-      _mc_wire = (double)mc_michel.first;
-      _mc_tick = mc_michel.second;
       // grab Michel MCShower
-      auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ idx ].second );
-      auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ idx ].first  );
+      auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ i ].second );
+      auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ i ].first  );
 
       if (muon_MCTrack.size() < 2)
 	continue;
 
-      auto const& e_strt = michel_MCShower.Start();
-      auto const& mu_end = muon_MCTrack.at( muon_MCTrack.size() - 2 );
+      FillMuonInfo(muon_MCTrack);
 
-      _mc_muon_decay_T = mu_end.T();
+      FillMichelInfo(michel_MCShower);
 
-      _mc_tick_muon = mu_end.X() / t2cm + (mu_end.T() / 1000.) * (0.11 / t2cm) ;
-
-      // finally, we have a Michel electron!
-
-      _mc_X = e_strt.X();
-      _mc_Y = e_strt.Y();
-      _mc_Z = e_strt.Z();
-      _mc_T = e_strt.T();
-      _mc_michel_E = e_strt.E();
-
-      _mc_michel_creation_T = michel_MCShower.DetProfile().T();
-
-      _tree->Fill();
+      FillDotProduct();
       
-    }// for all Michel clusters
-
-    
+      // find best match from Reco'd michels
+      auto const& matched = findBestMatch( _mc_michel_start_v[i], _rc_michel_start_v);
+      
+      _mc_tick = _mc_michel_start_v[i].second;
+      _mc_wire = _mc_michel_start_v[i].first;
+      
+      if (matched.first == false){
+	_tree->Fill();
+	continue;
+      }
+      
+      // if we found a good match, start filling info for RECO stuff
+      auto const& matched_michel_cluster = ev_cluster->at( matched.second );
+      _rc_wire = (double)matched_michel_cluster.StartWire();
+      _rc_tick = matched_michel_cluster.StartTick();
+      _matched = 1;
+      _tree->Fill();
+      }// for all MC michels
+      
+    }// if we fill an entry per MC michel
+	
     return true;
   }
 
@@ -219,5 +211,118 @@ namespace larlite {
     return true;
   }
 
+  std::pair<bool, int> RecoEffStudy::findBestMatch(const std::pair<double,double>& coordinates,
+						   const std::vector< std::pair<double,double> >& coord_v)
+  {
+
+    bool   found = false;
+    int    idx   = -1;
+    double d_min = 10000.;
+    
+    for (size_t i=0; i < coord_v.size(); i++){
+      
+      double d = coordinates.first - coord_v[i].first;
+      d *= d;
+      
+      if (d < d_min){
+	idx = i;
+	d_min = d;
+      }
+
+    }// for all pairs of coordinates
+
+    if (d_min < _distance)
+      found = true;
+
+    return std::make_pair(found, idx);
+  }
+
+  void RecoEffStudy::FillMuonInfo(const larlite::mctrack& muon)
+  {
+
+    _mc_muon_E  = muon.Start().E();
+    _mc_muon_px = muon.Start().Px();
+    _mc_muon_py = muon.Start().Py();
+    _mc_muon_pz = muon.Start().Pz();
+    
+    double mag = sqrt( (_mc_muon_px * _mc_muon_px) +
+		       (_mc_muon_py * _mc_muon_py) +
+		       (_mc_muon_pz * _mc_muon_pz) );
+		       
+    _mc_muon_px /= mag;
+    _mc_muon_py /= mag;
+    _mc_muon_pz /= mag;
+
+    auto const& mu_end = muon.at( muon.size() - 2 );
+    
+    _mc_muon_decay_T = mu_end.T();
+    
+    _mc_tick_muon = mu_end.X() / _t2cm + (mu_end.T() / 1000.) * (0.11 / _t2cm) ;
+
+    return;
+  }
+
+  void RecoEffStudy::FillMichelInfo(const larlite::mcshower& michel)
+  {
+
+    auto const& e_strt = michel.Start();
+    
+    _mc_X = e_strt.X();
+    _mc_Y = e_strt.Y();
+    _mc_Z = e_strt.Z();
+    _mc_T = e_strt.T();
+
+    _mc_michel_E  = michel.Start().E();
+    _mc_michel_px = michel.Start().Px();
+    _mc_michel_py = michel.Start().Py();
+    _mc_michel_pz = michel.Start().Pz();
+
+    double mag = sqrt( (_mc_michel_px * _mc_michel_px) +
+		       (_mc_michel_py * _mc_michel_py) +
+		       (_mc_michel_pz * _mc_michel_pz) );
+		       
+    _mc_michel_px /= mag;
+    _mc_michel_py /= mag;
+    _mc_michel_pz /= mag;
+    
+    _mc_michel_creation_T = michel.DetProfile().T();
+
+    return;
+  }
+
+  void RecoEffStudy::FillDotProduct()
+  {
+
+    _3Ddot = _mc_muon_px * _mc_michel_px + _mc_muon_py * _mc_michel_py  + _mc_muon_pz * _mc_michel_pz;
+    
+    // projected on XZ plane which is what is seen on collection plane
+    _2Ddot = _mc_muon_px * _mc_michel_px + _mc_muon_pz * _mc_michel_pz;
+    _2Ddot /= sqrt( _mc_muon_px * _mc_muon_px + _mc_muon_pz * _mc_muon_pz );
+    _2Ddot /= sqrt( _mc_michel_px * _mc_michel_px + _mc_michel_pz * _mc_michel_pz );
+
+  }
+
+  void RecoEffStudy::ResetTTree()
+  {
+
+    _mc_X = _mc_Y = _mc_Z = _mc_T = kINVALID_DOUBLE;
+    _mc_wire = _rc_wire = _mc_tick = _rc_tick = kINVALID_DOUBLE;
+    _mc_tick_muon = kINVALID_DOUBLE;
+    
+    _trig_time = kINVALID_DOUBLE;
+    
+    _mc_muon_E = _mc_muon_px = _mc_muon_py = _mc_muon_pz = kINVALID_DOUBLE;
+    _mc_michel_E = _mc_michel_px = _mc_michel_py = _mc_michel_pz = kINVALID_DOUBLE;
+    
+    _rc_michel_E = kINVALID_DOUBLE;
+    
+    _mc_muon_decay_T = _mc_michel_creation_T = kINVALID_DOUBLE;
+    
+    _3Ddot = _2Ddot = kINVALID_DOUBLE;
+
+    _matched = 0;
+
+  }
+  
 }
 #endif
