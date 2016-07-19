@@ -168,40 +168,82 @@ namespace larlite {
     // **************************
     if (_all_mc){
 
-      ResetTTree();
-      
       for (size_t i=0; i < _mc_michel_start_v.size(); i++){
-
-      // grab Michel MCShower
-      auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ i ].second );
-      auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ i ].first  );
-
-      if (muon_MCTrack.size() < 2)
-	continue;
-
-      FillMuonInfo(muon_MCTrack);
-
-      FillMichelInfo(michel_MCShower);
-
-      FillDotProduct();
-      
-      // find best match from Reco'd michels
-      auto const& matched = findBestMatch( _mc_michel_start_v[i], _rc_michel_start_v);
-      
-      _mc_tick = _mc_michel_start_v[i].second;
-      _mc_wire = _mc_michel_start_v[i].first;
-      
-      if (matched.first == false){
+	
+	ResetTTree();
+	
+	// grab Michel MCShower
+	auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ i ].second );
+	auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ i ].first  );
+	
+	if (muon_MCTrack.size() < 2)
+	  continue;
+	
+	FillMuonInfo(muon_MCTrack);
+	
+	FillMichelInfo(michel_MCShower);
+	
+	FillDotProduct();
+	
+	// find best match from Reco'd michels
+	auto const& matched = findBestMatch( _mc_michel_start_v[i], _rc_michel_start_v);
+	
+	_mc_tick = _mc_michel_start_v[i].second;
+	_mc_wire = _mc_michel_start_v[i].first;
+	
+	if (matched.first == false){
+	  _tree->Fill();
+	  continue;
+	}
+	
+	// if we found a good match, start filling info for RECO stuff
+	auto const& matched_michel_cluster = ev_cluster->at( matched.second );
+	_rc_wire = (double)matched_michel_cluster.StartWire();
+	_rc_tick = matched_michel_cluster.StartTick();
+	_matched = 1;
 	_tree->Fill();
-	continue;
-      }
+      }// for all MC michels
       
-      // if we found a good match, start filling info for RECO stuff
-      auto const& matched_michel_cluster = ev_cluster->at( matched.second );
-      _rc_wire = (double)matched_michel_cluster.StartWire();
-      _rc_tick = matched_michel_cluster.StartTick();
-      _matched = 1;
-      _tree->Fill();
+    }// if we fill an entry per MC michel
+    
+    // **************************
+    // SAVE ENTRY PER RECO MICHEL
+    // **************************
+    else{
+      
+      for (size_t i=0; i < _rc_michel_start_v.size(); i++){
+	
+	ResetTTree();
+	
+	// find best match from Reco'd michels
+	auto const& matched = findBestMatch( _rc_michel_start_v[i], _mc_michel_start_v);
+
+	_rc_tick = _rc_michel_start_v[i].second;
+	_rc_wire = _rc_michel_start_v[i].first;
+
+	if (matched.first == false){
+	  _tree->Fill();
+	  continue;
+	}
+	
+	// grab Michel MCShower
+	auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ matched.second ].second );
+	auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ matched.second ].first  );
+	
+	if (muon_MCTrack.size() < 2)
+	  continue;
+	
+	FillMuonInfo(muon_MCTrack);
+	
+	FillMichelInfo(michel_MCShower);
+	
+	FillDotProduct();
+
+	_mc_tick = _rc_michel_start_v[ matched.second ].second;
+	_mc_wire = _rc_michel_start_v[ matched.second ].first;
+	
+	_matched = 1;
+	_tree->Fill();
       }// for all MC michels
       
     }// if we fill an entry per MC michel
