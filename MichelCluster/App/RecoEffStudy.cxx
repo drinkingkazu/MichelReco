@@ -30,6 +30,8 @@ namespace larlite {
     _w2cm = larutil::GeometryHelper::GetME()->WireToCm();
     _t2cm = larutil::GeometryHelper::GetME()->TimeToCm();
 
+
+
     if (_tree) delete _tree;
 
     _tree = new TTree("_tree","tree");
@@ -70,14 +72,11 @@ namespace larlite {
   }
   
   bool RecoEffStudy::analyze(storage_manager* storage) {
+
+    double efield   = larutil::LArProperties::GetME()->Efield(); // kV/cm
+    double temp     = larutil::LArProperties::GetME()->Temperature(); // Kelvin
+    double driftVel = larutil::LArProperties::GetME()->DriftVelocity(efield,temp); // [cm/us]
     
-
-    // time->cm (accounting for different operating voltages)
-    //double driftVel = larutil::LArProperties::GetME()->DriftVelocity(0.273,87); // [cm/us]
-    // tick width in time
-    //double tickWidth = 0.5; // [us]
-    //double t2cm = tickWidth*driftVel;
-
     _trackIDMap.clear();
     _mc_michel_start_v.clear();
     _rc_michel_start_v.clear();
@@ -99,8 +98,8 @@ namespace larlite {
     _trig_time = trigger->TriggerTime();
     */
 
-    //if (_debug)
-    std::cout << std::endl << "found " << ev_cluster->size() << " michels" << std::endl;
+    if (_debug)
+      std::cout << std::endl << "found " << ev_cluster->size() << " michels" << std::endl;
     
     // build ID -> position map for MCTracks
     for (size_t i=0; i < ev_mctrack->size(); i++)
@@ -136,8 +135,11 @@ namespace larlite {
       double start_t = e_strt.X() / _t2cm;
       // account for offset in trigger [T0]
       // get time in us and get distance w/ drift-velocity
-      start_t += ( e_strt.T() / 1000.) * 0.11 / _t2cm;
-      std::cout << "True michel start wire : " << start_w << std::endl;
+      start_t += ( e_strt.T() / 1000.) * driftVel / _t2cm + 800;
+
+      // if start tick out of truncated waveform bounds -> don't include
+      if ( (start_t < 0) or (start_t > 6300) )
+	   continue;
 
       if (_debug)
 	std::cout << "Found Michel starting @ [X,Z,T] -> [" << _mc_X << ", " << _mc_Z
@@ -157,7 +159,6 @@ namespace larlite {
     //  save information on reconstructed michels
     if (ev_cluster){
       for (auto const& clus : *ev_cluster){
-	std::cout << "\tfound michel cluster with wire : " << clus.StartWire() << std::endl;
 	_rc_michel_start_v.push_back( std::make_pair( (double)clus.StartWire(), clus.StartTick() ) );
       }
     }
@@ -261,7 +262,7 @@ namespace larlite {
     
     _mc_muon_decay_T = mu_end.T();
     
-    _mc_tick_muon = mu_end.X() / _t2cm + (mu_end.T() / 1000.) * (0.11 / _t2cm) ;
+    _mc_tick_muon = mu_end.X() / _t2cm + (mu_end.T() / 1000.) * ( 0.11 / _t2cm) ;
 
     return;
   }
