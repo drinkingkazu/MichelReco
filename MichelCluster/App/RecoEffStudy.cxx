@@ -56,6 +56,7 @@ namespace larlite {
     _tree->Branch("_mc_muon_decay_T",&_mc_muon_decay_T,"mc_muon_decay_T/D");
     _tree->Branch("_mc_michel_creation_T",&_mc_michel_creation_T,"mc_michel_creation_T/D");
 
+
     _tree->Branch("_rc_michel_E",&_rc_michel_E,"rc_michel_E/D");
 
     _tree->Branch("_trig_time",&_trig_time,"trig_time/D");
@@ -98,8 +99,8 @@ namespace larlite {
     _trig_time = trigger->TriggerTime();
     */
 
-    if (_debug)
-      std::cout << "found " << ev_cluster->size() << " michels" << std::endl;
+    //if (_debug)
+    std::cout << std::endl << "found " << ev_cluster->size() << " michels" << std::endl;
     
     // build ID -> position map for MCTracks
     for (size_t i=0; i < ev_mctrack->size(); i++)
@@ -136,6 +137,7 @@ namespace larlite {
       // account for offset in trigger [T0]
       // get time in us and get distance w/ drift-velocity
       start_t += ( e_strt.T() / 1000.) * 0.11 / _t2cm;
+      std::cout << "True michel start wire : " << start_w << std::endl;
 
       if (_debug)
 	std::cout << "Found Michel starting @ [X,Z,T] -> [" << _mc_X << ", " << _mc_Z
@@ -154,8 +156,10 @@ namespace larlite {
 
     //  save information on reconstructed michels
     if (ev_cluster){
-      for (auto const& clus : *ev_cluster)
+      for (auto const& clus : *ev_cluster){
+	std::cout << "\tfound michel cluster with wire : " << clus.StartWire() << std::endl;
 	_rc_michel_start_v.push_back( std::make_pair( (double)clus.StartWire(), clus.StartTick() ) );
+      }
     }
 
     // **************************
@@ -230,8 +234,8 @@ namespace larlite {
       }
 
     }// for all pairs of coordinates
-
-    if (d_min < _distance)
+    
+    if (d_min < _distance*_distance)
       found = true;
 
     return std::make_pair(found, idx);
