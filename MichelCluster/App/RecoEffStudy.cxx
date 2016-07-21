@@ -116,10 +116,12 @@ namespace larlite {
       
       auto const& e_strt = mcsh.Start();
       
-      // if no energy deposited in TPC by shower -> exit
-      if (mcsh.DetProfile().E() < 1)
+      // make sure shower starts in TPC
+      if ( (e_strt.X() < 0) or (e_strt.X() > 256) or 
+	   (e_strt.Y() < -116) or (e_strt.Y() > 116) or
+	   (e_strt.Z() < 0) or (e_strt.Z() > 1036) )
 	continue;
-
+      
       // get the parent nuon
       auto const& muon = ev_mctrack->at( _trackIDMap[ mcsh.MotherTrackID() ] );
 
@@ -127,6 +129,10 @@ namespace larlite {
       if (muon.size() < 2)
 	continue;
 
+      // if muon does not decay at rest -> exit
+      if ( muon.at(muon.size() - 2).E() > 106)
+	continue;
+    
       // project the Michel's start point onto the collection plane
       double start_w = e_strt.Z() / _w2cm;
       double start_t = e_strt.X() / _t2cm;
@@ -293,6 +299,8 @@ namespace larlite {
     _mc_muon_px = muon.Start().Px();
     _mc_muon_py = muon.Start().Py();
     _mc_muon_pz = muon.Start().Pz();
+
+
     
     double mag = sqrt( (_mc_muon_px * _mc_muon_px) +
 		       (_mc_muon_py * _mc_muon_py) +
