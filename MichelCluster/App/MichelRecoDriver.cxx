@@ -184,35 +184,6 @@ namespace larlite {
     if (michels.size() > 0)
       _hit_tree->Fill();
     
-    // loop through michels
-    for (auto const& michel : michels){
-      if (michel._has_michel){
-	// find index with largest number of hits
-	size_t max_hits = 0;
-	unsigned short largest_clus_idx = 0;
-	auto input_clusters = michel.getInputClusterIndex_v();
-	std::cout << "reco'd michel from input clusters [ ";
-	for (auto idx : input_clusters){
-	  std::cout << idx << " ";
-	  if (hit_ass_set[idx].size() > max_hits) { 
-	    max_hits = hit_ass_set[idx].size();
-	    largest_clus_idx = idx;
-	  }
-	}
-	std::cout << "]. Largest cluster index is " << michel.getLargestCluster().first
-		  << " with " << michel.getLargestCluster().second << " hits "
-		  << " and matches the expected "<< largest_clus_idx << std::endl;
-
-	int startwire = ev_cluster->at(largest_clus_idx).StartWire();
-	int endwire   = ev_cluster->at(largest_clus_idx).EndWire();
-
-
-
-      }// if there is a michel
-    }// for all output MichelClsuters
-
-    // save [run,subrun,event,clus idx] to an output file for saved michels
-
     // We may want to save the michels we found as clusters
     // if this option is selected, take the michel hits
     // and group them in "michel" clusters

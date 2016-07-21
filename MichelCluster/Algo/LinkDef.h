@@ -34,6 +34,7 @@
 #pragma link C++ class michel::StepSuperSonicCluster+;
 #pragma link C++ class michel::ConeHitFinder+;
 #pragma link C++ class michel::RemoveBraggPeakHits+;
+#pragma link C++ class michel::ClusterPhotons+;
 
 /// MIDFilter
 #pragma link C++ class michel::DecideIfStoppingMuon+;

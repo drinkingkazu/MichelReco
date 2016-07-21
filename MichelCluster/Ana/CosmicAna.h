@@ -73,6 +73,8 @@ protected:
 
     bool _has_michel;
 
+    std::vector<int> _photon_clus_v;
+
     std::vector<double> _t_q_v;
     std::vector<double> _t_dqds_v;
     std::vector<double> _chi_v;

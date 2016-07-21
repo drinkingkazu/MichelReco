@@ -43,10 +43,18 @@ namespace michel {
     double _energy;
     double _length;
     HitPt  _start;
+    HitPt  _dir;
 
     std::string Diff(const Michel& rhs) const;
     
     void Dump() const;
+
+    // store electron hit indices
+    std::vector<size_t> _electron_hit_idx_v;
+    // store photon hit clusters, each a list of hit indices
+    std::vector< std::vector<size_t> > _photon_clus_v;
+    
+    
   };
 }
 

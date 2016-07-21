@@ -145,13 +145,6 @@ public:
     {
       _cluster_idx_v.clear();
       _cluster_idx_v.push_back(clus_info.first);
-      _largest_cluster = clus_info;
-    }
-
-    /// set largest input cluster index
-    void setLargestCluster(const std::pair<unsigned short, size_t>& clus_info)
-    {
-      _largest_cluster = clus_info;
     }
 
     /// set input cluster index list
@@ -161,9 +154,6 @@ public:
     /// get input cluster index list
     std::vector<unsigned short> getInputClusterIndex_v() const { return _cluster_idx_v; }
 
-    /// get the largest cluster index
-    std::pair<unsigned short, size_t> getLargestCluster() const { return _largest_cluster; }
-
 protected:
 
     /// ID for a michel
@@ -171,9 +161,6 @@ protected:
 
     /// vector of original cluster indices being used 
     std::vector<unsigned short> _cluster_idx_v;
-
-    // largest cluster information (index, n_hits)
-    std::pair<unsigned short, size_t> _largest_cluster;
 
     //
     // Private attribute functions

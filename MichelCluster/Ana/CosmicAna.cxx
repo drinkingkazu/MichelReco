@@ -45,6 +45,8 @@ void CosmicAna::Initialize()
   _out_tree->Branch("_dirs_v", "std::vector<double>" , &_dirs_v);
   _out_tree->Branch("_s_v",    "std::vector<double>" , &_s_v);
 
+  _out_tree->Branch("_photon_clus_v", "std::vector<int>", &_photon_clus_v);
+
   _out_tree->Branch("_has_michel", &_has_michel, "_has_michel/O");
   _out_tree->Branch("_forward", &_forward, "_forward/I");
   _out_tree->Branch("_run", &_run, "_run/I");
@@ -152,8 +154,6 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
     std::vector<double> forwardChi;
     std::vector<double> backwardChi;
 
-
-
     for (size_t n = 0; n < _chi_v.size(); n++) {
       if (n < _boundary)
 	backwardChi.push_back(_chi_v[n]);
@@ -218,10 +218,22 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
         if (mhit._t < _lowest_hit_t)
           _lowest_hit_t = mhit._t;
       }
-
+      
       _michel_clustered_charge = total_charge;
       _michel_n_hits           = out._michel.size();
 
+      for (auto const& clus : out._michel._photon_clus_v){
+
+	for (auto const& hit_idx : clus){
+
+	  _photon_clus_v.push_back( hit_idx );
+
+	}
+
+	_photon_clus_v.push_back( -1 );
+
+      }// for all photon clusters
+      
     }
     else {
       _michel_clustered_charge = -1;
@@ -254,7 +266,6 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
     _michel_hit_qs->Write();
     //fout->Write();
   }
-  
   
   
   double CosmicAna::get_mean(const std::vector<double>& data) {
