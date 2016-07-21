@@ -93,6 +93,7 @@ namespace larlite {
     double _mc_wire, _rc_wire;
     double _mc_tick, _rc_tick;
     double _mc_tick_muon;
+    double _rc_ADCq;
 
     double _trig_time;
 

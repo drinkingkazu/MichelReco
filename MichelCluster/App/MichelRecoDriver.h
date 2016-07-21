@@ -118,10 +118,6 @@ namespace larlite {
 
   private:
 
-    // text file where to dump input clsuter information
-    std::ofstream _out_txt_file;
-    std::ofstream _out_txt_file_all;
-
   };
 }
 #endif

@@ -6,6 +6,7 @@
 
 #include "DataFormat/cluster.h"
 #include "DataFormat/trigger.h"
+#include "DataFormat/hit.h"
 
 #include "LArUtil/GeometryHelper.h"
 #include "LArUtil/LArProperties.h"
@@ -44,6 +45,7 @@ namespace larlite {
     _tree->Branch("_mc_tick",&_mc_tick,"mc_tick/D");
     _tree->Branch("_mc_tick_muon",&_mc_tick_muon,"mc_tick_muon/D");
     _tree->Branch("_rc_tick",&_rc_tick,"rc_tick/D");
+    _tree->Branch("_rc_ADCq",&_rc_ADCq,"rc_ADCq/D");
 
     _tree->Branch("_mc_muon_E",&_mc_muon_E,"mc_muon_E/D");
     _tree->Branch("_mc_muon_px",&_mc_muon_px,"mc_muon_px/D");
@@ -63,7 +65,7 @@ namespace larlite {
 
     _tree->Branch("_trig_time",&_trig_time,"trig_time/D");
 
-    _tree->Branch("_matched",&_matched,"matched/D");
+    _tree->Branch("_matched",&_matched,"matched/I");
 
     _tree->Branch("_3Ddot",&_3Ddot,"3Ddot/D");
     _tree->Branch("_2Ddot",&_2Ddot,"2Ddot/D"); // w.r.t. collection plane
@@ -89,14 +91,9 @@ namespace larlite {
     // load Michel clusters
     auto ev_cluster  = storage->get_data<event_cluster>("michel");
 
-    /*
-    // grab trigger
-    auto trigger = storage->get_data<larlite::trigger>("detsim");
-    std::cout << "trig time is" << trigger->TriggerTime() << std::endl;
-    std::cout << "beamgate time is" << trigger->BeamGateTime() << std::endl;
-    std::cout << "trig number is" << trigger->TriggerNumber() << std::endl;
-    _trig_time = trigger->TriggerTime();
-    */
+    // load hits associated to Michels
+    larlite::event_hit *ev_hit = nullptr;
+    auto const& hit_ass_set = storage->find_one_ass(ev_cluster->id(), ev_hit, ev_cluster->name());
 
     if (_debug)
       std::cout << std::endl << "found " << ev_cluster->size() << " michels" << std::endl;
@@ -200,6 +197,11 @@ namespace larlite {
 	auto const& matched_michel_cluster = ev_cluster->at( matched.second );
 	_rc_wire = (double)matched_michel_cluster.StartWire();
 	_rc_tick = matched_michel_cluster.StartTick();
+	// grab hits associated to this michel
+	auto const& hit_idx_v = hit_ass_set[ matched.second ];
+	_rc_ADCq = 0.;
+	for (auto const& hit_idx : hit_idx_v)
+	  _rc_ADCq += ev_hit->at(hit_idx).Integral();
 	_matched = 1;
 	_tree->Fill();
       }// for all MC michels
@@ -355,6 +357,8 @@ namespace larlite {
     _mc_X = _mc_Y = _mc_Z = _mc_T = kINVALID_DOUBLE;
     _mc_wire = _rc_wire = _mc_tick = _rc_tick = kINVALID_DOUBLE;
     _mc_tick_muon = kINVALID_DOUBLE;
+
+    _rc_ADCq = 0;
     
     _trig_time = kINVALID_DOUBLE;
     

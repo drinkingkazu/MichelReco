@@ -24,8 +24,6 @@ namespace larlite {
     _fout=0;
     _save_clusters=false;
     _Efield=0.5;
-    _out_txt_file.open("michel_events.txt");
-    _out_txt_file_all.open("michel_events_all.txt");
     // FIX ME: currently set only plane 2 reconstruction
     SetPlane(2);
   }
@@ -225,10 +223,6 @@ namespace larlite {
       auto michel_cluster_v = storage->get_data<event_cluster>("michel");
       // create association object for clusters
       auto michel_cluster_ass_v = storage->get_data<event_ass>(michel_cluster_v->name());
-      // create muon cluster object
-      auto muon_cluster_v = storage->get_data<event_cluster>("muon");
-      // create association object for clusters
-      auto muon_cluster_ass_v = storage->get_data<event_ass>(muon_cluster_v->name());
 
       // set event ID through storage manager
       storage->set_id(storage->get_data<event_cluster>(_producer)->run(),
@@ -268,57 +262,17 @@ namespace larlite {
 	double tick_min = 9600;
 	double tick_max = 0;
 
-	for (auto const& michel_hit : michel){
+	for (auto const& michel_hit : michel)
 	  michel_clus_hits.push_back(michel_hit._id);
-	  auto const& hit = ev_hit->at(michel_hit._id);
-	  auto const& hit_tick = hit.PeakTime();
-	  if (hit_tick > tick_max) { tick_max = hit_tick; }
-	  if (hit_tick < tick_min) { tick_min = hit_tick; }
-	  auto const& hit_wire = hit.WireID().Wire;
-	  if (hit_wire > wire_max) { wire_max = hit_wire; }
-	  if (hit_wire < wire_min) { wire_min = hit_wire; }
-	}
-
-	std::cout << "Reconstructed Michel w/ " << michel.size() << " hits." << std::endl
-		  << "w/ tick-range [" << tick_min << ", " << tick_max << "]" << std::endl
-		  << "w/ wire-range [" << wire_min << ", " << wire_max << "]" << std::endl
-		  << std::endl;
-
-	_out_txt_file_all << _run << " " << _subrun << " " << _event << " " << tick_min << " " << tick_max << " " << wire_min << " " << wire_max << std::endl;
-	_out_txt_file     << _run << " " << _subrun << " " << _event << std::endl;
 
 	// add this vector to the associations
 	if (michel_clus_hits.size() > 3){
 	  michel_clus_hit_ass_v.push_back(michel_clus_hits);
-	  // if we want to save the michel hits,
-	  // do the same for the muon hits
-	  // prepare an empty cluster
-	  larlite::cluster clus_muon;
-	  muon_cluster_v->push_back(clus_muon);
-	  auto const& muon = michelClus._hits;
-	  // empty vector where to store hits associated for this specific muon cluster
-	  std::vector<unsigned int> muon_clus_hits;
-	  // get the boundary position
-	  auto const& boundary = michelClus._boundary;
-	  // is the michel forwards or backwards?
-	  auto const& forwards = michelClus._forward;
-	  if (forwards){			
-	    for (size_t n=0; n < boundary; n++)
-	      muon_clus_hits.push_back(muon[n]._id);
-	  }
-	  else{
-	    for (size_t n=boundary; n < muon.size(); n++)
-	      muon_clus_hits.push_back(muon[n]._id);
-	  } 
-	  // add the association information
-	  muon_clus_hit_ass_v.push_back(muon_clus_hits);
-	  
 	}// if there are at least 3 hits in the michel cluster
 	
       }// loop over all found michels
       // now save the association information
       michel_cluster_ass_v->set_association(michel_cluster_v->id(),product_id(data::kHit,ev_hit->name()),michel_clus_hit_ass_v);
-      muon_cluster_ass_v->set_association(muon_cluster_v->id(),product_id(data::kHit,ev_hit->name()),muon_clus_hit_ass_v);
       
     }// if we should save cluster
 
@@ -331,15 +285,7 @@ namespace larlite {
 
   bool MichelRecoDriver::finalize() {
 
-    _out_txt_file.close();
-    _out_txt_file_all.close();
-
     std::cout << "time/event = " << _event_time/_event_ctr * 1.e6 << std::endl;
-
-
-    auto ts = ::larutil::TimeService::GetME();
-    std::cout << "TPCTick -> TDC: 1000 -> " << ts->TPCTick2TDC(1000) << std::endl;
-    std::cout << "TPCTick -> TDC: 2000 -> " << ts->TPCTick2TDC(2000) << std::endl;
 
     _fout->cd();
     _mgr.Finalize(_fout);
