@@ -35,6 +35,7 @@
 #pragma link C++ class michel::ConeHitFinder+;
 #pragma link C++ class michel::RemoveBraggPeakHits+;
 #pragma link C++ class michel::ClusterPhotons+;
+#pragma link C++ class michel::RecoMichelDirection+;
 
 /// MIDFilter
 #pragma link C++ class michel::DecideIfStoppingMuon+;

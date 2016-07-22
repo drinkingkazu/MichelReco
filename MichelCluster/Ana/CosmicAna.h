@@ -73,7 +73,11 @@ protected:
 
     bool _has_michel;
 
+    // list of indices of hits in Michel cluster associated with:
+    // the various photon clusters
     std::vector<int> _photon_clus_v;
+    // the 1 electron cluster
+    std::vector<int> _electron_clus;
 
     std::vector<double> _t_q_v;
     std::vector<double> _t_dqds_v;
@@ -100,6 +104,8 @@ protected:
     int _clus_idx;
     
     double _michel_start_Z, _michel_start_X;
+
+    double _michel_dir_x, _michel_dir_z;
 
     // mean Q along muon truncating the averaging
     double _mean_q_muon;

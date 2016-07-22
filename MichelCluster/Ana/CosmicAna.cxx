@@ -39,6 +39,9 @@ void CosmicAna::Initialize()
   _out_tree->Branch("_michel_start_Z",&_michel_start_Z,"michel_start_Z/D");
   _out_tree->Branch("_michel_start_X",&_michel_start_X,"michel_start_X/D");
 
+  _out_tree->Branch("_michel_dir_X",&_michel_dir_x,"michel_dir_x/D");
+  _out_tree->Branch("_michel_dir_z",&_michel_dir_z,"michel_dir_z/D");  
+
   _out_tree->Branch("_q_v",    "std::vector<double>" , &_q_v);
   _out_tree->Branch("_t_q_v",    "std::vector<double>" , &_t_q_v);
   _out_tree->Branch("_t_dqds_v", "std::vector<double>" , &_t_dqds_v);
@@ -46,6 +49,7 @@ void CosmicAna::Initialize()
   _out_tree->Branch("_s_v",    "std::vector<double>" , &_s_v);
 
   _out_tree->Branch("_photon_clus_v", "std::vector<int>", &_photon_clus_v);
+  _out_tree->Branch("_electron_clus", "std::vector<int>", &_electron_clus);
 
   _out_tree->Branch("_has_michel", &_has_michel, "_has_michel/O");
   _out_tree->Branch("_forward", &_forward, "_forward/I");
@@ -210,6 +214,10 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
       _lowest_hit_t = 99999999.;
 
       for (const auto& mhit : out._michel) {
+
+	_michel_dir_x = out._michel._dir._t;
+	_michel_dir_z = out._michel._dir._w;
+	
         _michel_Z.push_back(mhit._w);
         _michel_X.push_back(mhit._t);
 	_michel_Q.push_back(mhit._q);
@@ -222,6 +230,7 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
       _michel_clustered_charge = total_charge;
       _michel_n_hits           = out._michel.size();
 
+      // eneter info for photon clusters
       for (auto const& clus : out._michel._photon_clus_v){
 
 	for (auto const& hit_idx : clus){
@@ -229,10 +238,13 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
 	  _photon_clus_v.push_back( hit_idx );
 
 	}
-
 	_photon_clus_v.push_back( -1 );
 
       }// for all photon clusters
+
+      // eneter info for electron cluster
+      for (auto const& hit_idx : out._michel._electron_hit_idx_v)
+	_electron_clus.push_back( hit_idx );
       
     }
     else {
@@ -348,6 +360,9 @@ void CosmicAna::Analyze(const MichelClusterArray& input_cluster_v,
     _Z.clear();
     _X.clear();
     _idx.clear();
+
+    _photon_clus_v.clear();
+    _electron_clus.clear();
     
     _slope_v.clear();
     
