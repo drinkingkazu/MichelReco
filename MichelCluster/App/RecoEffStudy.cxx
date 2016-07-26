@@ -20,7 +20,7 @@ namespace larlite {
     _name   = "RecoEffStudy";
     _all_mc = true;
     _fout   = 0;
-    _distance = 3;
+    _distance = 5;
   }
 
   bool RecoEffStudy::initialize() {
@@ -278,13 +278,10 @@ namespace larlite {
 	idx = i;
 	d_min = d;
       }
-
     }// for all pairs of coordinates
     
     if (d_min < _distance*_distance)
       found = true;
-
-    std::cout << "min dist is " << d_min << std::endl;
 
     return std::make_pair(found, idx);
   }
@@ -360,7 +357,7 @@ namespace larlite {
   {
 
     _mc_X = _mc_Y = _mc_Z = _mc_T = kINVALID_DOUBLE;
-    _mc_wire = _rc_wire = _mc_tick = _rc_tick = kINVALID_DOUBLE;
+    _mc_wire = _rc_wire = _mc_tick = _rc_tick = -1000;//kINVALID_DOUBLE;
     _mc_tick_muon = kINVALID_DOUBLE;
 
     _rc_ADCq = 0;

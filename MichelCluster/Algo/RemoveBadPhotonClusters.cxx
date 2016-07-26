@@ -18,7 +18,7 @@ namespace michel{
 					       const std::vector<HitPt>& hits)
   {
 
-    std::cout << "remove bad photons " << std::endl;
+    //std::cout << "remove bad photons " << std::endl;
     
     ClusterVectorCalculator _clusterCalc;
 
@@ -32,7 +32,7 @@ namespace michel{
     // get all photon clusters
     auto const& photon_clus_v = michel._photon_clus_v;
 
-    std::cout << "There are " << photon_clus_v.size() << " photon clusters..." << std::endl;
+    //std::cout << "There are " << photon_clus_v.size() << " photon clusters..." << std::endl;
 
     // loop through all photon clusters and save only ones that
     // pass quality cuts
@@ -44,20 +44,20 @@ namespace michel{
 
       // if too many hits -> remove
       if (photon_hit_v.size() > 20){
-	std::cout << "removing photon cluster w/ " << photon_hit_v.size() << " hits" << std::endl;
+	//std::cout << "removing photon cluster w/ " << photon_hit_v.size() << " hits" << std::endl;
 	continue;
       }
 
       // if too many hits -> remove
       if (photon_hit_v.size() < 2){
-	std::cout << "removing photon cluster w/ " << photon_hit_v.size() << " hits" << std::endl;
+	//std::cout << "removing photon cluster w/ " << photon_hit_v.size() << " hits" << std::endl;
 	continue;
       }	
       
       // very few hits? save
       if (photon_hit_v.size() < 5){
 	good_photon_clus_v.push_back( photon_hit_v );
-	std::cout << "less than 5 hits...keep this event." << std::endl;
+	//std::cout << "less than 5 hits...keep this event." << std::endl;
 	continue;
       }
       
@@ -70,13 +70,13 @@ namespace michel{
       }
       double linearity = _clusterCalc.cov( photon_w_v, photon_t_v );
 
-      std::cout << "measured a linearity of " << linearity << std::endl;
+      //std::cout << "measured a linearity of " << linearity << std::endl;
       
       // too high? continue
       if (linearity < 0)
 	linearity *= -1;
       if ( linearity > _max_linearity){
-	std::cout << "remove photon cluster due to high linearity : " << linearity << std::endl;
+	//std::cout << "remove photon cluster due to high linearity : " << linearity << std::endl;
 	continue;
       }
       

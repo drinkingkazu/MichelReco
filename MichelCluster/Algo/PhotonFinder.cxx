@@ -45,7 +45,7 @@ namespace michel {
     // make sure direction vector is unit-normalized
     // necessary for subsequent calculations
     double mag = michelDir._w * michelDir._w + michelDir._t * michelDir._t;
-    std::cout << "Michel direction vector magnitude is " << mag << std::endl;
+    //std::cout << "Michel direction vector magnitude is " << mag << std::endl;
 
     // fit michel to a straight line
     auto fitinfo = _clusterCalc.GetLinearFit(michel);
@@ -118,7 +118,7 @@ namespace michel {
       ctr += 1;
     }
 
-    std::cout << "Added " << ctr << " hits" << std::endl;
+    //std::cout << "Added " << ctr << " hits" << std::endl;
     
     return true;
   }
