@@ -23,6 +23,7 @@ namespace michel{
 
     // clear this michel's cluster of photons
     cluster._michel._photon_clus_v.clear();
+    cluster._michel._electron_hit_idx_v.clear();
 
     // keep track of which hit is closest to the Michel start point
     // this will be our electron cluster
@@ -154,9 +155,14 @@ namespace michel{
 
     // find the cluster associated with the electron index
     auto clus_idx = _hit_cluster_map[electron_idx];
+
+    //if there are only 1 or 2 hits in the Michel electron portion -> remove
+    if ( cluster._michel._photon_clus_v.at( clus_idx ).size() <= 2)
+      return false;
+
     cluster._michel._electron_hit_idx_v = cluster._michel._photon_clus_v.at( clus_idx );
     cluster._michel._photon_clus_v.erase( cluster._michel._photon_clus_v.begin() + clus_idx );
-    
+
     if(_verbosity <= msg::kINFO) {
       std::stringstream ss;
       ss << "\n\t\tFound " << cluster._michel._photon_clus_v.size()

@@ -99,6 +99,7 @@ namespace larlite {
 
     double _mc_muon_E, _mc_muon_px, _mc_muon_py, _mc_muon_pz;
     double _mc_michel_E, _mc_michel_px, _mc_michel_py, _mc_michel_pz;
+    double _mc_michel_E_nobrem;
 
     double _rc_michel_E;
 
@@ -119,6 +120,9 @@ namespace larlite {
 
     // distance required for a good MC-RECO match
     double _distance;
+
+    // drift velocity
+    double _driftVel;
     
     
   };

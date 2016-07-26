@@ -31,7 +31,9 @@ namespace larlite {
     _w2cm = larutil::GeometryHelper::GetME()->WireToCm();
     _t2cm = larutil::GeometryHelper::GetME()->TimeToCm();
 
-
+    double efield   = larutil::LArProperties::GetME()->Efield(); // kV/cm
+    double temp     = larutil::LArProperties::GetME()->Temperature(); // Kelvin
+    _driftVel       = larutil::LArProperties::GetME()->DriftVelocity(efield,temp); // [cm/us]
 
     if (_tree) delete _tree;
 
@@ -53,6 +55,7 @@ namespace larlite {
     _tree->Branch("_mc_muon_pz",&_mc_muon_pz,"mc_muon_pz/D");
 
     _tree->Branch("_mc_michel_E",&_mc_michel_E,"mc_michel_E/D");
+    _tree->Branch("_mc_michel_E_nobrem",&_mc_michel_E_nobrem,"mc_michel_E_nobrem/D");
     _tree->Branch("_mc_michel_px",&_mc_michel_px,"mc_michel_px/D");
     _tree->Branch("_mc_michel_py",&_mc_michel_py,"mc_michel_py/D");
     _tree->Branch("_mc_michel_pz",&_mc_michel_pz,"mc_michel_pz/D");
@@ -75,9 +78,7 @@ namespace larlite {
   
   bool RecoEffStudy::analyze(storage_manager* storage) {
 
-    double efield   = larutil::LArProperties::GetME()->Efield(); // kV/cm
-    double temp     = larutil::LArProperties::GetME()->Temperature(); // Kelvin
-    double driftVel = larutil::LArProperties::GetME()->DriftVelocity(efield,temp); // [cm/us]
+
     
     _trackIDMap.clear();
     _mc_michel_start_v.clear();
@@ -138,7 +139,7 @@ namespace larlite {
       double start_t = e_strt.X() / _t2cm;
       // account for offset in trigger [T0]
       // get time in us and get distance w/ drift-velocity
-      start_t += ( e_strt.T() / 1000.) * driftVel / _t2cm + 800;
+      start_t += ( e_strt.T() / 1000.) * _driftVel / _t2cm + 800;
 
       // if start tick out of truncated waveform bounds -> don't include
       if ( (start_t < 0) or (start_t > 6300) )
@@ -179,8 +180,10 @@ namespace larlite {
 	auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ i ].second );
 	auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ i ].first  );
 	
-	if (muon_MCTrack.size() < 2)
+	if (muon_MCTrack.size() < 2){
+	  _tree->Fill();
 	  continue;
+	}
 	
 	FillMuonInfo(muon_MCTrack);
 	
@@ -194,20 +197,10 @@ namespace larlite {
 	_mc_tick = _mc_michel_start_v[i].second;
 	_mc_wire = _mc_michel_start_v[i].first;
 	
-	if (matched.first == false){
-	  _tree->Fill();
-	  continue;
-	}
-	
 	// if we found a good match, start filling info for RECO stuff
 	auto const& matched_michel_cluster = ev_cluster->at( matched.second );
 	_rc_wire = (double)matched_michel_cluster.StartWire();
 	_rc_tick = matched_michel_cluster.StartTick();
-	// grab hits associated to this michel
-	auto const& hit_idx_v = hit_ass_set[ matched.second ];
-	_rc_ADCq = 0.;
-	for (auto const& hit_idx : hit_idx_v)
-	  _rc_ADCq += ev_hit->at(hit_idx).Integral();
 	_matched = 1;
 	_tree->Fill();
       }// for all MC michels
@@ -226,10 +219,10 @@ namespace larlite {
 	// find best match from Reco'd michels
 	auto const& matched = findBestMatch( _rc_michel_start_v[i], _mc_michel_start_v);
 
-	_rc_tick = _rc_michel_start_v[i].second;
-	_rc_wire = _rc_michel_start_v[i].first;
+	_rc_tick = (double)_rc_michel_start_v[i].second;
+	_rc_wire = (double)_rc_michel_start_v[i].first;
 
-	if (matched.first == false){
+	if (matched.second < 0){
 	  _tree->Fill();
 	  continue;
 	}
@@ -238,8 +231,10 @@ namespace larlite {
 	auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ matched.second ].second );
 	auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ matched.second ].first  );
 	
-	if (muon_MCTrack.size() < 2)
+	if (muon_MCTrack.size() < 2){
+	  _tree->Fill();
 	  continue;
+	}
 	
 	FillMuonInfo(muon_MCTrack);
 	
@@ -247,12 +242,12 @@ namespace larlite {
 	
 	FillDotProduct();
 
-	_mc_tick = _rc_michel_start_v[ matched.second ].second;
-	_mc_wire = _rc_michel_start_v[ matched.second ].first;
+	_mc_tick = _mc_michel_start_v[ matched.second ].second;
+	_mc_wire = _mc_michel_start_v[ matched.second ].first;
 	
 	_matched = 1;
 	_tree->Fill();
-      }// for all MC michels
+      }// for all RECO michels
       
     }// if we fill an entry per MC michel
 	
@@ -289,6 +284,8 @@ namespace larlite {
     if (d_min < _distance*_distance)
       found = true;
 
+    std::cout << "min dist is " << d_min << std::endl;
+
     return std::make_pair(found, idx);
   }
 
@@ -314,7 +311,7 @@ namespace larlite {
     
     _mc_muon_decay_T = mu_end.T();
     
-    _mc_tick_muon = mu_end.X() / _t2cm + (mu_end.T() / 1000.) * ( 0.11 / _t2cm) ;
+    _mc_tick_muon = mu_end.X() / _t2cm + (mu_end.T() / 1000.) * ( _driftVel / _t2cm) ;
 
     return;
   }

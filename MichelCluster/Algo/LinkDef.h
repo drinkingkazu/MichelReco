@@ -36,6 +36,7 @@
 #pragma link C++ class michel::RemoveBraggPeakHits+;
 #pragma link C++ class michel::ClusterPhotons+;
 #pragma link C++ class michel::RecoMichelDirection+;
+#pragma link C++ class michel::PhotonFinder+;
 
 /// MIDFilter
 #pragma link C++ class michel::DecideIfStoppingMuon+;
@@ -51,6 +52,7 @@
 #pragma link C++ class michel::RequireSlopeSignFlip+;
 #pragma link C++ class michel::RequireCloseTruncatedPeaks+;
 #pragma link C++ class michel::RequireBoundaryInLowCov+;
+#pragma link C++ class michel::RemoveBadPhotonClusters+;
 
 /// Various method classes
 #pragma link C++ class michel::CalcTruncated+;
