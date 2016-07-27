@@ -201,6 +201,12 @@ namespace larlite {
 	auto const& matched_michel_cluster = ev_cluster->at( matched.second );
 	_rc_wire = (double)matched_michel_cluster.StartWire();
 	_rc_tick = matched_michel_cluster.StartTick();
+
+	auto const& hit_idx_v = hit_ass_set[ matched.second ];
+	_rc_ADCq = 0.;
+	for (auto const& hit_idx : hit_idx_v)
+	  _rc_ADCq += ev_hit->at(hit_idx).Integral();
+	
 	_matched = 1;
 	_tree->Fill();
       }// for all MC michels
@@ -244,6 +250,11 @@ namespace larlite {
 
 	_mc_tick = _mc_michel_start_v[ matched.second ].second;
 	_mc_wire = _mc_michel_start_v[ matched.second ].first;
+
+	auto const& hit_idx_v = hit_ass_set[ i ];
+	_rc_ADCq = 0.;
+	for (auto const& hit_idx : hit_idx_v)
+	  _rc_ADCq += ev_hit->at(hit_idx).Integral();
 	
 	_matched = 1;
 	_tree->Fill();
@@ -356,22 +367,22 @@ namespace larlite {
   void RecoEffStudy::ResetTTree()
   {
 
-    _mc_X = _mc_Y = _mc_Z = _mc_T = kINVALID_DOUBLE;
+    _mc_X = _mc_Y = _mc_Z = _mc_T = -1;
     _mc_wire = _rc_wire = _mc_tick = _rc_tick = -1000;//kINVALID_DOUBLE;
-    _mc_tick_muon = kINVALID_DOUBLE;
+    _mc_tick_muon = -1;
 
     _rc_ADCq = 0;
     
-    _trig_time = kINVALID_DOUBLE;
+    _trig_time = -1;
     
-    _mc_muon_E = _mc_muon_px = _mc_muon_py = _mc_muon_pz = kINVALID_DOUBLE;
-    _mc_michel_E = _mc_michel_px = _mc_michel_py = _mc_michel_pz = kINVALID_DOUBLE;
+    _mc_muon_E = _mc_muon_px = _mc_muon_py = _mc_muon_pz = -1;
+    _mc_michel_E = _mc_michel_px = _mc_michel_py = _mc_michel_pz = -1;
     
-    _rc_michel_E = kINVALID_DOUBLE;
+    _rc_michel_E = -1;
     
     _mc_muon_decay_T = _mc_michel_creation_T = kINVALID_DOUBLE;
     
-    _3Ddot = _2Ddot = kINVALID_DOUBLE;
+    _3Ddot = _2Ddot = -1;
 
     _matched = 0;
 
