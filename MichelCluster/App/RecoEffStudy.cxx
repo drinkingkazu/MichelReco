@@ -228,6 +228,11 @@ namespace larlite {
 	_rc_tick = (double)_rc_michel_start_v[i].second;
 	_rc_wire = (double)_rc_michel_start_v[i].first;
 
+	auto const& hit_idx_v = hit_ass_set[ i ];
+	_rc_ADCq = 0.;
+	for (auto const& hit_idx : hit_idx_v)
+	  _rc_ADCq += ev_hit->at(hit_idx).Integral();
+
 	if (matched.second < 0){
 	  _tree->Fill();
 	  continue;
@@ -250,11 +255,6 @@ namespace larlite {
 
 	_mc_tick = _mc_michel_start_v[ matched.second ].second;
 	_mc_wire = _mc_michel_start_v[ matched.second ].first;
-
-	auto const& hit_idx_v = hit_ass_set[ i ];
-	_rc_ADCq = 0.;
-	for (auto const& hit_idx : hit_idx_v)
-	  _rc_ADCq += ev_hit->at(hit_idx).Integral();
 	
 	_matched = 1;
 	_tree->Fill();
