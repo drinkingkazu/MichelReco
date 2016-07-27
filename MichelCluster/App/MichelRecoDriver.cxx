@@ -227,15 +227,15 @@ namespace larlite {
 	// empty vector where to store hits associated for this specific michel cluster
 	std::vector<unsigned int> michel_clus_hits;
 
-	// additionally get hit range in time/wire
-	int wire_min = 8256;
-	int wire_max = 0;
-	double tick_min = 9600;
-	double tick_max = 0;
-
-	for (auto const& michel_hit : michel)
-	  michel_clus_hits.push_back(michel_hit._id);
-
+	// save michel hits
+	// 1st electron hits
+	for (auto const& michel_elec_hit_idx : michel._electron_hit_idx_v)
+	  michel_clus_hits.push_back( michel[ michel_elec_hit_idx ]._id );
+	// 2nd the various photons
+	for (auto const& photon_hit_v : michel._photon_clus_v){
+	  for (auto const& photon_hit_idx : photon_hit_v)
+	    michel_clus_hits.push_back( michel[ photon_hit_idx ]._id );
+	}
 	// add this vector to the associations
 	if (michel_clus_hits.size() > 3){
 	  michel_clus_hit_ass_v.push_back(michel_clus_hits);
