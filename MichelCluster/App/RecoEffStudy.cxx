@@ -14,7 +14,8 @@
 namespace larlite {
 
   RecoEffStudy::RecoEffStudy()
-    : _tree(nullptr)
+    : _tree_mc(nullptr)
+    , _tree_rc(nullptr)
   {
     _debug  = false;
     _name   = "RecoEffStudy";
@@ -35,43 +36,81 @@ namespace larlite {
     double temp     = larutil::LArProperties::GetME()->Temperature(); // Kelvin
     _driftVel       = larutil::LArProperties::GetME()->DriftVelocity(efield,temp); // [cm/us]
 
-    if (_tree) delete _tree;
+    if (_tree_mc) delete _tree_mc;
+    if (_tree_rc) delete _tree_rc;
 
-    _tree = new TTree("_tree","tree");
-    _tree->Branch("_mc_X",&_mc_X,"mc_X/D");
-    _tree->Branch("_mc_Y",&_mc_Y,"mc_Y/D");
-    _tree->Branch("_mc_Z",&_mc_Z,"mc_Z/D");
-    _tree->Branch("_mc_T",&_mc_T,"mc_T/D");
-    _tree->Branch("_mc_wire",&_mc_wire,"mc_wire/D");
-    _tree->Branch("_rc_wire",&_rc_wire,"rc_wire/D");
-    _tree->Branch("_mc_tick",&_mc_tick,"mc_tick/D");
-    _tree->Branch("_mc_tick_muon",&_mc_tick_muon,"mc_tick_muon/D");
-    _tree->Branch("_rc_tick",&_rc_tick,"rc_tick/D");
-    _tree->Branch("_rc_ADCq",&_rc_ADCq,"rc_ADCq/D");
+    _tree_mc = new TTree("_tree_mc","tree");
+    _tree_mc->Branch("_mc_X",&_mc_X,"mc_X/D");
+    _tree_mc->Branch("_mc_Y",&_mc_Y,"mc_Y/D");
+    _tree_mc->Branch("_mc_Z",&_mc_Z,"mc_Z/D");
+    _tree_mc->Branch("_mc_T",&_mc_T,"mc_T/D");
+    _tree_mc->Branch("_mc_wire",&_mc_wire,"mc_wire/D");
+    _tree_mc->Branch("_rc_wire",&_rc_wire,"rc_wire/D");
+    _tree_mc->Branch("_mc_tick",&_mc_tick,"mc_tick/D");
+    _tree_mc->Branch("_mc_tick_muon",&_mc_tick_muon,"mc_tick_muon/D");
+    _tree_mc->Branch("_rc_tick",&_rc_tick,"rc_tick/D");
+    _tree_mc->Branch("_rc_ADCq",&_rc_ADCq,"rc_ADCq/D");
 
-    _tree->Branch("_mc_muon_E",&_mc_muon_E,"mc_muon_E/D");
-    _tree->Branch("_mc_muon_px",&_mc_muon_px,"mc_muon_px/D");
-    _tree->Branch("_mc_muon_py",&_mc_muon_py,"mc_muon_py/D");
-    _tree->Branch("_mc_muon_pz",&_mc_muon_pz,"mc_muon_pz/D");
+    _tree_mc->Branch("_mc_muon_E",&_mc_muon_E,"mc_muon_E/D");
+    _tree_mc->Branch("_mc_muon_px",&_mc_muon_px,"mc_muon_px/D");
+    _tree_mc->Branch("_mc_muon_py",&_mc_muon_py,"mc_muon_py/D");
+    _tree_mc->Branch("_mc_muon_pz",&_mc_muon_pz,"mc_muon_pz/D");
 
-    _tree->Branch("_mc_michel_E",&_mc_michel_E,"mc_michel_E/D");
-    _tree->Branch("_mc_michel_E_nobrem",&_mc_michel_E_nobrem,"mc_michel_E_nobrem/D");
-    _tree->Branch("_mc_michel_px",&_mc_michel_px,"mc_michel_px/D");
-    _tree->Branch("_mc_michel_py",&_mc_michel_py,"mc_michel_py/D");
-    _tree->Branch("_mc_michel_pz",&_mc_michel_pz,"mc_michel_pz/D");
+    _tree_mc->Branch("_mc_michel_E",&_mc_michel_E,"mc_michel_E/D");
+    _tree_mc->Branch("_mc_michel_E_nobrem",&_mc_michel_E_nobrem,"mc_michel_E_nobrem/D");
+    _tree_mc->Branch("_mc_michel_px",&_mc_michel_px,"mc_michel_px/D");
+    _tree_mc->Branch("_mc_michel_py",&_mc_michel_py,"mc_michel_py/D");
+    _tree_mc->Branch("_mc_michel_pz",&_mc_michel_pz,"mc_michel_pz/D");
 
-    _tree->Branch("_mc_muon_decay_T",&_mc_muon_decay_T,"mc_muon_decay_T/D");
-    _tree->Branch("_mc_michel_creation_T",&_mc_michel_creation_T,"mc_michel_creation_T/D");
+    _tree_mc->Branch("_mc_muon_decay_T",&_mc_muon_decay_T,"mc_muon_decay_T/D");
+    _tree_mc->Branch("_mc_michel_creation_T",&_mc_michel_creation_T,"mc_michel_creation_T/D");
 
 
-    _tree->Branch("_rc_michel_E",&_rc_michel_E,"rc_michel_E/D");
+    _tree_mc->Branch("_rc_michel_E",&_rc_michel_E,"rc_michel_E/D");
 
-    _tree->Branch("_trig_time",&_trig_time,"trig_time/D");
+    _tree_mc->Branch("_trig_time",&_trig_time,"trig_time/D");
 
-    _tree->Branch("_matched",&_matched,"matched/I");
+    _tree_mc->Branch("_matched",&_matched,"matched/I");
 
-    _tree->Branch("_3Ddot",&_3Ddot,"3Ddot/D");
-    _tree->Branch("_2Ddot",&_2Ddot,"2Ddot/D"); // w.r.t. collection plane
+    _tree_mc->Branch("_3Ddot",&_3Ddot,"3Ddot/D");
+    _tree_mc->Branch("_2Ddot",&_2Ddot,"2Ddot/D"); // w.r.t. collection plane
+
+
+    // tree to be filled for every reco michel
+    _tree_rc->Branch("_mc_X",&_mc_X,"mc_X/D");
+    _tree_rc->Branch("_mc_Y",&_mc_Y,"mc_Y/D");
+    _tree_rc->Branch("_mc_Z",&_mc_Z,"mc_Z/D");
+    _tree_rc->Branch("_mc_T",&_mc_T,"mc_T/D");
+    _tree_rc->Branch("_mc_wire",&_mc_wire,"mc_wire/D");
+    _tree_rc->Branch("_rc_wire",&_rc_wire,"rc_wire/D");
+    _tree_rc->Branch("_mc_tick",&_mc_tick,"mc_tick/D");
+    _tree_rc->Branch("_mc_tick_muon",&_mc_tick_muon,"mc_tick_muon/D");
+    _tree_rc->Branch("_rc_tick",&_rc_tick,"rc_tick/D");
+    _tree_rc->Branch("_rc_ADCq",&_rc_ADCq,"rc_ADCq/D");
+
+    _tree_rc->Branch("_mc_muon_E",&_mc_muon_E,"mc_muon_E/D");
+    _tree_rc->Branch("_mc_muon_px",&_mc_muon_px,"mc_muon_px/D");
+    _tree_rc->Branch("_mc_muon_py",&_mc_muon_py,"mc_muon_py/D");
+    _tree_rc->Branch("_mc_muon_pz",&_mc_muon_pz,"mc_muon_pz/D");
+
+    _tree_rc->Branch("_mc_michel_E",&_mc_michel_E,"mc_michel_E/D");
+    _tree_rc->Branch("_mc_michel_E_nobrem",&_mc_michel_E_nobrem,"mc_michel_E_nobrem/D");
+    _tree_rc->Branch("_mc_michel_px",&_mc_michel_px,"mc_michel_px/D");
+    _tree_rc->Branch("_mc_michel_py",&_mc_michel_py,"mc_michel_py/D");
+    _tree_rc->Branch("_mc_michel_pz",&_mc_michel_pz,"mc_michel_pz/D");
+
+    _tree_rc->Branch("_mc_muon_decay_T",&_mc_muon_decay_T,"mc_muon_decay_T/D");
+    _tree_rc->Branch("_mc_michel_creation_T",&_mc_michel_creation_T,"mc_michel_creation_T/D");
+
+
+    _tree_rc->Branch("_rc_michel_E",&_rc_michel_E,"rc_michel_E/D");
+
+    _tree_rc->Branch("_trig_time",&_trig_time,"trig_time/D");
+
+    _tree_rc->Branch("_matched",&_matched,"matched/I");
+
+    _tree_rc->Branch("_3Ddot",&_3Ddot,"3Ddot/D");
+    _tree_rc->Branch("_2Ddot",&_2Ddot,"2Ddot/D"); // w.r.t. collection plane
 
     return true;
   }
@@ -170,104 +209,98 @@ namespace larlite {
     // **************************
     // SAVE ENTRY PER TRUE MICHEL
     // **************************
-    if (_all_mc){
-
-      for (size_t i=0; i < _mc_michel_start_v.size(); i++){
-	
-	ResetTTree();
-	
-	// grab Michel MCShower
-	auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ i ].second );
-	auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ i ].first  );
-	
-	if (muon_MCTrack.size() < 2){
-	  _tree->Fill();
-	  continue;
-	}
-	
-	FillMuonInfo(muon_MCTrack);
-	
-	FillMichelInfo(michel_MCShower);
-	
-	FillDotProduct();
-	
-	// find best match from Reco'd michels
-	auto const& matched = findBestMatch( _mc_michel_start_v[i], _rc_michel_start_v);
-	
-	_mc_tick = _mc_michel_start_v[i].second;
-	_mc_wire = _mc_michel_start_v[i].first;
-	
-	// if we found a good match, start filling info for RECO stuff
-	auto const& matched_michel_cluster = ev_cluster->at( matched.second );
-	_rc_wire = (double)matched_michel_cluster.StartWire();
-	_rc_tick = matched_michel_cluster.StartTick();
-
-	auto const& hit_idx_v = hit_ass_set[ matched.second ];
-	_rc_ADCq = 0.;
-	for (auto const& hit_idx : hit_idx_v)
-	  _rc_ADCq += ev_hit->at(hit_idx).Integral();
-	
-	_matched = 1;
-	_tree->Fill();
-      }// for all MC michels
+    for (size_t i=0; i < _mc_michel_start_v.size(); i++){
       
-    }// if we fill an entry per MC michel
+      ResetTTree();
+      
+      // grab Michel MCShower
+      auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ i ].second );
+      auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ i ].first  );
+      
+      if (muon_MCTrack.size() < 2){
+	_tree_mc->Fill();
+	continue;
+      }
+      
+      FillMuonInfo(muon_MCTrack);
+      
+      FillMichelInfo(michel_MCShower);
+      
+      FillDotProduct();
+      
+      // find best match from Reco'd michels
+      auto const& matched = findBestMatch( _mc_michel_start_v[i], _rc_michel_start_v);
+      
+      _mc_tick = _mc_michel_start_v[i].second;
+      _mc_wire = _mc_michel_start_v[i].first;
+      
+      // if we found a good match, start filling info for RECO stuff
+      auto const& matched_michel_cluster = ev_cluster->at( matched.second );
+      _rc_wire = (double)matched_michel_cluster.StartWire();
+      _rc_tick = matched_michel_cluster.StartTick();
+      
+      auto const& hit_idx_v = hit_ass_set[ matched.second ];
+      _rc_ADCq = 0.;
+      for (auto const& hit_idx : hit_idx_v)
+	_rc_ADCq += ev_hit->at(hit_idx).Integral();
+      
+      _matched = 1;
+      _tree_mc->Fill();
+    }// for all MC michels
     
     // **************************
     // SAVE ENTRY PER RECO MICHEL
     // **************************
-    else{
+    for (size_t i=0; i < _rc_michel_start_v.size(); i++){
       
-      for (size_t i=0; i < _rc_michel_start_v.size(); i++){
-	
-	ResetTTree();
-	
-	// find best match from Reco'd michels
-	auto const& matched = findBestMatch( _rc_michel_start_v[i], _mc_michel_start_v);
-
-	_rc_tick = (double)_rc_michel_start_v[i].second;
-	_rc_wire = (double)_rc_michel_start_v[i].first;
-
-	auto const& hit_idx_v = hit_ass_set[ i ];
-	_rc_ADCq = 0.;
-	for (auto const& hit_idx : hit_idx_v)
-	  _rc_ADCq += ev_hit->at(hit_idx).Integral();
-
-	if (matched.second < 0){
-	  _tree->Fill();
-	  continue;
-	}
-	
-	// grab Michel MCShower
-	auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ matched.second ].second );
-	auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ matched.second ].first  );
-	
-	if (muon_MCTrack.size() < 2){
-	  _tree->Fill();
-	  continue;
-	}
-	
-	FillMuonInfo(muon_MCTrack);
-	
-	FillMichelInfo(michel_MCShower);
-	
-	FillDotProduct();
-
-	_mc_tick = _mc_michel_start_v[ matched.second ].second;
-	_mc_wire = _mc_michel_start_v[ matched.second ].first;
-	
-	_matched = 1;
-	_tree->Fill();
-      }// for all RECO michels
+      ResetTTree();
       
-    }// if we fill an entry per MC michel
+      // find best match from Reco'd michels
+      auto const& matched = findBestMatch( _rc_michel_start_v[i], _mc_michel_start_v);
+      
+      _rc_tick = (double)_rc_michel_start_v[i].second;
+      _rc_wire = (double)_rc_michel_start_v[i].first;
+      
+      auto const& hit_idx_v = hit_ass_set[ i ];
+      _rc_ADCq = 0.;
+      for (auto const& hit_idx : hit_idx_v)
+	_rc_ADCq += ev_hit->at(hit_idx).Integral();
+      
+      if (matched.second < 0){
+	_tree_rc->Fill();
+	continue;
+      }
+      
+      // grab Michel MCShower
+      auto const& michel_MCShower = ev_mcshower->at( _muon_michel_idx_map[ matched.second ].second );
+      auto const& muon_MCTrack    = ev_mctrack ->at( _muon_michel_idx_map[ matched.second ].first  );
+      
+      if (muon_MCTrack.size() < 2){
+	_tree_rc->Fill();
+	continue;
+      }
+      
+      FillMuonInfo(muon_MCTrack);
+      
+      FillMichelInfo(michel_MCShower);
+      
+      FillDotProduct();
+      
+      _mc_tick = _mc_michel_start_v[ matched.second ].second;
+      _mc_wire = _mc_michel_start_v[ matched.second ].first;
+      
+      _matched = 1;
+      _tree_rc->Fill();
+    }// for all RECO michels
+    
 	
     return true;
   }
 
   bool RecoEffStudy::finalize() {
 
-    _tree->Write();
+    _tree_mc->Write();
+    _tree_rc->Write();
 
     return true;
   }

@@ -88,7 +88,8 @@ namespace larlite {
     // map linking _michel_start_v idx to [mu idx, michel idx];
     std::map<int, std::pair<int,int> > _muon_michel_idx_map;
 
-    TTree *_tree;
+    TTree *_tree_mc;
+    TTree *_tree_rc;
     double _mc_X, _mc_Y, _mc_Z, _mc_T;
     double _mc_wire, _rc_wire;
     double _mc_tick, _rc_tick;
