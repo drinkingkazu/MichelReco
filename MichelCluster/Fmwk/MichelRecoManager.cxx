@@ -131,7 +131,8 @@ namespace michel {
     
     // If nothing to be done, return
     if (_input_v.empty()) return;
-    
+
+    /*
     // make sure hit vectors provided & cluster list (another hit arrays) are consistent
     _used_hit_marker_v.resize(_all_hit_v.size(), false);
     for (size_t i = 0; i < _used_hit_marker_v.size(); ++i) {
@@ -140,6 +141,7 @@ namespace michel {
       else
 	_used_hit_marker_v[i] = false;
     }
+    */
     
     if (_verbosity <= msg::kDEBUG) {
       
@@ -173,7 +175,8 @@ namespace michel {
 
     // save merged clusters
     _merged_v = _output_v;
-    
+
+    /*
     // Update "used hits" list
     for (auto const& cluster : _output_v) {
       
@@ -188,6 +191,7 @@ namespace michel {
 	_used_hit_marker_v[hit_pt._id] = true;
       }
     }
+    */
     
     
     std::vector<MichelCluster> processed_cluster_v;

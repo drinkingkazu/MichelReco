@@ -56,8 +56,16 @@ namespace larlite {
     _tree_mc->Branch("_mc_muon_py",&_mc_muon_py,"mc_muon_py/D");
     _tree_mc->Branch("_mc_muon_pz",&_mc_muon_pz,"mc_muon_pz/D");
 
-    _tree_mc->Branch("_mc_michel_E",&_mc_michel_E,"mc_michel_E/D");
-    _tree_mc->Branch("_mc_michel_E_nobrem",&_mc_michel_E_nobrem,"mc_michel_E_nobrem/D");
+    _tree_mc->Branch("_mc_michel_E_true",&_mc_michel_E_true,"mc_michel_E_true/D");
+    _tree_mc->Branch("_mc_michel_E_edep",&_mc_michel_E_edep,"mc_michel_E_edep/D");
+    _tree_mc->Branch("_mc_michel_E_elec",&_mc_michel_E_elec,"mc_michel_E_elec/D");
+    _tree_mc->Branch("_mc_michel_px",&_mc_michel_px,"mc_michel_px/D");
+    _tree_mc->Branch("_mc_michel_py",&_mc_michel_py,"mc_michel_py/D");
+    _tree_mc->Branch("_mc_michel_pz",&_mc_michel_pz,"mc_michel_pz/D");
+
+    _tree_mc->Branch("_mc_michel_E_true",&_mc_michel_E_true,"mc_michel_E_true/D");
+    _tree_mc->Branch("_mc_michel_E_edep",&_mc_michel_E_edep,"mc_michel_E_edep/D");
+    _tree_mc->Branch("_mc_michel_E_elec",&_mc_michel_E_elec,"mc_michel_E_elec/D");
     _tree_mc->Branch("_mc_michel_px",&_mc_michel_px,"mc_michel_px/D");
     _tree_mc->Branch("_mc_michel_py",&_mc_michel_py,"mc_michel_py/D");
     _tree_mc->Branch("_mc_michel_pz",&_mc_michel_pz,"mc_michel_pz/D");
@@ -93,8 +101,9 @@ namespace larlite {
     _tree_rc->Branch("_mc_muon_py",&_mc_muon_py,"mc_muon_py/D");
     _tree_rc->Branch("_mc_muon_pz",&_mc_muon_pz,"mc_muon_pz/D");
 
-    _tree_rc->Branch("_mc_michel_E",&_mc_michel_E,"mc_michel_E/D");
-    _tree_rc->Branch("_mc_michel_E_nobrem",&_mc_michel_E_nobrem,"mc_michel_E_nobrem/D");
+    _tree_rc->Branch("_mc_michel_E_true",&_mc_michel_E_true,"mc_michel_E_true/D");
+    _tree_rc->Branch("_mc_michel_E_edep",&_mc_michel_E_edep,"mc_michel_E_edep/D");
+    _tree_rc->Branch("_mc_michel_E_elec",&_mc_michel_E_elec,"mc_michel_E_elec/D");
     _tree_rc->Branch("_mc_michel_px",&_mc_michel_px,"mc_michel_px/D");
     _tree_rc->Branch("_mc_michel_py",&_mc_michel_py,"mc_michel_py/D");
     _tree_rc->Branch("_mc_michel_pz",&_mc_michel_pz,"mc_michel_pz/D");
@@ -125,7 +134,7 @@ namespace larlite {
     _muon_michel_idx_map.clear();
 
     // load MCShower / MCTracks
-    auto ev_mcshower = storage->get_data<event_mcshower>("mcreco");
+    auto ev_mcshower = storage->get_data<event_mcshower>("mcreco2");
     auto ev_mctrack  = storage->get_data<event_mctrack>("mcreco");
 
     // load Michel clusters
@@ -367,7 +376,9 @@ namespace larlite {
     _mc_Z = e_strt.Z();
     _mc_T = e_strt.T();
 
-    _mc_michel_E  = michel.Start().E();
+    _mc_michel_E_true  = michel.Start().E();
+    _mc_michel_E_edep  = michel.DetProfile().E();
+    _mc_michel_E_elec  = michel.End().E();
     _mc_michel_px = michel.Start().Px();
     _mc_michel_py = michel.Start().Py();
     _mc_michel_pz = michel.Start().Pz();
@@ -409,7 +420,8 @@ namespace larlite {
     _trig_time = -1;
     
     _mc_muon_E = _mc_muon_px = _mc_muon_py = _mc_muon_pz = -1;
-    _mc_michel_E = _mc_michel_px = _mc_michel_py = _mc_michel_pz = -1;
+    _mc_michel_px = _mc_michel_py = _mc_michel_pz = -1;
+    _mc_michel_E_true = _mc_michel_E_edep = _mc_michel_E_elec = 0;
     
     _rc_michel_E = -1;
     

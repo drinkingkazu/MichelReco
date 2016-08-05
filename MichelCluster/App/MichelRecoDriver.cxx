@@ -212,9 +212,10 @@ namespace larlite {
 
 	// prepare an empty cluster
 	larlite::cluster clus_michel;
+	// set start location
 	clus_michel.set_start_wire( michelClus._michel._start._w / w2cm, 0. );
 	clus_michel.set_start_tick( michelClus._michel._start._t / t2cm, 0. );
-	michel_cluster_v->push_back(clus_michel);
+
 	// get the hits (in "michel" notation) for this cluster
 	auto const& michel = michelClus._michel; // this is a vector of HitPt
 	// michel is a list of HitPt
@@ -229,8 +230,12 @@ namespace larlite {
 
 	// save michel hits
 	// 1st electron hits
-	for (auto const& michel_elec_hit_idx : michel._electron_hit_idx_v)
+	double Qelec = 0;
+	for (auto const& michel_elec_hit_idx : michel._electron_hit_idx_v){
 	  michel_clus_hits.push_back( michel[ michel_elec_hit_idx ]._id );
+	  Qelec += michel[ michel_elec_hit_idx ]._q;
+	}
+	clus_michel.set_summedADC( Qelec, 0, 0);
 	// 2nd the various photons
 	for (auto const& photon_hit_v : michel._photon_clus_v){
 	  for (auto const& photon_hit_idx : photon_hit_v)
@@ -240,8 +245,12 @@ namespace larlite {
 	if (michel_clus_hits.size() > 3){
 	  michel_clus_hit_ass_v.push_back(michel_clus_hits);
 	}// if there are at least 3 hits in the michel cluster
+
+	// store michel cluster
+	michel_cluster_v->push_back(clus_michel);
 	
       }// loop over all found michels
+      
       // now save the association information
       michel_cluster_ass_v->set_association(michel_cluster_v->id(),product_id(data::kHit,ev_hit->name()),michel_clus_hit_ass_v);
       
