@@ -49,7 +49,8 @@ namespace larlite {
     _tree_mc->Branch("_mc_tick",&_mc_tick,"mc_tick/D");
     _tree_mc->Branch("_mc_tick_muon",&_mc_tick_muon,"mc_tick_muon/D");
     _tree_mc->Branch("_rc_tick",&_rc_tick,"rc_tick/D");
-    _tree_mc->Branch("_rc_ADCq",&_rc_ADCq,"rc_ADCq/D");
+    _tree_mc->Branch("_rc_ADCq_elec",&_rc_ADCq_elec,"rc_ADCq_elec/D");
+    _tree_mc->Branch("_rc_ADCq_tot",&_rc_ADCq_tot,"rc_ADCq_tot/D");
 
     _tree_mc->Branch("_mc_muon_E",&_mc_muon_E,"mc_muon_E/D");
     _tree_mc->Branch("_mc_muon_px",&_mc_muon_px,"mc_muon_px/D");
@@ -85,6 +86,7 @@ namespace larlite {
 
 
     // tree to be filled for every reco michel
+    _tree_rc = new TTree("_tree_rc","tree");
     _tree_rc->Branch("_mc_X",&_mc_X,"mc_X/D");
     _tree_rc->Branch("_mc_Y",&_mc_Y,"mc_Y/D");
     _tree_rc->Branch("_mc_Z",&_mc_Z,"mc_Z/D");
@@ -94,7 +96,8 @@ namespace larlite {
     _tree_rc->Branch("_mc_tick",&_mc_tick,"mc_tick/D");
     _tree_rc->Branch("_mc_tick_muon",&_mc_tick_muon,"mc_tick_muon/D");
     _tree_rc->Branch("_rc_tick",&_rc_tick,"rc_tick/D");
-    _tree_rc->Branch("_rc_ADCq",&_rc_ADCq,"rc_ADCq/D");
+    _tree_rc->Branch("_rc_ADCq_elec",&_rc_ADCq_elec,"rc_ADCq_elec/D");
+    _tree_rc->Branch("_rc_ADCq_tot",&_rc_ADCq_tot,"rc_ADCq_tot/D");
 
     _tree_rc->Branch("_mc_muon_E",&_mc_muon_E,"mc_muon_E/D");
     _tree_rc->Branch("_mc_muon_px",&_mc_muon_px,"mc_muon_px/D");
@@ -126,11 +129,13 @@ namespace larlite {
   
   bool RecoEffStudy::analyze(storage_manager* storage) {
 
-
+    if (_debug)
+      std::cout << "RecoEffStudy Start" << std::endl;
     
     _trackIDMap.clear();
     _mc_michel_start_v.clear();
     _rc_michel_start_v.clear();
+    _rc_michel_elecQ_v.clear();
     _muon_michel_idx_map.clear();
 
     // load MCShower / MCTracks
@@ -212,12 +217,18 @@ namespace larlite {
     if (ev_cluster){
       for (auto const& clus : *ev_cluster){
 	_rc_michel_start_v.push_back( std::make_pair( (double)clus.StartWire(), clus.StartTick() ) );
+	_rc_michel_elecQ_v.push_back( clus.SummedADC() );
       }
     }
 
+
+    
     // **************************
     // SAVE ENTRY PER TRUE MICHEL
     // **************************
+    if (_debug)
+      std::cout << "save entry per true michel..." << std::endl;
+    
     for (size_t i=0; i < _mc_michel_start_v.size(); i++){
       
       ResetTTree();
@@ -238,28 +249,48 @@ namespace larlite {
       FillDotProduct();
       
       // find best match from Reco'd michels
+      if (_debug)
+	std::cout << "\tfind best match" << std::endl;
+      
       auto const& matched = findBestMatch( _mc_michel_start_v[i], _rc_michel_start_v);
+
+      if (matched.first == false){
+	_tree_mc->Fill();
+	continue;
+      }
       
       _mc_tick = _mc_michel_start_v[i].second;
       _mc_wire = _mc_michel_start_v[i].first;
+
+      if (_debug)
+	std::cout << "\tget matched reco cluster" << std::endl;
       
       // if we found a good match, start filling info for RECO stuff
       auto const& matched_michel_cluster = ev_cluster->at( matched.second );
       _rc_wire = (double)matched_michel_cluster.StartWire();
       _rc_tick = matched_michel_cluster.StartTick();
-      
+      _rc_ADCq_elec = (double)matched_michel_cluster.SummedADC();
+      std::cout << "accessing index " << matched.second << std::endl;
+      std::cout << "hit_ass_set has " << hit_ass_set.size() << " elements" << std::endl;
       auto const& hit_idx_v = hit_ass_set[ matched.second ];
-      _rc_ADCq = 0.;
+      _rc_ADCq_tot = 0.;
       for (auto const& hit_idx : hit_idx_v)
-	_rc_ADCq += ev_hit->at(hit_idx).Integral();
+	_rc_ADCq_tot += ev_hit->at(hit_idx).Integral();
       
       _matched = 1;
+
+      if (_debug)
+	std::cout << "\tfill tree" << std::endl;
+      
       _tree_mc->Fill();
     }// for all MC michels
     
     // **************************
     // SAVE ENTRY PER RECO MICHEL
     // **************************
+    if (_debug)
+      std::cout << "save entry per reco michel..." << std::endl;
+    
     for (size_t i=0; i < _rc_michel_start_v.size(); i++){
       
       ResetTTree();
@@ -269,11 +300,12 @@ namespace larlite {
       
       _rc_tick = (double)_rc_michel_start_v[i].second;
       _rc_wire = (double)_rc_michel_start_v[i].first;
+      //_rc_ADCq_elec = (double)_rc_michel_elecQ_v[i];
       
       auto const& hit_idx_v = hit_ass_set[ i ];
-      _rc_ADCq = 0.;
+      _rc_ADCq_tot = 0.;
       for (auto const& hit_idx : hit_idx_v)
-	_rc_ADCq += ev_hit->at(hit_idx).Integral();
+	_rc_ADCq_tot += ev_hit->at(hit_idx).Integral();
       
       if (matched.second < 0){
 	_tree_rc->Fill();
@@ -301,7 +333,9 @@ namespace larlite {
       _matched = 1;
       _tree_rc->Fill();
     }// for all RECO michels
-    
+
+    if (_debug)
+      std::cout << "RecoEffStudy event end" << std::endl;
 	
     return true;
   }
@@ -415,7 +449,7 @@ namespace larlite {
     _mc_wire = _rc_wire = _mc_tick = _rc_tick = -1000;//kINVALID_DOUBLE;
     _mc_tick_muon = -1;
 
-    _rc_ADCq = 0;
+    _rc_ADCq_tot = _rc_ADCq_elec = 0;
     
     _trig_time = -1;
     

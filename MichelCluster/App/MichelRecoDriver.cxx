@@ -241,10 +241,7 @@ namespace larlite {
 	  for (auto const& photon_hit_idx : photon_hit_v)
 	    michel_clus_hits.push_back( michel[ photon_hit_idx ]._id );
 	}
-	// add this vector to the associations
-	if (michel_clus_hits.size() > 3){
-	  michel_clus_hit_ass_v.push_back(michel_clus_hits);
-	}// if there are at least 3 hits in the michel cluster
+	michel_clus_hit_ass_v.push_back(michel_clus_hits);
 
 	// store michel cluster
 	michel_cluster_v->push_back(clus_michel);

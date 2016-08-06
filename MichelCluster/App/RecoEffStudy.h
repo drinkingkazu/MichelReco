@@ -85,6 +85,8 @@ namespace larlite {
     std::vector< std::pair<double,double> > _mc_michel_start_v;
     // from reco
     std::vector< std::pair<double,double> > _rc_michel_start_v;
+    // vector containing ADC charge from electron-part only
+    std::vector< double > _rc_michel_elecQ_v;
     // map linking _michel_start_v idx to [mu idx, michel idx];
     std::map<int, std::pair<int,int> > _muon_michel_idx_map;
 
@@ -94,7 +96,7 @@ namespace larlite {
     double _mc_wire, _rc_wire;
     double _mc_tick, _rc_tick;
     double _mc_tick_muon;
-    double _rc_ADCq;
+    double _rc_ADCq_elec, _rc_ADCq_tot;
 
     double _trig_time;
 
