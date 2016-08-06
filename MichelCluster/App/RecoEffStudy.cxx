@@ -164,18 +164,24 @@ namespace larlite {
       if ( (mcsh.Process() != "Decay") and (mcsh.Process() != "muMinusCaptureAtRest") )
 	continue;
 
+      if (mcsh.PdgCode() == 22)
+	continue;
+      
       // with parent a muon
       if ( (mcsh.MotherPdgCode() != 13) and (mcsh.MotherPdgCode() != -13) )
 	continue;
       
       auto const& e_strt = mcsh.Start();
+
+      if (e_strt.E() < 1)
+	continue;
       
       // make sure shower starts in TPC
       if ( (e_strt.X() < 0) or (e_strt.X() > 256) or 
 	   (e_strt.Y() < -116) or (e_strt.Y() > 116) or
 	   (e_strt.Z() < 0) or (e_strt.Z() > 1036) )
 	continue;
-      
+
       // get the parent nuon
       auto const& muon = ev_mctrack->at( _trackIDMap[ mcsh.MotherTrackID() ] );
 
@@ -186,6 +192,12 @@ namespace larlite {
       // if muon does not decay at rest -> exit
       if ( muon.at(muon.size() - 2).E() > 106)
 	continue;
+
+      if (_debug)
+	std::cout << "Found a true michel w/ energy " << e_strt.E()
+		  << " and process " << mcsh.Process()
+		  << " parent muon trackID : " << mcsh.MotherTrackID() 
+		  << std::endl;
     
       // project the Michel's start point onto the collection plane
       double start_w = e_strt.Z() / _w2cm;
@@ -222,7 +234,6 @@ namespace larlite {
     }
 
 
-    
     // **************************
     // SAVE ENTRY PER TRUE MICHEL
     // **************************
@@ -270,8 +281,6 @@ namespace larlite {
       _rc_wire = (double)matched_michel_cluster.StartWire();
       _rc_tick = matched_michel_cluster.StartTick();
       _rc_ADCq_elec = (double)matched_michel_cluster.SummedADC();
-      std::cout << "accessing index " << matched.second << std::endl;
-      std::cout << "hit_ass_set has " << hit_ass_set.size() << " elements" << std::endl;
       auto const& hit_idx_v = hit_ass_set[ matched.second ];
       _rc_ADCq_tot = 0.;
       for (auto const& hit_idx : hit_idx_v)
@@ -300,7 +309,7 @@ namespace larlite {
       
       _rc_tick = (double)_rc_michel_start_v[i].second;
       _rc_wire = (double)_rc_michel_start_v[i].first;
-      //_rc_ADCq_elec = (double)_rc_michel_elecQ_v[i];
+      _rc_ADCq_elec = (double)_rc_michel_elecQ_v[i];
       
       auto const& hit_idx_v = hit_ass_set[ i ];
       _rc_ADCq_tot = 0.;
