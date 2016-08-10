@@ -87,6 +87,12 @@ namespace michel{
     
     double slope_michel = avg_slope/((double)count);
 
+    // David C Aug 9th 2016
+
+    auto const& michel_dir = cluster._michel._dir;
+
+    slope_michel = michel_dir._t / michel_dir._w;
+
     // same for the muon -> calculate an average slope
 
     // get relevant quantities

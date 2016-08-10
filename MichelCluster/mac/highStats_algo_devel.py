@@ -123,6 +123,15 @@ def PrepareMichelAlgo():
     micheldir = michel.RecoMichelDirection()
     algoList.append(micheldir)
 
+    #############################################
+    # require large angle between michel and muon
+    largeangle = michel.RequireLargeAngle()
+    largeangle.SetMinAngle(30.*3.14/180.)
+    largeangle.SetMinStraightMichelHits(5)
+    largeangle.SetMuonLengthUsed(10000)
+    #largeangle.SetVerbosity(michel.msg.kDEBUG)
+    algoList.append(largeangle)
+
     ##############################################
     # final mid algo cutting on num of michel hits
     michelhits = michel.CutOnMichelNumHits()
@@ -135,15 +144,6 @@ def PrepareMichelAlgo():
     pmtremoved = michel.RemoveFakePMTSignals()
     pmtremoved.SetMaxErrorTime(0.1)
     algoList.append(pmtremoved)
-
-    #############################################
-    # require large angle between michel and muon
-    largeangle = michel.RequireLargeAngle()
-    largeangle.SetMinAngle(30.*3.14/180.)
-    largeangle.SetMinStraightMichelHits(5)
-    largeangle.SetMuonLengthUsed(10000)
-    #largeangle.SetVerbosity(michel.msg.kDEBUG)
-    algoList.append(largeangle)
 
     #############################################
     # remove bragg peak hits
