@@ -69,6 +69,14 @@ namespace larlite {
     // grab reconstructed tracks
     auto ev_track = storage->get_data<event_track>(_producer);
 
+    // grab clusters associated to tracks
+    larlite::event_cluster *ev_clus = nullptr;
+    auto const& trk_clus_ass_v_v = storage->find_one_ass( ev_track->id(), ev_clus, ev_track->name() );
+    
+    // grab the hits associated with the reconstructed tracks
+    larlite::event_hit *ev_hit = nullptr;
+    auto const& trk_hit_ass_v_v = storage->find_one_ass( ev_clus->id(), ev_hit, ev_clus->name() );
+    
     // create output tracks and clusters
     auto out_track = storage->get_data<event_track>("output");
     auto out_clus  = storage->get_data<event_cluster>("michel");
@@ -81,22 +89,24 @@ namespace larlite {
       std::cout<<"No tracks found. Skipping event: "<<storage->event_id()<<std::endl;
       return false;
     }
-    
-    // grab the hits associated with the reconstructed tracks
-    larlite::event_hit *ev_hit = nullptr;
-    auto const& trk_hit_ass_v_v = storage->find_one_ass( ev_track->id(), ev_hit, ev_track->name() );
 
+    // If ev_hit is null, failed to find data or assocaition (shouldn't happen)
+    if(!ev_clus || ev_clus->empty()) {
+      std::cout << "No hit found associated to 3D tracks. Skipping event: "<<storage->event_id()<<std::endl;
+      return false;
+    }
+    
     // If ev_hit is null, failed to find data or assocaition (shouldn't happen)
     if(!ev_hit || ev_hit->empty()) {
       std::cout << "No hit found associated to 3D tracks. Skipping event: "<<storage->event_id()<<std::endl;
       return false;
     }
 
-
     storage->set_id(_run,_subrun,_event);
 
     // 1st thing to do is loop through tracks and create GeoAlgo track objects.
     _geoTrj_v.clear();
+    _geoTrj_map.clear();
     for (size_t i=0; i < ev_track->size(); i++){
       // create geotrack from track
       auto const& trk = ev_track->at(i);
@@ -107,67 +117,75 @@ namespace larlite {
 	trj.push_back ( pt );
       }// for all traj points
       _geoTrj_v.push_back(trj);
+      _geoTrj_map[ _geoTrj_v.size() - 1 ] = i;
     }// for all tracks
 
-    std::cout << " added " << _geoTrj_v.size() << " tracks" << std::endl;
+    for (size_t i=0; i < _geoTrj_v.size(); i++){
 
+      auto const& trj = _geoTrj_v[i];
 
-    
-    // 1st step: check for 3D kink topology in tracks
-    std::vector< std::pair<int,int> > trj_pairs_v;
-    std::vector<geoalgo::Point_t>   PoCA_v;
-    SearchTrajectoryPairs(trj_pairs_v,PoCA_v);
-    std::cout << "found " << trj_pairs_v.size() << " good matches" << std::endl;
-    for (size_t t=0; t < trj_pairs_v.size(); t++){
-      auto const& trj_pair = trj_pairs_v[t];
-      out_track->emplace_back( ev_track->at( trj_pair.first  ) );
-      out_track->emplace_back( ev_track->at( trj_pair.second ) );
-
-      // get longest track of the two
-      double len1 = ev_track->at( trj_pair.first  ).Length();
-      double len2 = ev_track->at( trj_pair.second ).Length();
-      
-      std::vector<unsigned int> trk_hit_indices;
-      if (len1 < len2){
-	for (auto const& hit_idx : trk_hit_ass_v_v[ trj_pair.first ] ){
-	  auto const& hit = ev_hit->at(hit_idx);
-	  if (hit.WireID().Plane == 2)
-	    trk_hit_indices.push_back( hit_idx );
-	}
-      }
-      else{
-	for (auto const& hit_idx : trk_hit_ass_v_v[ trj_pair.second ] ){
-	  auto const& hit = ev_hit->at(hit_idx);
-	  if (hit.WireID().Plane == 2)
-	    trk_hit_indices.push_back( hit_idx );
-	}
-      }
-      
-      std::cout << "Shortest track has " << trk_hit_indices.size() << " hits " << std::endl;
-      if (trk_hit_indices.size() == 0)
+      if (trj.Length() < 50)
 	continue;
 
-      michel_clus_hit_ass_v_v.push_back( trk_hit_indices );
+      ::geoalgo::Point_t muStop;
+      if (trj.at(0)[1] > trj.at(trj.size()-1)[1])
+	muStop = trj.at(trj.size()-1);
+      else
+	muStop = trj.at(0);
 
-      // create output larlite cluster
+      if (muStop[1] < -90)
+	continue;
+      if ( (muStop[2] < 30) or (muStop[2] > 1000) )
+	continue;
+      if ( (muStop[0] < -20) or (muStop[0] > 290) )
+	continue;
+
+      // match trajectories to make sure there are no other ones nearby
+      bool good = true;
+      for (size_t j=0; j < _geoTrj_v.size(); j++){
+
+	if (i == j) continue;
+
+	auto const& trj2 = _geoTrj_v[j];
+
+	if (trj2.Length() < 10)
+	  continue;
+	
+	double dist = _geoAlgo.SqDist(muStop, trj2);
+	if (dist < 30*30){
+	  good = false;
+	  break;
+	}
+	
+      }// second loop of tracks
+      
+      if (good == false)
+	continue;
+
+      // take end point and convert to collection plane point
       double *xyz = new double[3];
-      xyz[0] = PoCA_v[t][0];
-      xyz[1] = PoCA_v[t][1];
-      xyz[2] = PoCA_v[t][2];
+      xyz[0] = muStop[0];
+      xyz[1] = muStop[1];
+      xyz[2] = muStop[2];
       auto const& projection2D = geomHelper->Point_3Dto2D(xyz, 2);
-      int wire = (int) ev_hit->at( trk_hit_indices[0] ).WireID().Wire;
-      int time = (int) ev_hit->at( trk_hit_indices[0] ).PeakTime();
+
+      int wire = (int) ( projection2D.w / geomHelper->WireToCm() );
+      int time = (int) ( projection2D.t / geomHelper->TimeToCm() );
+
       larlite::cluster clus;
       clus.set_start_wire( wire, 0. );
       clus.set_start_tick( time, 0. );
       out_clus->emplace_back( clus );
-      // get shortest track of the two. This is the Michel
       
+      std::cout << "saving a michel @ [w,t] -> [" << wire << ", " << time << "]" << std::endl;
       
-    }
-
+      std::vector<unsigned int> v;
+      michel_clus_hit_ass_v_v.push_back( v );
+      
+    }// for all trajectories
+    
     out_clus_hit_ass_v_v->set_association(out_clus->id(),product_id(data::kHit,ev_hit->name()),michel_clus_hit_ass_v_v);
-
+    
     return true;
   }
 
@@ -186,50 +204,6 @@ namespace larlite {
     if (_hit_tree)
       _hit_tree->Write();
     return true;
-  }
-
-
-  void MichelRecoDriver3D::SearchTrajectoryPairs(std::vector< std::pair<int,int> >& trj_pairs_v,
-						 std::vector<geoalgo::Point_t>& PoCA_v) {
-    
-    trj_pairs_v.clear();
-    PoCA_v.clear();
-
-    for (size_t n=0; n < _geoTrj_v.size(); n++){
-
-      auto const& trj1 = _geoTrj_v[n];
-
-      if (trj1.Length() < 4) continue;
-
-      for (size_t m=n+1; m < _geoTrj_v.size(); m++){
-
-	auto const& trj2 = _geoTrj_v[m];
-
-	if (trj2.Length() < 4) continue;
-
-	geoalgo::Point_t pt1;
-	geoalgo::Point_t pt2;
-
-	double sqDistMin = 1000.;
-	double sqDist1 = trj1.at(0).Dist( trj2.at(0) );
-	if (sqDist1 < sqDistMin) { sqDistMin = sqDist1; pt1 = trj1.at(0); pt2 = trj2.at(0); }
-	double sqDist2 = trj1.at( trj1.size()-1 ).Dist( trj2.at(0) );
-	if (sqDist2 < sqDistMin) { sqDistMin = sqDist2; pt1 = trj1.at( trj1.size()-1 ); pt2 = trj2.at(0); }
-	double sqDist3 = trj1.at(0).Dist( trj2.at( trj2.size()-1 ) );
-	if (sqDist1 < sqDistMin) { sqDistMin = sqDist3; pt1 = trj1.at(0); pt2 = trj2.at( trj2.size()-1 ); }
-	double sqDist4 = trj1.at( trj1.size()-1 ).Dist( trj2.at( trj2.size()-1 ) );
-	if (sqDist1 < sqDistMin) { sqDistMin = sqDist4; pt1 = trj1.at( trj1.size()-1 ); pt2 = trj2.at( trj2.size()-1 ); }
-	
-	if (sqDistMin < 5){
-	  PoCA_v.push_back( ( pt1 + pt2 ) / 2 );
-	  trj_pairs_v.push_back( std::make_pair(n,m) );
-	}
-
-      }// for all trajectories, loop 2
-    }// for all trajectories, loop 1
-
-    return;
-
   }
 
 }

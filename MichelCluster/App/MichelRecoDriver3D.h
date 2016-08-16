@@ -122,13 +122,11 @@ namespace larlite {
 
     // vector of geoalgo::tracks grabbed from the event
     std::vector<geoalgo::Trajectory> _geoTrj_v;
+    std::map<size_t, size_t> _geoTrj_map;
 
     // geoalgo to compute geometrical quantities
     geoalgo::GeoAlgo _geoAlgo;
 
-    // search for trajectory pairs
-    void SearchTrajectoryPairs(std::vector< std::pair<int,int> >& trj_pairs_v,
-			       std::vector<geoalgo::Point_t>& PoCA_v); 
 
   };
 }

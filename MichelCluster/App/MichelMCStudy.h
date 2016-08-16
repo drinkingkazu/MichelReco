@@ -18,6 +18,8 @@
 #include "Analysis/ana_base.h"
 //Backtracker
 #include "MCComp/MCMatchAlg.h"
+// matching
+#include "MatchTruth.h"
 
 namespace larlite {
   /**
@@ -44,6 +46,10 @@ namespace larlite {
     void SetDebugMCQ(bool on) { _debug_mcq = on; }
 
   protected:
+
+    MatchTruth _MatchTruth;
+
+    void Reset();
 
     /// boolean -> debug mc charge collection info
     bool _debug_mcq;

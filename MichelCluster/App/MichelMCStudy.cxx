@@ -24,6 +24,7 @@ namespace larlite {
     _mc_hit_tree = new TTree("_mc_hit_tree","MC Hit Information");
     _mc_hit_tree->Branch("_hit_integral",&_hit_integral,"hit_integral/D");
     _mc_hit_tree->Branch("_hit_mc_q",&_hit_mc_q,"hit_mc_q/D");
+    _mc_hit_tree->Branch("_event" , &_event  , "event/I");
 
     // MC Michel & Muon Information (& Simchannel stuff)
     _mc_tree = new TTree("_mc_tree","MC comparison TTree");
@@ -54,7 +55,7 @@ namespace larlite {
     _mc_tree->Branch("_reco_energy"    , &_reco_energy         , "reco_energy/D");
     _mc_tree->Branch("_michel_hit_fracReco", "std::vector<double>" , &_michel_hit_fracReco);
     _mc_tree->Branch("_michel_hit_QtotReco", "std::vector<double>" , &_michel_hit_QtotReco);
-    _mc_tree->Branch("_michel_hit_idxReco",  "std::vector<double>" , &_michel_hit_idxReco );
+    //_mc_tree->Branch("_michel_hit_idxReco",  "std::vector<double>" , &_michel_hit_idxReco );
     _mc_tree->Branch("_michel_hit_fracMC", "std::vector<double>" , &_michel_hit_fracMC);
     _mc_tree->Branch("_michel_hit_QtotMC", "std::vector<double>" , &_michel_hit_QtotMC);
     _mc_tree->Branch("_QMichelMC", &_QMichelMC, "QMichelMC/D");
@@ -76,139 +77,93 @@ namespace larlite {
     auto ev_mctrack  = storage->get_data<event_mctrack> ( "mcreco"   );
     auto ev_simch    = storage->get_data<event_simch>   ( "largeant" );
 
+    _event  = storage->event_id();
+    _subrun = storage->subrun_id();
+    _run    = storage->run_id();
+
+    // are there saved Michels? if no quit
+    if (!ev_michel or (ev_michel->size() == 0) )
+      return false;
+    
     // get hits associated with michel clusters
     larlite::event_hit *ev_hit = nullptr;
     auto const& ass_clus_hit_v = storage->find_one_ass(ev_michel->id(), ev_hit, ev_michel->name());
 
-    _QMichelRecoSimch_all     = 0.;
-    _QMichelRecoSimch_shr     = 0.;
-    _QMichelPartMCSimch_all   = 0.;
-    _QMichelPartMCSimch_shr   = 0.;
-    _QMichelShowerMCSimch_all = 0.;
-    _QMichelShowerMCSimch_shr = 0.;
-    _michel_hit_fracReco.clear();
-    _michel_hit_QtotReco.clear();
-    _michel_hit_idxReco.clear();
-    _michel_hit_fracMC.clear();
-    _michel_hit_QtotMC.clear();
-
-    _wiremap.clear();
-
-    /*
-
-    // get the 
-    
     bool shower_exists = false;
     
     _reco_energy = 0;
     _mc_energy = -1;
-    
-    //
-    // Get the MeV scale energy for this shower
-    
-    for(auto const& mcs : *ev_mcshower){
+
+    // match the RECO michels to MC
+    _MatchTruth.Match(ev_mcshower, ev_mctrack, ev_michel);
+
+    // grab RECO -> MC matches
+    auto const& reco_to_mc_match_v = _MatchTruth.GetRecotoMCMatch();
+
+    std::cout << "found " << reco_to_mc_match_v.size() << " reco'd micheld to match..." << std::endl;
+
+    // loop through matched pairs
+    for (auto const& entry : reco_to_mc_match_v){
+
+      Reset();
+
+      std::cout << "reco cluster idx " << entry.first << " matched mc shower idx " << entry.second << std::endl;
+
+      // grab the cluster
+      auto const& clus = ev_michel->at( entry.first );
+
+      // grab the hits indices associated to this cluster
+      auto const& michel_hit_idx_v = ass_clus_hit_v[ entry.first ];
+
+      std::cout << "index of mcshower matched is : " <<  entry.second << std::endl;
       
-      if ( ( ( mcs.MotherPdgCode() == 13 ) || ( mcs.MotherPdgCode() == -13 ) ) &&              // parent is a muon
-	   ( ( mcs.Process() == "muMinusCaptureAtRest" ) || ( mcs.Process() == "Decay" ) ) &&  // process is consistent with michel decay
-	   ( mcs.DetProfile().E()/mcs.Start().E()  > 0.5 ) ) {                                 // at least 50% of energy is contained
-	
-	shower_exists = true;
-      }
-    }
-    
-    //
-    // If there is an MC shower in this event, backtrack reconstructed
-    // hits and find charge deposition
-    
-    bool reco_michel_exists = true;
-    if (!ev_michel or (ev_michel->size() == 0) )
-      reco_michel_exists = false;
-    
-    if(shower_exists){// && reco_michel_exists ) { 
-      
-      // You will probably complain about this but I need to use backtracker
-      // how well we can self contain the class in current repo is another story
-      
-      auto mc_energy_min = 0;  // MeV 
-      auto mc_energy_max = 65; // MeV 
+      // grab the mcshower
+      auto const& mcs = ev_mcshower->at( entry.second );
       
       // gather up track IDs for all particles in the Michel EM Shower
       std::vector<std::vector<unsigned int> > g4_trackid_v_shr;
       // use only the Michel particle, ignoring radiated photons
       std::vector<std::vector<unsigned int> > g4_trackid_v_part;
       
-      for(size_t mc_index=0; mc_index < ev_mcshower->size(); ++mc_index) {
-	auto const& mcs = (*ev_mcshower)[mc_index];
-	
-	
-	if ( ( ( mcs.MotherPdgCode() == 13 ) || ( mcs.MotherPdgCode() == -13 ) ) &&              // parent is a muon
-	     ( ( mcs.Process() == "muMinusCaptureAtRest" ) || ( mcs.Process() == "Decay" ) ) &&  // process is consistent with michel decay
-	     ( mcs.DetProfile().E()/mcs.Start().E()  > 0.5 ) ) {                                 // at least 50% of energy is contained
-	  
-	  _mc_energy = mcs.DetProfile().E();
-	  _QMichelMC = mcs.Charge(2);
-	  // calculate lifetime correction
-	  _mc_x  = mcs.Start().X();
-	  _mc_y  = mcs.Start().Y();
-	  _mc_z  = mcs.Start().Z();
-	  _mc_px = mcs.Start().Px();
-	  _mc_py = mcs.Start().Py();
-	  _mc_pz = mcs.Start().Pz();
-	  double mag = sqrt( (_mc_px*_mc_px) + (_mc_py*_mc_py) + (_mc_pz*_mc_pz) );	    
-	  _mc_px /= mag;
-	  _mc_py /= mag;
-	  _mc_pz /= mag;
-	  // 2D angle on Y plane view (in x-z space)
-	  _mc_yplane_angle = _mc_pz / sqrt ( _mc_px*_mc_px + _mc_pz*_mc_pz );
-	  
-	  // find the MCTrack that produced this Michel electron
-	  for (auto const& mct : *ev_mctrack){
-	    if ( (mcs.MotherTrackID() == mct.TrackID()) and ( abs(mct.PdgCode()) == 13 ) ){
-	      // if only 1 step: continue
-	      if (mct.size() < 2)
-		continue;
-	      _mu_energy  = mct[0].E();
-	      _mu_px = mct[0].Px();
-	      _mu_py = mct[0].Py();
-	      _mu_pz = mct[0].Pz();
-	      mag = sqrt( (_mu_px*_mu_px) + (_mu_py*_mu_py) + (_mu_pz*_mu_pz) );
-	      _mu_px /= mag;
-	      _mu_py /= mag;
-	      _mu_pz /= mag;
-	      // 2D angle on Y plane view (in x-z space)
-	      _mu_yplane_angle = _mu_pz / sqrt ( _mu_px*_mu_px + _mu_pz*_mu_pz );
-	      // muon - michel 3D angle
-	      _mu_michel_3dangle = _mu_px*_mc_px + _mu_py*_mc_py + _mu_pz*_mc_pz;
-	    }// if we found the parent muon
-	  }// for all mctracks
-	  
-	  double energy = mcs.DetProfile().E();
-	  
-	  std::vector<unsigned int> id_v;
-	  id_v.reserve(mcs.DaughterTrackID().size());
-	  
-	  if( mc_energy_min < energy && energy < mc_energy_max ) {
-	    for(auto const& id : mcs.DaughterTrackID()) {
-	      if(id == mcs.TrackID()) continue;
-	      id_v.push_back(id);
-	    }
-	    id_v.push_back(mcs.TrackID());
-	    g4_trackid_v_shr.push_back(id_v);
-	    // only for michel particle and no photons
-	    std::vector<unsigned int> id_v_part = {mcs.TrackID()};
-	    g4_trackid_v_part.push_back(id_v_part);
-	  }
-	}
+      _mc_energy = mcs.DetProfile().E();
+      _QMichelMC = mcs.Charge(2);
+      // calculate lifetime correction
+      _mc_x  = mcs.Start().X();
+      _mc_y  = mcs.Start().Y();
+      _mc_z  = mcs.Start().Z();
+      _mc_px = mcs.Start().Px();
+      _mc_py = mcs.Start().Py();
+      _mc_pz = mcs.Start().Pz();
+      double mag = sqrt( (_mc_px*_mc_px) + (_mc_py*_mc_py) + (_mc_pz*_mc_pz) );	    
+      _mc_px /= mag;
+      _mc_py /= mag;
+      _mc_pz /= mag;
+      // 2D angle on Y plane view (in x-z space)
+      _mc_yplane_angle = _mc_pz / sqrt ( _mc_px*_mc_px + _mc_pz*_mc_pz );
+      
+      double energy = mcs.DetProfile().E();
+      
+      std::vector<unsigned int> id_v;
+      id_v.reserve(mcs.DaughterTrackID().size());
+      
+      for(auto const& id : mcs.DaughterTrackID()) {
+	if(id == mcs.TrackID()) continue;
+	id_v.push_back(id);
       }
+      id_v.push_back(mcs.TrackID());
+      g4_trackid_v_shr.push_back(id_v);
+      // only for michel particle and no photons
+      std::vector<unsigned int> id_v_part = {mcs.TrackID()};
+      g4_trackid_v_part.push_back(id_v_part);
       
       if(g4_trackid_v_shr.size() == 0)
 	std::cout << "No track IDs found for backtracker !!!" << std::endl;
       
       else{
 	
-	try { _BTAlgShower.BuildMap(g4_trackid_v_shr, *ev_simch, *ev_hit, hit_ass_set); }
+	try { _BTAlgShower.BuildMap(g4_trackid_v_shr, *ev_simch, *ev_hit, ass_clus_hit_v); }
 	catch(...) { std::cout << "\n Exception at building BTAlg map...\n"; }
-	try { _BTAlgPart.BuildMap(g4_trackid_v_part, *ev_simch, *ev_hit, hit_ass_set); }
+	try { _BTAlgPart.BuildMap(g4_trackid_v_part, *ev_simch, *ev_hit, ass_clus_hit_v); }
 	catch(...) { std::cout << "\n Exception at building BTAlg map...\n"; }
 	
 	auto btalgoShower = _BTAlgShower.BTAlg();
@@ -228,7 +183,9 @@ namespace larlite {
 	    continue;
 	  
 	  //::btutil::WireRange_t wire_hit(h.Channel(),h.StartTick()+3050,h.EndTick()+3050);
-	  ::btutil::WireRange_t wire_hit(h.Channel(),h.PeakTime()-3*h.RMS()+3050,h.PeakTime()+3*h.RMS()+3050);
+	  //::btutil::WireRange_t wire_hit(h.Channel(),h.PeakTime()-3*h.RMS()+3050,h.PeakTime()+3*h.RMS()+3050);
+	  //::btutil::WireRange_t wire_hit(h.Channel(),h.PeakTime()-3*h.RMS()+2155,h.PeakTime()+3*h.RMS()+2355);
+	  ::btutil::WireRange_t wire_hit(h.Channel(),h.PeakTime()-3*h.RMS()+2398,h.PeakTime()+3*h.RMS()+2398);
 	  
 	  // check if this wire-range has already been used
 	  auto wire_ranges = getUnUsedWireRange(wire_hit);
@@ -239,9 +196,11 @@ namespace larlite {
 	    //if the wire-ranges are empty, continue
 	    if (wire_range.start == wire_range.end)
 	      continue;
-	    
+
+	    /*
 	    if (_debug_mcq)
 	      std::cout << "hit wire : " << h.Channel() << " w/ range [" << wire_range.start << ", " << wire_range.end << "]" << " with integral : " << h.Integral() << std::endl;
+	    */
 	    
 	    // offending malloc if _BTAlg is not class member...
 	    auto partsShower = btalgoShower.MCQ(wire_range);
@@ -256,8 +215,10 @@ namespace larlite {
 	    double michel_part = partsShower.at(0);
 	    double other_part  = partsShower.at(1);
 	    double hit_frac    = michel_part / ( michel_part + other_part );
+	    /*
 	    if (_debug_mcq)
 	      std::cout << "hit " << hit_index << " has " << michel_part+other_part << " and " << hit_frac << " michel contribution..." << std::endl;
+	    */
 	    if (hit_frac > 0.1){
 	      _QMichelShowerMCSimch_shr += michel_part;
 	      _QMichelShowerMCSimch_all += (michel_part+other_part);
@@ -265,30 +226,21 @@ namespace larlite {
 	      _michel_hit_fracMC.push_back(hit_frac);
 	    }
 	    
-	    // if no michel is reconstructed, skip this part
-	    if (reco_michel_exists){
-	      // get the reconstructed michel electron
-	      if (ev_michel and (ev_michel->size() == 1) ){
-		auto michel_cluster = ev_michel->at(0);
-		// get list of hits associated to the michel cluster
-		auto michel_hit_ass_v = ass_michel_hit_v[0];
-		// this list has the indices of the hits associated with the michel
-		for (aut const& h_idx : michel_hit_ass_v){
-		  if (h_idx == hit_index){
-		    if (_debug_mcq)
-		      std::cout << "...this hit is michel" << std::endl;
-		    michel_hits += 1;
-		    auto const& hit = ev_hit->at(h_idx);
-		    _reco_charge += hit.Integral();
-		    _QMichelRecoSimch_all += (michel_part+other_part);
-		    _QMichelRecoSimch_shr += michel_part;
-		    _michel_hit_QtotReco.push_back(michel_part);
-		    _michel_hit_fracReco.push_back(hit_frac);
-		    _michel_hit_idxReco.push_back(h._id);
-		  }// if the index maches
-	      }// for all michel hits
-	      }// if there is a michel cluster reconstructed
-	    }// if a reconstructed michel exists
+	    // this list has the indices of the hits associated with the michel
+	    for (auto const& h_idx : michel_hit_idx_v){
+	      if (h_idx == hit_index){
+		if (_debug_mcq)
+		  std::cout << "...this hit is reconstructed as michel" << std::endl;
+		michel_hits += 1;
+		auto const& hit = ev_hit->at(h_idx);
+		//_reco_charge += hit.Integral();
+		_QMichelRecoSimch_all += (michel_part+other_part);
+		_QMichelRecoSimch_shr += michel_part;
+		_michel_hit_QtotReco.push_back(michel_part);
+		_michel_hit_fracReco.push_back(hit_frac);
+		//_michel_hit_idxReco.push_back(h._id);
+	      }// if the index maches
+	    }// for all michel hits
 	    
 	    // now add charge from michel original electron only
 	    michel_part = partsPart.at(0);
@@ -322,14 +274,11 @@ namespace larlite {
       // How do we really know one of our hits is michel, well it has higher fraction of
       // number of electrons from michel than "not", go ahead and swap for writeout, if this vector
       // is empty in TTree then there was no MC shower
+
+      _mc_tree->Fill();
       
-      
-    } // if we found an mcshower
+    } // for all reco showers
     
-    _mc_tree->Fill();
-
-    */
-
     return true;
   }
 
@@ -414,6 +363,25 @@ namespace larlite {
     }// if there is some overlap
     
     return out_ranges;
+  }
+
+
+  void MichelMCStudy::Reset()
+  {
+    _QMichelRecoSimch_all     = 0.;
+    _QMichelRecoSimch_shr     = 0.;
+    _QMichelPartMCSimch_all   = 0.;
+    _QMichelPartMCSimch_shr   = 0.;
+    _QMichelShowerMCSimch_all = 0.;
+    _QMichelShowerMCSimch_shr = 0.;
+    _michel_hit_fracReco.clear();
+    _michel_hit_QtotReco.clear();
+    _michel_hit_idxReco.clear();
+    _michel_hit_fracMC.clear();
+    _michel_hit_QtotMC.clear();
+    _wiremap.clear();
+
+    return;
   }
 
 
