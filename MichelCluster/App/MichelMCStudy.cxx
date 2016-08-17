@@ -17,6 +17,7 @@ namespace larlite {
   {
     _name="MichelMCStudy";
     _fout=0;
+    _debug_mcq = false;
   }
 
   bool MichelMCStudy::initialize() {
@@ -100,22 +101,23 @@ namespace larlite {
     // grab RECO -> MC matches
     auto const& reco_to_mc_match_v = _MatchTruth.GetRecotoMCMatch();
 
-    std::cout << "found " << reco_to_mc_match_v.size() << " reco'd micheld to match..." << std::endl;
+    //std::cout << "found " << reco_to_mc_match_v.size() << " reco'd micheld to match..." << std::endl;
 
     // loop through matched pairs
     for (auto const& entry : reco_to_mc_match_v){
 
       Reset();
 
-      std::cout << "reco cluster idx " << entry.first << " matched mc shower idx " << entry.second << std::endl;
-
       // grab the cluster
       auto const& clus = ev_michel->at( entry.first );
+
+      // save reconstructed ADC charge
+      _reco_energy = clus.SummedADC();
 
       // grab the hits indices associated to this cluster
       auto const& michel_hit_idx_v = ass_clus_hit_v[ entry.first ];
 
-      std::cout << "index of mcshower matched is : " <<  entry.second << std::endl;
+      //std::cout << "index of mcshower matched is : " <<  entry.second << std::endl;
       
       // grab the mcshower
       auto const& mcs = ev_mcshower->at( entry.second );

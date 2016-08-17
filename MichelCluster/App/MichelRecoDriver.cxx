@@ -191,9 +191,13 @@ namespace larlite {
     if (_save_clusters){
 
       // create michel cluster object
-      auto michel_cluster_v = storage->get_data<event_cluster>("michel");
-      // create association object for clusters
-      auto michel_cluster_ass_v = storage->get_data<event_ass>(michel_cluster_v->name());
+      auto electron_cluster_v = storage->get_data<event_cluster>("electron");
+      auto photon_cluster_v   = storage->get_data<event_cluster>("photon");
+      // create association object for clusters to hits
+      auto electron_cluster_ass_v = storage->get_data<event_ass>(electron_cluster_v->name());
+      auto photon_cluster_ass_v   = storage->get_data<event_ass>(photon_cluster_v->name());
+      // create an association for electron cluster to photon clusters
+      auto electron_photon_ass_v  = storage->get_data<event_ass>("electron");
 
       // set event ID through storage manager
       storage->set_id(storage->get_data<event_cluster>(_producer)->run(),
@@ -201,8 +205,10 @@ namespace larlite {
 		      storage->get_data<event_cluster>(_producer)->event_id()); 
 
       // create a vector where to store the cluster -> hit association
-      std::vector<std::vector<unsigned int> > michel_clus_hit_ass_v; // michel cluster -> hit
-      std::vector<std::vector<unsigned int> > muon_clus_hit_ass_v;   // muon cluster -> hit
+      std::vector<std::vector<unsigned int> > electron_clus_hit_ass_v; // michel cluster -> hit
+      std::vector<std::vector<unsigned int> > photon_clus_hit_ass_v; // michel cluster -> hit
+      // create a vector where to store electron -> photon clusters associations
+      std::vector<std::vector<unsigned int> > electron_photon_clus_ass_v; // electron -> photons
       // we need to loop over the michel hits and add them to new clusters
 
       // get the vector of MichelCluster objects
@@ -211,10 +217,10 @@ namespace larlite {
       for (auto const& michelClus : michels){
 
 	// prepare an empty cluster
-	larlite::cluster clus_michel;
+	larlite::cluster clus_electron;
 	// set start location
-	clus_michel.set_start_wire( michelClus._michel._start._w / w2cm, 0. );
-	clus_michel.set_start_tick( michelClus._michel._start._t / t2cm, 0. );
+	clus_electron.set_start_wire( michelClus._michel._start._w / w2cm, 0. );
+	clus_electron.set_start_tick( michelClus._michel._start._t / t2cm, 0. );
 
 	// get the hits (in "michel" notation) for this cluster
 	auto const& michel = michelClus._michel; // this is a vector of HitPt
@@ -225,31 +231,49 @@ namespace larlite {
 	// we basically need to create an association between the cluster
 	// and all the hits in this michel
 
-	// empty vector where to store hits associated for this specific michel cluster
-	std::vector<unsigned int> michel_clus_hits;
+	// empty vector where to store hits associated for this specific electron cluster
+	std::vector<unsigned int> electron_clus_hits;
+
+	// empty vector where to store photon cluster indices associated to the electron cluster
+	std::vector<unsigned int> electron_photon_ass;
 
 	// save michel hits
+
 	// 1st electron hits
 	double Qelec = 0;
 	for (auto const& michel_elec_hit_idx : michel._electron_hit_idx_v){
-	  michel_clus_hits.push_back( michel[ michel_elec_hit_idx ]._id );
+	  electron_clus_hits.push_back( michel[ michel_elec_hit_idx ]._id );
 	  Qelec += michel[ michel_elec_hit_idx ]._q;
 	}
-	clus_michel.set_summedADC( Qelec, 0, 0);
+	clus_electron.set_summedADC( Qelec, 0, 0);
+	electron_clus_hit_ass_v.push_back(electron_clus_hits);
+	electron_cluster_v->push_back(clus_electron);
+
 	// 2nd the various photons
 	for (auto const& photon_hit_v : michel._photon_clus_v){
-	  for (auto const& photon_hit_idx : photon_hit_v)
-	    michel_clus_hits.push_back( michel[ photon_hit_idx ]._id );
+	  // empty vector where to store hits associated for this specific photon cluster
+	  std::vector<unsigned int> photon_clus_hits;
+	  larlite::cluster clus_photon;
+	  // charge for this photon
+	  double Qphoton =  0;
+	  for (auto const& photon_hit_idx : photon_hit_v){
+	    photon_clus_hits.push_back( michel[ photon_hit_idx ]._id );
+	    Qphoton += michel[ photon_hit_idx ]._q;
+	  }
+	  clus_photon.set_summedADC( Qelec, 0, 0);
+	  photon_clus_hit_ass_v.push_back( photon_clus_hits );
+	  photon_cluster_v->push_back(clus_photon);
+	  electron_photon_ass.push_back( photon_cluster_v->size() - 1);
 	}
-	michel_clus_hit_ass_v.push_back(michel_clus_hits);
 
-	// store michel cluster
-	michel_cluster_v->push_back(clus_michel);
+	electron_photon_clus_ass_v.push_back( electron_photon_ass );
 	
       }// loop over all found michels
       
       // now save the association information
-      michel_cluster_ass_v->set_association(michel_cluster_v->id(),product_id(data::kHit,ev_hit->name()),michel_clus_hit_ass_v);
+      electron_cluster_ass_v -> set_association( electron_cluster_v->id(), product_id(data::kHit,ev_hit->name()),               electron_clus_hit_ass_v    );
+      photon_cluster_ass_v   -> set_association( photon_cluster_v->id(),   product_id(data::kHit,ev_hit->name()),               photon_clus_hit_ass_v      );
+      electron_photon_ass_v  -> set_association( electron_cluster_v->id(), product_id(data::kCluster,photon_cluster_v->name()), electron_photon_clus_ass_v );
       
     }// if we should save cluster
 

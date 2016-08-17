@@ -19,7 +19,7 @@
 #pragma link C++ class larlite::FilterMichels+;
 #pragma link C++ class larlite::NeutrinoFilter+;
 #pragma link C++ class larlite::RecoEffStudy+;
-#pragma link C++ class MatchTruth+;
+#pragma link C++ class larlite::MatchTruth+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

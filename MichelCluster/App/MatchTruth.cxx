@@ -10,7 +10,7 @@ namespace larlite{
 
   MatchTruth::MatchTruth()
   {
-    _debug = true;
+    _debug = false;
   }
 
   void MatchTruth::Match(const larlite::event_mcshower* ev_mcshower,
@@ -99,9 +99,11 @@ namespace larlite{
       
     }// for all mcshowers
 
+    /*
     std::cout << "what michels did we find?" << std::endl;
     for (size_t i=0; i < _mc_michel_idx_v.size(); i++)
       std::cout << "\tindex " << _mc_michel_idx_v[i] << std::endl;
+    */
 
 
     //  save information on reconstructed michels
@@ -193,10 +195,12 @@ namespace larlite{
 	if (_debug) std::cout << "no close matching michel found -> don't add" << std::endl;
 	continue;
       }
-
+      
+      /*
       std::cout << "what michels did we find?" << std::endl;
       for (size_t k=0; k < _mc_michel_idx_v.size(); k++)
 	std::cout << "\tindex " << _mc_michel_idx_v[k] << std::endl;
+      */
       
       // save this index
       if (_debug)

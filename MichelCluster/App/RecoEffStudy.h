@@ -59,8 +59,12 @@ namespace larlite {
     void SetFillPerMC(bool on) { _all_mc = on; }
     
     void SetGoodMatchDistance(double d) { _distance = d; }
+    
+    void SetMCShowerProducer(std::string s) { _mcshower_producer = s; }
 
   protected:
+
+    std::string _mcshower_producer;
 
     // function to get true best matched pair
     std::pair<bool, int> findBestMatch(const std::pair<double,double>& coordinates,

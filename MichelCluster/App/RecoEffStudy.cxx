@@ -19,6 +19,7 @@ namespace larlite {
   {
     _debug  = false;
     _name   = "RecoEffStudy";
+    _mcshower_producer = "";
     _all_mc = true;
     _fout   = 0;
     _distance = 5;
@@ -139,7 +140,7 @@ namespace larlite {
     _muon_michel_idx_map.clear();
 
     // load MCShower / MCTracks
-    auto ev_mcshower = storage->get_data<event_mcshower>("mcreco2");
+    auto ev_mcshower = storage->get_data<event_mcshower>(_mcshower_producer);
     auto ev_mctrack  = storage->get_data<event_mctrack>("mcreco");
 
     // load Michel clusters
