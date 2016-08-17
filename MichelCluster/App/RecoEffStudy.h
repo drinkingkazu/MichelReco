@@ -20,6 +20,8 @@
 #include "DataFormat/mcshower.h"
 #include "DataFormat/mctrack.h"
 
+#include "MatchTruth.h"
+
 #include "TTree.h"
 
 #include <map>
@@ -56,13 +58,13 @@ namespace larlite {
 
     void SetDebug(bool on) { _debug = on; }
     
-    void SetFillPerMC(bool on) { _all_mc = on; }
-    
     void SetGoodMatchDistance(double d) { _distance = d; }
     
     void SetMCShowerProducer(std::string s) { _mcshower_producer = s; }
 
   protected:
+
+    MatchTruth _MatchTruth;
 
     std::string _mcshower_producer;
 
@@ -91,6 +93,11 @@ namespace larlite {
     std::vector< std::pair<double,double> > _rc_michel_start_v;
     // vector containing ADC charge from electron-part only
     std::vector< double > _rc_michel_elecQ_v;
+    // vector containing ADC charge for various photons
+    std::vector< std::vector< double> > _rc_michel_photonQ_v;
+    // vector containing X/Z coordinate of electron segments
+    std::vector< std::vector< double > > _rc_elec_w_coord_v;
+    std::vector< std::vector< double > > _rc_elec_t_coord_v;
     // map linking _michel_start_v idx to [mu idx, michel idx];
     std::map<int, std::pair<int,int> > _muon_michel_idx_map;
 
@@ -101,6 +108,10 @@ namespace larlite {
     double _mc_tick, _rc_tick;
     double _mc_tick_muon;
     double _rc_ADCq_elec, _rc_ADCq_tot;
+
+    std::vector<double> _photon_q_v;
+    std::vector<double> _electron_w_v;
+    std::vector<double> _electron_t_v;
 
     double _trig_time;
 
@@ -122,9 +133,6 @@ namespace larlite {
     // debug mode?
     bool _debug;
     
-    // fill one entry per MC michel or not?
-    bool _all_mc;
-
     // distance required for a good MC-RECO match
     double _distance;
 

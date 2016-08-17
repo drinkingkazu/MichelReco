@@ -99,13 +99,6 @@ namespace larlite{
       
     }// for all mcshowers
 
-    /*
-    std::cout << "what michels did we find?" << std::endl;
-    for (size_t i=0; i < _mc_michel_idx_v.size(); i++)
-      std::cout << "\tindex " << _mc_michel_idx_v[i] << std::endl;
-    */
-
-
     //  save information on reconstructed michels
     if (ev_cluster){
       for (size_t i=0; i < ev_cluster->size(); i++){

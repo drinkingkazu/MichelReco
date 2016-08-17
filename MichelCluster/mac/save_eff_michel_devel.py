@@ -75,22 +75,22 @@ my_unit.FilterEvents(False)
 my_proc.add_process(my_unit)
 
 filterMichels = fmwk.FilterMichels()
-filterMichels.SetProducer("michel")
+filterMichels.SetProducer("electron")
 my_proc.add_process(filterMichels)
 
 reco = fmwk.RecoEffStudy()
-reco.SetDebug(False)
-reco.SetFillPerMC(False)
+reco.SetDebug(True)
 reco.SetGoodMatchDistance(30)
+reco.SetMCShowerProducer("mcreco")
 my_proc.add_process(reco)
 
 my_proc.enable_filter(False)
 
 
 #my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
-my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
+#my_proc.set_data_to_write(fmwk.data.kCluster,'michel')
 #my_proc.set_data_to_write(fmwk.data.kCluster,'rawclusters')
-my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
+#my_proc.set_data_to_write(fmwk.data.kAssociation,'michel')
 #my_proc.set_data_to_write(fmwk.data.kAssociation,'rawclusters')
 
 

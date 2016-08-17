@@ -3,7 +3,6 @@
 
 #include "RecoEffStudy.h"
 
-
 #include "DataFormat/cluster.h"
 #include "DataFormat/trigger.h"
 #include "DataFormat/hit.h"
@@ -20,7 +19,6 @@ namespace larlite {
     _debug  = false;
     _name   = "RecoEffStudy";
     _mcshower_producer = "";
-    _all_mc = true;
     _fout   = 0;
     _distance = 5;
   }
@@ -41,6 +39,7 @@ namespace larlite {
     if (_tree_rc) delete _tree_rc;
 
     _tree_mc = new TTree("_tree_mc","tree");
+    
     _tree_mc->Branch("_mc_X",&_mc_X,"mc_X/D");
     _tree_mc->Branch("_mc_Y",&_mc_Y,"mc_Y/D");
     _tree_mc->Branch("_mc_Z",&_mc_Z,"mc_Z/D");
@@ -52,6 +51,11 @@ namespace larlite {
     _tree_mc->Branch("_rc_tick",&_rc_tick,"rc_tick/D");
     _tree_mc->Branch("_rc_ADCq_elec",&_rc_ADCq_elec,"rc_ADCq_elec/D");
     _tree_mc->Branch("_rc_ADCq_tot",&_rc_ADCq_tot,"rc_ADCq_tot/D");
+
+    // some reconstructed information on hits
+    _tree_mc->Branch("_photon_q_v", "std::vector<double>", &_photon_q_v);
+    _tree_mc->Branch("_electron_w_v", "std::vector<double>", &_electron_w_v);
+    _tree_mc->Branch("_electron_t_v", "std::vector<double>", &_electron_t_v);
 
     _tree_mc->Branch("_mc_muon_E",&_mc_muon_E,"mc_muon_E/D");
     _tree_mc->Branch("_mc_muon_px",&_mc_muon_px,"mc_muon_px/D");
@@ -100,6 +104,11 @@ namespace larlite {
     _tree_rc->Branch("_rc_ADCq_elec",&_rc_ADCq_elec,"rc_ADCq_elec/D");
     _tree_rc->Branch("_rc_ADCq_tot",&_rc_ADCq_tot,"rc_ADCq_tot/D");
 
+    // some reconstructed information on hits
+    _tree_rc->Branch("_photon_q_v", "std::vector<double>", &_photon_q_v);
+    _tree_rc->Branch("_electron_w_v", "std::vector<double>", &_electron_w_v);
+    _tree_rc->Branch("_electron_t_v", "std::vector<double>", &_electron_t_v);
+
     _tree_rc->Branch("_mc_muon_E",&_mc_muon_E,"mc_muon_E/D");
     _tree_rc->Branch("_mc_muon_px",&_mc_muon_px,"mc_muon_px/D");
     _tree_rc->Branch("_mc_muon_py",&_mc_muon_py,"mc_muon_py/D");
@@ -114,7 +123,6 @@ namespace larlite {
 
     _tree_rc->Branch("_mc_muon_decay_T",&_mc_muon_decay_T,"mc_muon_decay_T/D");
     _tree_rc->Branch("_mc_michel_creation_T",&_mc_michel_creation_T,"mc_michel_creation_T/D");
-
 
     _tree_rc->Branch("_rc_michel_E",&_rc_michel_E,"rc_michel_E/D");
 
@@ -137,22 +145,31 @@ namespace larlite {
     _mc_michel_start_v.clear();
     _rc_michel_start_v.clear();
     _rc_michel_elecQ_v.clear();
+    _rc_michel_photonQ_v.clear();
+
+    
     _muon_michel_idx_map.clear();
 
     // load MCShower / MCTracks
     auto ev_mcshower = storage->get_data<event_mcshower>(_mcshower_producer);
     auto ev_mctrack  = storage->get_data<event_mctrack>("mcreco");
 
-    // load Michel clusters
-    auto ev_cluster  = storage->get_data<event_cluster>("michel");
+    // load electron clusters
+    auto ev_electron  = storage->get_data<event_cluster>("electron");
+    // load photon clusters associated to electrons
+    larlite::event_cluster *ev_photon = nullptr;
+    auto const& photon_ass_set = storage->find_one_ass(ev_electron->id(), ev_photon, ev_electron->name());
 
-    // load hits associated to Michels
-    larlite::event_hit *ev_hit = nullptr;
-    auto const& hit_ass_set = storage->find_one_ass(ev_cluster->id(), ev_hit, ev_cluster->name());
+    // load hits associated to electrons
+    larlite::event_hit *ev_electron_hit = nullptr;
+    auto const& electron_hit_ass_set = storage->find_one_ass(ev_electron->id(), ev_electron_hit, ev_electron->name());
+    // load hits associated to photons
+    larlite::event_hit *ev_photon_hit = nullptr;
+    auto const& photon_hit_ass_set = storage->find_one_ass(ev_photon->id(), ev_photon_hit, ev_photon->name());
 
     if (_debug)
-      std::cout << std::endl << "found " << ev_cluster->size() << " michels" << std::endl;
-    
+      std::cout << std::endl << "found " << ev_electron->size() << " michels" << std::endl;
+
     // build ID -> position map for MCTracks
     for (size_t i=0; i < ev_mctrack->size(); i++)
       _trackIDMap[ ev_mctrack->at(i).TrackID() ] = i;
@@ -227,10 +244,42 @@ namespace larlite {
     }// for all mcshowers
 
     //  save information on reconstructed michels
-    if (ev_cluster){
-      for (auto const& clus : *ev_cluster){
-	_rc_michel_start_v.push_back( std::make_pair( (double)clus.StartWire(), clus.StartTick() ) );
-	_rc_michel_elecQ_v.push_back( clus.SummedADC() );
+    if (ev_electron){
+      for (size_t i=0; i < ev_electron->size(); i++){
+	auto const& elec_clus = ev_electron->at(i);
+	//std::cout << "electron charge is : " << elec_clus.SummedADC() << std::endl;
+	// get information on all hits, electron and photon, associated to this michel
+	// 1) electron hits
+	auto const& associated_electron_hit_idx_v = electron_hit_ass_set[ i ];
+	std::vector<double> elec_t_v;
+	std::vector<double> elec_w_v;
+	for (auto const& elec_hit_idx : associated_electron_hit_idx_v){
+	  auto const& hit = ev_electron_hit->at( elec_hit_idx );
+	  elec_t_v.push_back( hit.PeakTime() );
+	  elec_w_v.push_back( hit.WireID().Wire );
+	}
+	//std::cout << "there are " << elec_w_v.size() << " electron hits" << std::endl;
+	_rc_elec_w_coord_v.push_back ( elec_w_v );
+	_rc_elec_t_coord_v.push_back ( elec_t_v );
+	// 2) photon clusters
+	auto const& associated_photon_clus_idx_v = photon_ass_set[ i ];
+	// 3) photon hits
+	std::vector< double > photonQ_v;
+	for (auto const& photon_clus_idx : associated_photon_clus_idx_v){
+	  double Qphoton = 0.;
+	  auto const& photon_hits_idx_v = photon_hit_ass_set[ photon_clus_idx ];
+	  for (auto const& photon_hit_idx : photon_hits_idx_v){
+	    auto const& photon_hit = ev_photon_hit->at( photon_hit_idx);
+	    Qphoton += photon_hit.Integral();
+	  }// for all photon hits in this photon
+	  //std::cout << "\tphoton charge is : " << Qphoton << std::endl;
+	  photonQ_v.push_back( Qphoton );
+	}// for all photon clusters
+	_rc_michel_start_v.push_back( std::make_pair( (double)elec_clus.StartWire(), elec_clus.StartTick() ) );
+	_rc_michel_elecQ_v.push_back( elec_clus.SummedADC() );
+	_rc_michel_photonQ_v.push_back(  photonQ_v );
+	//std::cout << " there are " << photonQ_v.size() << " photons" << std::endl;
+	//_rc_michel_etotQ_v.push_back( Qtot );
       }
     }
 
@@ -278,14 +327,14 @@ namespace larlite {
 	std::cout << "\tget matched reco cluster" << std::endl;
       
       // if we found a good match, start filling info for RECO stuff
-      auto const& matched_michel_cluster = ev_cluster->at( matched.second );
+      auto const& matched_michel_cluster = ev_electron->at( matched.second );
       _rc_wire = (double)matched_michel_cluster.StartWire();
       _rc_tick = matched_michel_cluster.StartTick();
       _rc_ADCq_elec = (double)matched_michel_cluster.SummedADC();
-      auto const& hit_idx_v = hit_ass_set[ matched.second ];
+      auto const& hit_idx_v = electron_hit_ass_set[ matched.second ];
       _rc_ADCq_tot = 0.;
       for (auto const& hit_idx : hit_idx_v)
-	_rc_ADCq_tot += ev_hit->at(hit_idx).Integral();
+	_rc_ADCq_tot += ev_electron_hit->at(hit_idx).Integral();
       
       _matched = 1;
 
@@ -308,14 +357,20 @@ namespace larlite {
       // find best match from Reco'd michels
       auto const& matched = findBestMatch( _rc_michel_start_v[i], _mc_michel_start_v);
       
-      _rc_tick = (double)_rc_michel_start_v[i].second;
-      _rc_wire = (double)_rc_michel_start_v[i].first;
+      _rc_tick      = (double)_rc_michel_start_v[i].second;
+      _rc_wire      = (double)_rc_michel_start_v[i].first;
       _rc_ADCq_elec = (double)_rc_michel_elecQ_v[i];
+      _photon_q_v   = _rc_michel_photonQ_v[i];
+      //std::cout << "photons? " << _photon_q_v.size() << std::endl;
+      _electron_w_v = _rc_elec_w_coord_v[i];
+      _electron_t_v = _rc_elec_t_coord_v[i];
+	
+      //std::cout << "elec Q = " << _rc_michel_elecQ_v[i] << std::endl;
       
-      auto const& hit_idx_v = hit_ass_set[ i ];
+      auto const& hit_idx_v = electron_hit_ass_set[ i ];
       _rc_ADCq_tot = 0.;
       for (auto const& hit_idx : hit_idx_v)
-	_rc_ADCq_tot += ev_hit->at(hit_idx).Integral();
+	_rc_ADCq_tot += ev_electron_hit->at(hit_idx).Integral();
       
       if (matched.second < 0){
 	_tree_rc->Fill();
@@ -370,6 +425,8 @@ namespace larlite {
       
       double d = coordinates.first - coord_v[i].first;
       d *= d;
+
+      //std::cout << "distance is " << d << std::endl;
       
       if (d < d_min){
 	idx = i;
@@ -454,6 +511,10 @@ namespace larlite {
 
   void RecoEffStudy::ResetTTree()
   {
+
+    _photon_q_v.clear();
+    _electron_w_v.clear();
+    _electron_t_v.clear();
 
     _mc_X = _mc_Y = _mc_Z = _mc_T = -1;
     _mc_wire = _rc_wire = _mc_tick = _rc_tick = -1000;//kINVALID_DOUBLE;
