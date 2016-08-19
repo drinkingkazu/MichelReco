@@ -103,6 +103,9 @@ namespace larlite {
 
     TTree *_tree_mc;
     TTree *_tree_rc;
+
+    int _event, _subrun, _run;
+
     double _mc_X, _mc_Y, _mc_Z, _mc_T;
     double _mc_wire, _rc_wire;
     double _mc_tick, _rc_tick;

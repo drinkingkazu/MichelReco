@@ -45,6 +45,8 @@ namespace larlite {
     /// set debugger for mcq
     void SetDebugMCQ(bool on) { _debug_mcq = on; }
 
+    void SetFillHitTree(bool on) { _fill_hit_tree = on; }
+
   protected:
 
     MatchTruth _MatchTruth;
@@ -53,6 +55,9 @@ namespace larlite {
 
     /// boolean -> debug mc charge collection info
     bool _debug_mcq;
+
+    /// boool -> fill hit by hit tree
+    bool _fill_hit_tree;
 
     // btalg instance for the entire Michel shower
     ::btutil::MCMatchAlg _BTAlgShower;

@@ -18,6 +18,7 @@ namespace larlite {
     _name="MichelMCStudy";
     _fout=0;
     _debug_mcq = false;
+    _fill_hit_tree = false;
   }
 
   bool MichelMCStudy::initialize() {
@@ -73,8 +74,8 @@ namespace larlite {
   
   bool MichelMCStudy::analyze(storage_manager* storage) {
 
-    auto ev_michel   = storage->get_data<event_cluster> ( "michel"   );  
-    auto ev_mcshower = storage->get_data<event_mcshower>( "mcreco"   );  
+    auto ev_electron = storage->get_data<event_cluster> ( "electron" );  
+    auto ev_mcshower = storage->get_data<event_mcshower>( "mcreco2"  );  
     auto ev_mctrack  = storage->get_data<event_mctrack> ( "mcreco"   );
     auto ev_simch    = storage->get_data<event_simch>   ( "largeant" );
 
@@ -83,12 +84,31 @@ namespace larlite {
     _run    = storage->run_id();
 
     // are there saved Michels? if no quit
-    if (!ev_michel or (ev_michel->size() == 0) )
+    if (!ev_electron or (ev_electron->size() == 0) )
       return false;
-    
-    // get hits associated with michel clusters
-    larlite::event_hit *ev_hit = nullptr;
-    auto const& ass_clus_hit_v = storage->find_one_ass(ev_michel->id(), ev_hit, ev_michel->name());
+
+    // are there saved MC showers? if no quit
+    if (!ev_mcshower or (ev_mcshower->size() == 0) ){
+      std::cout << "No MCShower for module " << _name << " -> quit " << std::endl;
+      return false;
+    }
+
+    // are there saved MC tracks? if no quit
+    if (!ev_mctrack or (ev_mctrack->size() == 0) ){
+      std::cout << "No MCTrack for module " << _name << " -> quit " << std::endl;
+      return false;
+    }
+
+    // load photon clusters associated to electrons
+    larlite::event_cluster *ev_photon = nullptr;
+    auto const& ass_photon_clus_v = storage->find_one_ass(ev_electron->id(), ev_photon, ev_electron->name());
+
+    // get hits associated with electron clusters
+    larlite::event_hit *ev_electron_hit = nullptr;
+    auto const& ass_clus_electron_hit_v = storage->find_one_ass(ev_electron->id(), ev_electron_hit, ev_electron->name());
+    // get hits associated with photon clusters
+    larlite::event_hit *ev_photon_hit = nullptr;
+    auto const& ass_clus_photon_hit_v = storage->find_one_ass(ev_photon->id(), ev_photon_hit, ev_photon->name());
 
     bool shower_exists = false;
     
@@ -96,7 +116,7 @@ namespace larlite {
     _mc_energy = -1;
 
     // match the RECO michels to MC
-    _MatchTruth.Match(ev_mcshower, ev_mctrack, ev_michel);
+    _MatchTruth.Match(ev_mcshower, ev_mctrack, ev_electron);
 
     // grab RECO -> MC matches
     auto const& reco_to_mc_match_v = _MatchTruth.GetRecotoMCMatch();
@@ -109,16 +129,26 @@ namespace larlite {
       Reset();
 
       // grab the cluster
-      auto const& clus = ev_michel->at( entry.first );
+      auto const& clus = ev_electron->at( entry.first );
 
       // save reconstructed ADC charge
       _reco_energy = clus.SummedADC();
 
-      // grab the hits indices associated to this cluster
-      auto const& michel_hit_idx_v = ass_clus_hit_v[ entry.first ];
+      // make a vector in which to store all hit indices associated to michel [e- and gamma]
+      std::vector<unsigned int> all_michel_hit_idx_v;
+      // grab the hits indices associated to the electron
+      auto const& electron_hit_idx_v = ass_clus_electron_hit_v[ entry.first ];
+      for (auto const& hit_idx : electron_hit_idx_v)
+	all_michel_hit_idx_v.push_back( hit_idx );
+      // grab the photons associated to the electron
+      auto const& photon_clus_idx_v  = ass_photon_clus_v[ entry.first ];
+      // grab the hits indices associated to the photons
+      for (auto const& clus_idx : photon_clus_idx_v){
+	auto const& photon_hit_idx_v = ass_clus_photon_hit_v[ clus_idx ];
+	for (auto const& hit_idx : photon_hit_idx_v)
+	  all_michel_hit_idx_v.push_back( hit_idx );
+      }// for all photon clusters
 
-      //std::cout << "index of mcshower matched is : " <<  entry.second << std::endl;
-      
       // grab the mcshower
       auto const& mcs = ev_mcshower->at( entry.second );
       
@@ -163,9 +193,9 @@ namespace larlite {
       
       else{
 	
-	try { _BTAlgShower.BuildMap(g4_trackid_v_shr, *ev_simch, *ev_hit, ass_clus_hit_v); }
+	try { _BTAlgShower.BuildMap(g4_trackid_v_shr, *ev_simch, *ev_electron_hit, ass_clus_electron_hit_v); }
 	catch(...) { std::cout << "\n Exception at building BTAlg map...\n"; }
-	try { _BTAlgPart.BuildMap(g4_trackid_v_part, *ev_simch, *ev_hit, ass_clus_hit_v); }
+	try { _BTAlgPart.BuildMap(g4_trackid_v_part, *ev_simch, *ev_electron_hit, ass_clus_electron_hit_v); }
 	catch(...) { std::cout << "\n Exception at building BTAlg map...\n"; }
 	
 	auto btalgoShower = _BTAlgShower.BTAlg();
@@ -177,9 +207,9 @@ namespace larlite {
 	// hits used for michel
 	int michel_hits = 0;
 	
-	for (size_t hit_index = 0; hit_index < ev_hit->size(); hit_index++){
+	for (size_t hit_index = 0; hit_index < ev_electron_hit->size(); hit_index++){
 	  
-	  const auto& h = ev_hit->at(hit_index);
+	  const auto& h = ev_electron_hit->at(hit_index);
 	  
 	  if(h.WireID().Plane != 2)
 	    continue;
@@ -199,10 +229,8 @@ namespace larlite {
 	    if (wire_range.start == wire_range.end)
 	      continue;
 
-	    /*
 	    if (_debug_mcq)
 	      std::cout << "hit wire : " << h.Channel() << " w/ range [" << wire_range.start << ", " << wire_range.end << "]" << " with integral : " << h.Integral() << std::endl;
-	    */
 	    
 	    // offending malloc if _BTAlg is not class member...
 	    auto partsShower = btalgoShower.MCQ(wire_range);
@@ -211,16 +239,17 @@ namespace larlite {
 	    // calculate hit MC information
 	    _hit_integral = h.Integral();
 	    _hit_mc_q     = partsShower.at(0)+partsShower.at(1);
-	    _mc_hit_tree->Fill();
+	    if (_fill_hit_tree)
+	      _mc_hit_tree->Fill();
 	    
 	    
 	    double michel_part = partsShower.at(0);
 	    double other_part  = partsShower.at(1);
 	    double hit_frac    = michel_part / ( michel_part + other_part );
-	    /*
+
 	    if (_debug_mcq)
 	      std::cout << "hit " << hit_index << " has " << michel_part+other_part << " and " << hit_frac << " michel contribution..." << std::endl;
-	    */
+
 	    if (hit_frac > 0.1){
 	      _QMichelShowerMCSimch_shr += michel_part;
 	      _QMichelShowerMCSimch_all += (michel_part+other_part);
@@ -229,12 +258,12 @@ namespace larlite {
 	    }
 	    
 	    // this list has the indices of the hits associated with the michel
-	    for (auto const& h_idx : michel_hit_idx_v){
+	    for (auto const& h_idx : all_michel_hit_idx_v){
 	      if (h_idx == hit_index){
 		if (_debug_mcq)
 		  std::cout << "...this hit is reconstructed as michel" << std::endl;
 		michel_hits += 1;
-		auto const& hit = ev_hit->at(h_idx);
+		auto const& hit = ev_electron_hit->at(h_idx);
 		//_reco_charge += hit.Integral();
 		_QMichelRecoSimch_all += (michel_part+other_part);
 		_QMichelRecoSimch_shr += michel_part;

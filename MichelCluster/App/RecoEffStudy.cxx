@@ -39,6 +39,10 @@ namespace larlite {
     if (_tree_rc) delete _tree_rc;
 
     _tree_mc = new TTree("_tree_mc","tree");
+
+    _tree_mc->Branch("_event",&_event,"event/I");
+    _tree_mc->Branch("_run",&_run,"run/I");
+    _tree_mc->Branch("_subrun",&_subrun,"subrun/I");
     
     _tree_mc->Branch("_mc_X",&_mc_X,"mc_X/D");
     _tree_mc->Branch("_mc_Y",&_mc_Y,"mc_Y/D");
@@ -69,13 +73,6 @@ namespace larlite {
     _tree_mc->Branch("_mc_michel_py",&_mc_michel_py,"mc_michel_py/D");
     _tree_mc->Branch("_mc_michel_pz",&_mc_michel_pz,"mc_michel_pz/D");
 
-    _tree_mc->Branch("_mc_michel_E_true",&_mc_michel_E_true,"mc_michel_E_true/D");
-    _tree_mc->Branch("_mc_michel_E_edep",&_mc_michel_E_edep,"mc_michel_E_edep/D");
-    _tree_mc->Branch("_mc_michel_E_elec",&_mc_michel_E_elec,"mc_michel_E_elec/D");
-    _tree_mc->Branch("_mc_michel_px",&_mc_michel_px,"mc_michel_px/D");
-    _tree_mc->Branch("_mc_michel_py",&_mc_michel_py,"mc_michel_py/D");
-    _tree_mc->Branch("_mc_michel_pz",&_mc_michel_pz,"mc_michel_pz/D");
-
     _tree_mc->Branch("_mc_muon_decay_T",&_mc_muon_decay_T,"mc_muon_decay_T/D");
     _tree_mc->Branch("_mc_michel_creation_T",&_mc_michel_creation_T,"mc_michel_creation_T/D");
 
@@ -92,6 +89,11 @@ namespace larlite {
 
     // tree to be filled for every reco michel
     _tree_rc = new TTree("_tree_rc","tree");
+
+    _tree_rc->Branch("_event",&_event,"event/I");
+    _tree_rc->Branch("_run",&_run,"run/I");
+    _tree_rc->Branch("_subrun",&_subrun,"subrun/I");
+
     _tree_rc->Branch("_mc_X",&_mc_X,"mc_X/D");
     _tree_rc->Branch("_mc_Y",&_mc_Y,"mc_Y/D");
     _tree_rc->Branch("_mc_Z",&_mc_Z,"mc_Z/D");
@@ -146,8 +148,9 @@ namespace larlite {
     _rc_michel_start_v.clear();
     _rc_michel_elecQ_v.clear();
     _rc_michel_photonQ_v.clear();
+    _rc_elec_w_coord_v.clear();
+    _rc_elec_t_coord_v.clear();
 
-    
     _muon_michel_idx_map.clear();
 
     // load MCShower / MCTracks
@@ -170,6 +173,10 @@ namespace larlite {
     if (_debug)
       std::cout << std::endl << "found " << ev_electron->size() << " michels" << std::endl;
 
+    _event  = storage->event_id();
+    _subrun = storage->subrun_id();
+    _run    = storage->run_id();
+
     // build ID -> position map for MCTracks
     for (size_t i=0; i < ev_mctrack->size(); i++)
       _trackIDMap[ ev_mctrack->at(i).TrackID() ] = i;
@@ -182,6 +189,10 @@ namespace larlite {
       if ( (mcsh.Process() != "Decay") and (mcsh.Process() != "muMinusCaptureAtRest") )
 	continue;
 
+      auto const& e_strt = mcsh.Start();
+
+      /*
+
       if (mcsh.PdgCode() == 22)
 	continue;
       
@@ -189,7 +200,7 @@ namespace larlite {
       if ( (mcsh.MotherPdgCode() != 13) and (mcsh.MotherPdgCode() != -13) )
 	continue;
       
-      auto const& e_strt = mcsh.Start();
+ 
 
       if (e_strt.E() < 1)
 	continue;
@@ -211,6 +222,8 @@ namespace larlite {
       if ( muon.at(muon.size() - 2).E() > 106)
 	continue;
 
+      */
+
       if (_debug)
 	std::cout << "Found a true michel w/ energy " << e_strt.E()
 		  << " and process " << mcsh.Process()
@@ -222,11 +235,11 @@ namespace larlite {
       double start_t = e_strt.X() / _t2cm;
       // account for offset in trigger [T0]
       // get time in us and get distance w/ drift-velocity
-      start_t += ( e_strt.T() / 1000.) * _driftVel / _t2cm + 800;
+      start_t += ( e_strt.T() / 1000.) * _driftVel / _t2cm + 806;
 
       // if start tick out of truncated waveform bounds -> don't include
-      if ( (start_t < 0) or (start_t > 6300) )
-	   continue;
+      //if ( (start_t < 0) or (start_t > 6300) )
+      //	   continue;
 
       if (_debug)
 	std::cout << "Found Michel starting @ [X,Z,T] -> [" << _mc_X << ", " << _mc_Z
@@ -361,17 +374,12 @@ namespace larlite {
       _rc_wire      = (double)_rc_michel_start_v[i].first;
       _rc_ADCq_elec = (double)_rc_michel_elecQ_v[i];
       _photon_q_v   = _rc_michel_photonQ_v[i];
-      //std::cout << "photons? " << _photon_q_v.size() << std::endl;
       _electron_w_v = _rc_elec_w_coord_v[i];
       _electron_t_v = _rc_elec_t_coord_v[i];
-	
-      //std::cout << "elec Q = " << _rc_michel_elecQ_v[i] << std::endl;
-      
-      auto const& hit_idx_v = electron_hit_ass_set[ i ];
-      _rc_ADCq_tot = 0.;
-      for (auto const& hit_idx : hit_idx_v)
-	_rc_ADCq_tot += ev_electron_hit->at(hit_idx).Integral();
-      
+      _rc_ADCq_tot = _rc_ADCq_elec;
+      for (auto const& photonQ : _photon_q_v)
+	_rc_ADCq_tot += photonQ;
+
       if (matched.second < 0){
 	_tree_rc->Fill();
 	continue;
@@ -423,10 +431,9 @@ namespace larlite {
     
     for (size_t i=0; i < coord_v.size(); i++){
       
-      double d = coordinates.first - coord_v[i].first;
-      d *= d;
-
-      //std::cout << "distance is " << d << std::endl;
+      double d_wire = coordinates.first - coord_v[i].first;
+      double d_tick = coordinates.second - coord_v[i].second;
+      double d = d_wire * d_wire * _w2cm * _w2cm + d_tick * d_tick * _t2cm * _t2cm;
       
       if (d < d_min){
 	idx = i;
