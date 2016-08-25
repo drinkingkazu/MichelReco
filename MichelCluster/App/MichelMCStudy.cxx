@@ -42,27 +42,28 @@ namespace larlite {
     _mc_tree->Branch("_mc_py", &_mc_py, "mc_py/D");
     _mc_tree->Branch("_mc_pz", &_mc_pz, "mc_pz/D");
     _mc_tree->Branch("_mc_yplane_angle",&_mc_yplane_angle,"mc_yplane_angle/D");
-    // muon MC information
-    _mc_tree->Branch("_mu_x",  &_mu_x,  "mu_x/D" );
-    _mc_tree->Branch("_mu_y",  &_mu_y,  "mu_y/D" );
-    _mc_tree->Branch("_mu_z",  &_mu_z,  "mu_z/D" );
-    _mc_tree->Branch("_mu_px", &_mu_px, "mu_px/D");
-    _mc_tree->Branch("_mu_py", &_mu_py, "mu_py/D");
-    _mc_tree->Branch("_mu_pz", &_mu_pz, "mu_pz/D");
-    _mc_tree->Branch("_mu_yplane_angle",&_mu_yplane_angle,"mu_yplane_angle/D");
-    // 3D dot product between michel and muon direction
-    _mc_tree->Branch("_mu_michel_3dangle",&_mu_michel_3dangle,"mu_michel_3dangle/D");
     // Reconstructed energy & Simch stuff
-    _mc_tree->Branch("_mc_energy"      , &_mc_energy           , "mc_energy/D");
+    _mc_tree->Branch("_mc_energy"      , &_mc_energy           , "mc_energy/D" );
+    _mc_tree->Branch("_mc_detprof"     , &_mc_detprof          , "mc_detprof/D");
     _mc_tree->Branch("_reco_energy"    , &_reco_energy         , "reco_energy/D");
+    // hit by hit simchannel and ADC information [all michel hits]
     _mc_tree->Branch("_michel_hit_fracReco", "std::vector<double>" , &_michel_hit_fracReco);
     _mc_tree->Branch("_michel_hit_QtotReco", "std::vector<double>" , &_michel_hit_QtotReco);
-    //_mc_tree->Branch("_michel_hit_idxReco",  "std::vector<double>" , &_michel_hit_idxReco );
+    _mc_tree->Branch("_michel_hit_ADCtotReco", "std::vector<double>" , &_michel_hit_ADCtotReco);
     _mc_tree->Branch("_michel_hit_fracMC", "std::vector<double>" , &_michel_hit_fracMC);
     _mc_tree->Branch("_michel_hit_QtotMC", "std::vector<double>" , &_michel_hit_QtotMC);
+    // hit by hit simchannel and ADC information [electron-only hits]
+    _mc_tree->Branch("_electron_hit_fracReco", "std::vector<double>" , &_electron_hit_fracReco);
+    _mc_tree->Branch("_electron_hit_QtotReco", "std::vector<double>" , &_electron_hit_QtotReco);
+    _mc_tree->Branch("_electron_hit_ADCtotReco", "std::vector<double>" , &_electron_hit_ADCtotReco);
+    _mc_tree->Branch("_electron_hit_fracMC", "std::vector<double>" , &_electron_hit_fracMC);
+    _mc_tree->Branch("_electron_hit_QtotMC", "std::vector<double>" , &_electron_hit_QtotMC);
+
     _mc_tree->Branch("_QMichelMC", &_QMichelMC, "QMichelMC/D");
     _mc_tree->Branch("_QMichelRecoSimch_all", &_QMichelRecoSimch_all, "QMichelRecoSimch_all/D");
     _mc_tree->Branch("_QMichelRecoSimch_shr", &_QMichelRecoSimch_shr, "QMichelRecoSimch_shr/D");
+    _mc_tree->Branch("_QElectronRecoSimch_all", &_QElectronRecoSimch_all, "QElectronRecoSimch_all/D");
+    _mc_tree->Branch("_QElectronRecoSimch_shr", &_QElectronRecoSimch_shr, "QElectronRecoSimch_shr/D");
     _mc_tree->Branch("_QMichelShowerMCSimch_all", &_QMichelShowerMCSimch_all, "QMichelShowerMCSimch_all/D");
     _mc_tree->Branch("_QMichelShowerMCSimch_shr", &_QMichelShowerMCSimch_shr, "QMichelShowerMCSimch_shr/D");
     _mc_tree->Branch("_QMichelPartMCSimch_all", &_QMichelPartMCSimch_all, "QMichelPartMCSimch_all/D");
@@ -110,8 +111,6 @@ namespace larlite {
     larlite::event_hit *ev_photon_hit = nullptr;
     auto const& ass_clus_photon_hit_v = storage->find_one_ass(ev_photon->id(), ev_photon_hit, ev_photon->name());
 
-    bool shower_exists = false;
-    
     _reco_energy = 0;
     _mc_energy = -1;
 
@@ -157,7 +156,8 @@ namespace larlite {
       // use only the Michel particle, ignoring radiated photons
       std::vector<std::vector<unsigned int> > g4_trackid_v_part;
       
-      _mc_energy = mcs.DetProfile().E();
+      _mc_energy  = mcs.Start().E();
+      _mc_detprof = mcs.DetProfile().E();
       _QMichelMC = mcs.Charge(2);
       // calculate lifetime correction
       _mc_x  = mcs.Start().X();
@@ -172,8 +172,6 @@ namespace larlite {
       _mc_pz /= mag;
       // 2D angle on Y plane view (in x-z space)
       _mc_yplane_angle = _mc_pz / sqrt ( _mc_px*_mc_px + _mc_pz*_mc_pz );
-      
-      double energy = mcs.DetProfile().E();
       
       std::vector<unsigned int> id_v;
       id_v.reserve(mcs.DaughterTrackID().size());
@@ -204,9 +202,6 @@ namespace larlite {
 	std::vector<double> hit_frac_michel;
 	std::vector<double> hit_Qtot_michel;
 	
-	// hits used for michel
-	int michel_hits = 0;
-	
 	for (size_t hit_index = 0; hit_index < ev_electron_hit->size(); hit_index++){
 	  
 	  const auto& h = ev_electron_hit->at(hit_index);
@@ -232,16 +227,13 @@ namespace larlite {
 	    if (_debug_mcq)
 	      std::cout << "hit wire : " << h.Channel() << " w/ range [" << wire_range.start << ", " << wire_range.end << "]" << " with integral : " << h.Integral() << std::endl;
 	    
-	    // offending malloc if _BTAlg is not class member...
 	    auto partsShower = btalgoShower.MCQ(wire_range);
-	    auto partsPart   = btalgoPart.MCQ(wire_range);
 	    
 	    // calculate hit MC information
 	    _hit_integral = h.Integral();
 	    _hit_mc_q     = partsShower.at(0)+partsShower.at(1);
 	    if (_fill_hit_tree)
 	      _mc_hit_tree->Fill();
-	    
 	    
 	    double michel_part = partsShower.at(0);
 	    double other_part  = partsShower.at(1);
@@ -262,28 +254,47 @@ namespace larlite {
 	      if (h_idx == hit_index){
 		if (_debug_mcq)
 		  std::cout << "...this hit is reconstructed as michel" << std::endl;
-		michel_hits += 1;
 		auto const& hit = ev_electron_hit->at(h_idx);
 		//_reco_charge += hit.Integral();
 		_QMichelRecoSimch_all += (michel_part+other_part);
 		_QMichelRecoSimch_shr += michel_part;
-		_michel_hit_QtotReco.push_back(michel_part);
+		_michel_hit_ADCtotReco.push_back( hit.Integral() );
+		_michel_hit_QtotReco.push_back(michel_part + other_part);
 		_michel_hit_fracReco.push_back(hit_frac);
 		//_michel_hit_idxReco.push_back(h._id);
 	      }// if the index maches
 	    }// for all michel hits
-	    
+
+	    auto partsPart   = btalgoPart.MCQ(wire_range);
+
 	    // now add charge from michel original electron only
-	    michel_part = partsPart.at(0);
+	    double electron_part = partsPart.at(0);
 	    other_part  = partsPart.at(1);
-	    hit_frac    = michel_part / ( michel_part + other_part );
+	    hit_frac    = electron_part / ( electron_part + other_part );
 	    if (hit_frac > 0.1){
-	      _QMichelPartMCSimch_shr += michel_part;
-	      _QMichelPartMCSimch_all += michel_part + other_part;
+	      _QMichelPartMCSimch_shr += electron_part;
+	      _QMichelPartMCSimch_all += electron_part + other_part;
+	      _electron_hit_QtotMC.push_back(electron_part);
+	      _electron_hit_fracMC.push_back(hit_frac);
 	    }
-	    
-	  } // for all wire-ranges
-	} // for all hits
+
+	    // this list has the indices of the hits associated with the electron
+	    for (auto const& h_idx : electron_hit_idx_v){
+	      if (h_idx == hit_index){
+		if (_debug_mcq)
+		  std::cout << "...this hit is reconstructed as electron" << std::endl;
+		auto const& hit = ev_electron_hit->at(h_idx);
+		//_reco_charge += hit.Integral();
+		_QElectronRecoSimch_all += (electron_part+other_part);
+		_QElectronRecoSimch_shr += electron_part;
+		_electron_hit_ADCtotReco.push_back( hit.Integral() );
+		_electron_hit_QtotReco.push_back(electron_part+other_part);
+		_electron_hit_fracReco.push_back(hit_frac);
+		//_electron_hit_idxReco.push_back(h._id);
+	      }// if the index maches
+	    }// for all electron hits
+	  }// for all wire-ranges
+	}// for all hits
 	
 	_f_RecoHitsQ_fromMichelSimch = _QMichelRecoSimch_shr / _QMichelRecoSimch_all;
 	
@@ -399,17 +410,26 @@ namespace larlite {
 
   void MichelMCStudy::Reset()
   {
-    _QMichelRecoSimch_all     = 0.;
-    _QMichelRecoSimch_shr     = 0.;
-    _QMichelPartMCSimch_all   = 0.;
-    _QMichelPartMCSimch_shr   = 0.;
-    _QMichelShowerMCSimch_all = 0.;
-    _QMichelShowerMCSimch_shr = 0.;
+    _QMichelRecoSimch_all       = 0.;
+    _QMichelRecoSimch_shr       = 0.;
+    _QElectronRecoSimch_all     = 0.;
+    _QElectronRecoSimch_shr     = 0.;
+    _QMichelPartMCSimch_all     = 0.;
+    _QMichelPartMCSimch_shr     = 0.;
+    _QMichelShowerMCSimch_all   = 0.;
+    _QMichelShowerMCSimch_shr   = 0.;
     _michel_hit_fracReco.clear();
     _michel_hit_QtotReco.clear();
+    _michel_hit_ADCtotReco.clear();
     _michel_hit_idxReco.clear();
     _michel_hit_fracMC.clear();
     _michel_hit_QtotMC.clear();
+    _electron_hit_fracReco.clear();
+    _electron_hit_QtotReco.clear();
+    _electron_hit_ADCtotReco.clear();
+    _electron_hit_idxReco.clear();
+    _electron_hit_fracMC.clear();
+    _electron_hit_QtotMC.clear();
     _wiremap.clear();
 
     return;

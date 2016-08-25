@@ -78,28 +78,36 @@ namespace larlite {
     // mc tree
     TTree* _mc_tree;
     // MC information for Michel electron
-    double _mc_energy;
+    double _mc_energy; // Start().E()
+    double _mc_detprof; // DetProfile().E()
     double _mc_x, _mc_y, _mc_z, _mc_px, _mc_py, _mc_pz;
     double _mc_yplane_angle;
     double _mu_energy;
-    double _mu_x, _mu_y, _mu_z, _mu_px, _mu_py, _mu_pz;
-    double _mu_yplane_angle;
-    // muon-michel dot-product
-    double _mu_michel_3dangle;
     // reconstruted energy information
     double _reco_energy;
+    //  hit-by-hit information for all Michel hits
     std::vector<double> _michel_hit_fracReco;
     std::vector<double> _michel_hit_QtotReco;
+    std::vector<double> _michel_hit_ADCtotReco;
     std::vector<int>    _michel_hit_idxReco;
     std::vector<double> _michel_hit_fracMC;
     std::vector<double> _michel_hit_QtotMC;
-    double _QMichelMC;            // michel charge from MCShower Charge() function
-    double _QMichelRecoSimch_all; // sum of Q from hits that have been reco'd as michel (entire hit contribution)
-    double _QMichelRecoSimch_shr; // sum of Q from hits that have been reco'd as michel (only component from Michel IDEs)
-    double _QMichelShowerMCSimch_all; // sum of simch contribution from hits to full MCShower (entire hit contribution)
-    double _QMichelShowerMCSimch_shr; // sum of simch contribution from hits to full MCShower (only component from Michel IDEs)
-    double _QMichelPartMCSimch_all;   // sum of simch contribution from hits to michel part only (entire hit contribution)
-    double _QMichelPartMCSimch_shr;   // sum of simch contribution from hits to michel part only (only component from Michel IDEs)
+    //  hit-by-hit information for e- ionization-only hits
+    std::vector<double> _electron_hit_fracReco;
+    std::vector<double> _electron_hit_QtotReco;
+    std::vector<double> _electron_hit_ADCtotReco;
+    std::vector<int>    _electron_hit_idxReco;
+    std::vector<double> _electron_hit_fracMC;
+    std::vector<double> _electron_hit_QtotMC;
+    double _QMichelMC;                   // michel charge from MCShower Charge() function
+    double _QMichelRecoSimch_all;        // sum of Q from hits that have been reco'd as michel (entire hit contribution)
+    double _QMichelRecoSimch_shr;        // sum of Q from hits that have been reco'd as michel (only component from Michel IDEs)
+    double _QElectronRecoSimch_all;        // sum of Q from hits that have been reco'd as electron (entire hit contribution)
+    double _QElectronRecoSimch_shr;        // sum of Q from hits that have been reco'd as electron (only component from electron IDEs)
+    double _QMichelShowerMCSimch_all;    // sum of simch contribution from hits to full MCShower (entire hit contribution)
+    double _QMichelShowerMCSimch_shr;    // sum of simch contribution from hits to full MCShower (only component from Michel IDEs)
+    double _QMichelPartMCSimch_all;      // sum of simch contribution from hits to michel part only (entire hit contribution)
+    double _QMichelPartMCSimch_shr;      // sum of simch contribution from hits to michel part only (only component from Michel IDEs)
     double _f_RecoHitsQ_fromMichelSimch; // fraction of charge collected in reco'd michel hits actually from michel
     int _run;
     int _subrun;
