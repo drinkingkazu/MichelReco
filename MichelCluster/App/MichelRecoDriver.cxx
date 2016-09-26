@@ -23,7 +23,8 @@ namespace larlite {
     _name="MichelRecoDriver";
     _fout=0;
     _save_clusters=false;
-    _Efield=0.5;
+    _avg_gain = 5.3;
+    _chchgain.clear();
     // FIX ME: currently set only plane 2 reconstruction
     SetPlane(2);
   }
@@ -63,11 +64,7 @@ namespace larlite {
     // for (w,t) -> (cm, cm) conversion
     // wire->cm
     double w2cm = larutil::GeometryHelper::GetME()->WireToCm();
-    // time->cm (accounting for different operating voltages)
-    double driftVel = larutil::LArProperties::GetME()->DriftVelocity(_Efield,87); // [cm/us]
-    // tick width in time
-    double tickWidth = 0.5; // [us]
-    double t2cm = tickWidth*driftVel;
+    double t2cm = larutil::GeometryHelper::GetME()->TimeToCm();
 
     // Get data products
     auto ev_cluster = storage->get_data<event_cluster>(_producer);
@@ -125,7 +122,12 @@ namespace larlite {
     for(size_t hit_index=0; hit_index<ev_hit->size(); ++hit_index) {
       auto const& h = (*ev_hit)[hit_index];
       // chrage :
+
+      int chan = h.Channel();
+
       double q = h.Integral();
+
+      double qcalib = q * ( _avg_gain / _chchgain[chan] );
 
       double w = h.WireID().Wire * w2cm;
       double t = h.PeakTime() * t2cm;
@@ -139,7 +141,7 @@ namespace larlite {
 	_p_v.push_back(p);
       }
 
-      all_hits_v.emplace_back( h.Integral(), w, t, hit_index, p );
+      all_hits_v.emplace_back( qcalib , w, t, hit_index, p );
     }
     
     // all hits vector is registered to the manager for future use (search for local hits not clustered)
@@ -163,8 +165,10 @@ namespace larlite {
 	auto const& h = (*ev_hit)[hit_index];
 	
 	if(h.WireID().Plane != 2) continue;
+
+	double qcalib = h.Integral() * (_avg_gain / _chchgain[ h.Channel() ] );
 	
-	michel_cluster.emplace_back( h.Integral(),
+	michel_cluster.emplace_back( qcalib,
 				     h.WireID().Wire * w2cm,
 				     h.PeakTime() * t2cm,
 				     hit_index,
@@ -296,7 +300,17 @@ namespace larlite {
   }
 
 
+  void MichelRecoDriver::SetChGain(int ch, double g) {
 
+    if (_chchgain.size() >= ch){
+      std::cout << "ERROR : channel " << ch << " out of range" << std::endl;
+      throw std::exception();
+    }
+    
+    _chchgain[ch] = g;
+
+    return;
+  }
 
 
 }

@@ -43,6 +43,12 @@ namespace larlite {
     _tree_mc->Branch("_event",&_event,"event/I");
     _tree_mc->Branch("_run",&_run,"run/I");
     _tree_mc->Branch("_subrun",&_subrun,"subrun/I");
+
+    // physics process / PDG / etc information
+    _tree_mc->Branch("_pdg",&_pdg,"pdg/I");
+    _tree_mc->Branch("_parent_pdg",&_parent_pdg,"parent_pdg/I");
+    _tree_mc->Branch("process",&_process);
+    _tree_mc->Branch("_parent_end_E",&_parent_end_E,"parent_end_E/D");
     
     _tree_mc->Branch("_mc_X",&_mc_X,"mc_X/D");
     _tree_mc->Branch("_mc_Y",&_mc_Y,"mc_Y/D");
@@ -105,6 +111,12 @@ namespace larlite {
     _tree_rc->Branch("_rc_tick",&_rc_tick,"rc_tick/D");
     _tree_rc->Branch("_rc_ADCq_elec",&_rc_ADCq_elec,"rc_ADCq_elec/D");
     _tree_rc->Branch("_rc_ADCq_tot",&_rc_ADCq_tot,"rc_ADCq_tot/D");
+
+    // physics process / PDG / etc information
+    _tree_rc->Branch("_pdg",&_pdg,"pdg/I");
+    _tree_rc->Branch("_parent_pdg",&_parent_pdg,"parent_pdg/I");
+    _tree_rc->Branch("process",&_process);
+    _tree_rc->Branch("_parent_end_E",&_parent_end_E,"parent_end_E/D");
 
     // some reconstructed information on hits
     _tree_rc->Branch("_photon_q_v", "std::vector<double>", &_photon_q_v);
@@ -191,6 +203,10 @@ namespace larlite {
 
       auto const& e_strt = mcsh.Start();
 
+      auto const& muon = ev_mctrack->at( _trackIDMap[ mcsh.MotherTrackID() ] );
+
+
+
       /*
 
       if (mcsh.PdgCode() == 22)
@@ -212,7 +228,7 @@ namespace larlite {
 	continue;
 
       // get the parent nuon
-      auto const& muon = ev_mctrack->at( _trackIDMap[ mcsh.MotherTrackID() ] );
+
 
       // if muon's size is < 2 points -> ignore...
       if (muon.size() < 2)
@@ -455,7 +471,11 @@ namespace larlite {
     _mc_muon_py = muon.Start().Py();
     _mc_muon_pz = muon.Start().Pz();
 
-
+    _parent_pdg   = muon.PdgCode();
+    if (muon.size() < 2)
+      _parent_end_E = -1;
+    else
+      _parent_end_E = muon.at( muon.size() - 2).E();
     
     double mag = sqrt( (_mc_muon_px * _mc_muon_px) +
 		       (_mc_muon_py * _mc_muon_py) +
@@ -500,6 +520,10 @@ namespace larlite {
     _mc_michel_pz /= mag;
     
     _mc_michel_creation_T = michel.DetProfile().T();
+
+    _pdg          = michel.PdgCode();
+
+    _process      = michel.Process();
 
     return;
   }

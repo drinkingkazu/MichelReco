@@ -20,8 +20,10 @@
 #pragma link C++ class larlite::NeutrinoFilter+;
 #pragma link C++ class larlite::RecoEffStudy+;
 #pragma link C++ class larlite::MatchTruth+;
+#pragma link C++ class larlite::MichelTruthStudies+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 
 
 

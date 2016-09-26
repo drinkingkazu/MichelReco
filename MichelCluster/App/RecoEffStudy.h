@@ -118,6 +118,12 @@ namespace larlite {
 
     double _trig_time;
 
+    // mc information
+    int _pdg, _parent_pdg;
+    double _parent_end_E;
+    std::string _process;
+    
+
     double _mc_muon_E, _mc_muon_px, _mc_muon_py, _mc_muon_pz;
     double _mc_michel_px, _mc_michel_py, _mc_michel_pz;
     double _mc_michel_E_edep, _mc_michel_E_true, _mc_michel_E_elec;

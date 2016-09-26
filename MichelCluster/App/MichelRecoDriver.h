@@ -61,9 +61,6 @@ namespace larlite {
     /// Producer setter
     void SetClusterProducer(const std::string& name) { _producer = name; }
 
-    /// Set electric field strength (kV/cm)
-    void SetEField(double E) { _Efield = E; }
-
     /// Specifier for a specific plane reconstruction
     void SetPlane(unsigned int p) { _reco_plane.resize(p+1,false); _reco_plane[p]=true; }
 
@@ -73,6 +70,13 @@ namespace larlite {
 
     /// filter events
     void FilterEvents(bool on) { _filter_events = on; }
+
+    /// set channel-by-channel gain corrections
+    void SetNChannels(int n) { _chchgain.resize( n ); }
+    /// set a specific channel's gain
+    void SetChGain(int ch, double g);
+    /// set average gain so that charge is preserved in ADCs x Ticks
+    void SetAvgGain(double g) { _avg_gain = g; }
 
   protected:
 
@@ -110,11 +114,13 @@ namespace larlite {
     /// boolean to select if to save Michel Clusters or not
     bool _save_clusters;
 
-    /// electric field strength [kV/cm]
-    double _Efield;
-
     /// minimum cluster size for an input cluster to be considered
     int _minClusSize;
+
+    // channel-by-channel gain corrections
+    std::vector<double> _chchgain;
+    // average gain
+    double _avg_gain;
 
   private:
 
