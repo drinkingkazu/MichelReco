@@ -16,6 +16,7 @@
 #pragma link C++ class larlite::MichelRecoDriver3D+;
 #pragma link C++ class larlite::MichelOutputFilter+;
 #pragma link C++ class larlite::MichelMCStudy+;
+#pragma link C++ class larlite::MichelMCHitStudy+;
 #pragma link C++ class larlite::FilterMichels+;
 #pragma link C++ class larlite::NeutrinoFilter+;
 #pragma link C++ class larlite::RecoEffStudy+;

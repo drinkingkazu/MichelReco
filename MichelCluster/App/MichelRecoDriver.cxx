@@ -18,13 +18,16 @@
 namespace larlite {
 
   MichelRecoDriver::MichelRecoDriver()
-    : _hit_tree(nullptr)
+    : _hit_tree(nullptr),
+      _evt_tree(nullptr)
   {
     _name="MichelRecoDriver";
     _fout=0;
     _save_clusters=false;
     _avg_gain = 5.3;
     _chchgain.clear();
+    _out_txtfile = "";
+
     // FIX ME: currently set only plane 2 reconstruction
     SetPlane(2);
   }
@@ -36,6 +39,11 @@ namespace larlite {
       throw std::exception();
     }
 
+    if (_out_txtfile == "")
+      outfile.open("outfile.txt");
+    else
+      outfile.open(_out_txtfile);
+
     _events_info.clear();
     
     _hit_tree = new TTree("_hit_tree","Hit Tree [all hits in event]");
@@ -46,6 +54,11 @@ namespace larlite {
     _hit_tree->Branch("_w_v" , "std::vector<double>" , &_w_v);
     _hit_tree->Branch("_t_v" , "std::vector<double>" , &_t_v);
     _hit_tree->Branch("_p_v" , "std::vector<double>" , &_p_v);
+
+    _evt_tree = new TTree("_evt_tree","Event info tree");
+    _evt_tree->Branch("_run"   , &_run    , "run/I");
+    _evt_tree->Branch("_subrun", &_subrun , "subrun/I");
+    _evt_tree->Branch("_event" , &_event  , "event/I");
 
     _mgr.Initialize();
 
@@ -78,6 +91,8 @@ namespace larlite {
     _run = storage->get_data<event_cluster>(_producer)->run();
     _subrun = storage->get_data<event_cluster>(_producer)->subrun();
     _event = storage->get_data<event_cluster>(_producer)->event_id();
+
+    _evt_tree->Fill();
     
     michel::EventID id;
     id.run    = _run;
@@ -220,6 +235,10 @@ namespace larlite {
       // for each get the hits associated
       for (auto const& michelClus : michels){
 
+	outfile << _run << " " << _subrun << " " << _event << " " 
+		<< int(michelClus._michel._start._w / w2cm ) << " "
+		<< int(michelClus._michel._start._t / t2cm ) << "\n";
+
 	// prepare an empty cluster
 	larlite::cluster clus_electron;
 	// set start location
@@ -290,19 +309,23 @@ namespace larlite {
 
   bool MichelRecoDriver::finalize() {
 
+    outfile.close();
+
     std::cout << "time/event = " << _event_time/_event_ctr * 1.e6 << std::endl;
 
     _fout->cd();
     _mgr.Finalize(_fout);
     if (_hit_tree)
       _hit_tree->Write();
+    if (_evt_tree)
+      _evt_tree->Write();
     return true;
   }
 
 
-  void MichelRecoDriver::SetChGain(int ch, double g) {
+  void MichelRecoDriver::SetChGain(const int& ch, const double& g) {
 
-    if (_chchgain.size() >= ch){
+    if (_chchgain.size() <= ch){
       std::cout << "ERROR : channel " << ch << " out of range" << std::endl;
       throw std::exception();
     }

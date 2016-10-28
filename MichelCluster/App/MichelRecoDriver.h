@@ -74,9 +74,12 @@ namespace larlite {
     /// set channel-by-channel gain corrections
     void SetNChannels(int n) { _chchgain.resize( n ); }
     /// set a specific channel's gain
-    void SetChGain(int ch, double g);
+    void SetChGain(const int& ch, const double& g);
     /// set average gain so that charge is preserved in ADCs x Ticks
     void SetAvgGain(double g) { _avg_gain = g; }
+
+    // set output txt file
+    void set_outtxt_file(std::string s) { _out_txtfile = s; }
 
   protected:
 
@@ -96,6 +99,7 @@ namespace larlite {
 
     /// Output analysis TTree ptr
     TTree* _hit_tree;
+    TTree* _evt_tree;
     /// info for tree
     std::vector<double> _q_v;
     std::vector<double> _w_v;
@@ -121,6 +125,9 @@ namespace larlite {
     std::vector<double> _chchgain;
     // average gain
     double _avg_gain;
+
+    ofstream outfile;
+    std::string _out_txtfile;
 
   private:
 

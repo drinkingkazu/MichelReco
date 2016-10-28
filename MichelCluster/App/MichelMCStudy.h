@@ -79,6 +79,7 @@ namespace larlite {
     TTree* _mc_tree;
     // MC information for Michel electron
     double _mc_energy; // Start().E()
+    double _mc_elec;   // End().E(), energy associated with ionization only
     double _mc_detprof; // DetProfile().E()
     double _mc_x, _mc_y, _mc_z, _mc_px, _mc_py, _mc_pz;
     double _mc_yplane_angle;
