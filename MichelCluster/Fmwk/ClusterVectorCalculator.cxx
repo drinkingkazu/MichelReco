@@ -164,25 +164,25 @@ namespace michel {
     
     data.reserve(num);
     
-    for(int i = 1; i <= num; ++i) {
+    for(size_t i = 1; i <= num; ++i) {
       std::vector<T> inner;
       inner.reserve(20);
       // if we are at the beginning of the vector (and risk accessing -1 elements)
       if(i < w)
 	{
-	  for(int j = 0; j < 2 * (i%w) - 1; ++j)
+	  for(size_t j = 0; j < 2 * (i%w) - 1; ++j)
 	    inner.push_back(the_thing[j]);
 	}
       // if we are at the end of the vector (and risk going past it)
       else if (i > num - w + 1)
 	{
-	  for(int j = num - 2*((num - i)%w)-1 ; j < num; ++j)
+	  for(size_t j = num - 2*((num - i)%w)-1 ; j < num; ++j)
 	    inner.push_back(the_thing[j]);
 	}
       // if we are in the middle of the waveform
       else
 	{
-	  for(int j = i - w; j < i + w - 1; ++j)
+	  for(size_t j = i - w; j < i + w - 1; ++j)
 	    inner.push_back(the_thing[j]);
 	}
       data.emplace_back(inner);

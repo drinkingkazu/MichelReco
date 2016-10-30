@@ -66,7 +66,7 @@ namespace larlite {
 
     /// Set the minimum number of hits for a cluster to
     /// be considered as a candidate MichelCluster
-    void SetMinClusSize(int n) { _minClusSize = n; }
+    void SetMinClusSize(int n) { _minClusSize = (size_t)n; }
 
     /// filter events
     void FilterEvents(bool on) { _filter_events = on; }
@@ -74,7 +74,7 @@ namespace larlite {
     /// set channel-by-channel gain corrections
     void SetNChannels(int n) { _chchgain.resize( n ); }
     /// set a specific channel's gain
-    void SetChGain(const int& ch, const double& g);
+    void SetChGain(const unsigned int& ch, const double& g);
     /// set average gain so that charge is preserved in ADCs x Ticks
     void SetAvgGain(double g) { _avg_gain = g; }
 
@@ -119,14 +119,14 @@ namespace larlite {
     bool _save_clusters;
 
     /// minimum cluster size for an input cluster to be considered
-    int _minClusSize;
+    size_t _minClusSize;
 
     // channel-by-channel gain corrections
     std::vector<double> _chchgain;
     // average gain
     double _avg_gain;
 
-    ofstream outfile;
+    std::ofstream outfile;
     std::string _out_txtfile;
 
   private:

@@ -192,7 +192,7 @@ namespace larlite {
       
       // Append a hit-list (cluster) to a manager if not empty
       if(michel_cluster.size() > _minClusSize){
-	bool added = _mgr.Append(std::move(michel_cluster),idx);
+	_mgr.Append(std::move(michel_cluster),idx);
       }// if above the hit number threshold
     }// for all clusters
 
@@ -323,7 +323,7 @@ namespace larlite {
   }
 
 
-  void MichelRecoDriver::SetChGain(const int& ch, const double& g) {
+  void MichelRecoDriver::SetChGain(const unsigned int& ch, const double& g) {
 
     if (_chchgain.size() <= ch){
       std::cout << "ERROR : channel " << ch << " out of range" << std::endl;

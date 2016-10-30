@@ -9,8 +9,6 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class michel::SingleMuAna+;
-#pragma link C++ class michel::SingleMuAnaWCuts+;
 #pragma link C++ class michel::CosmicAna+;
 
 //ADD_NEW_CLASS ... do not change this line
