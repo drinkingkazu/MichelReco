@@ -54,43 +54,46 @@ public:
 
 protected:
 
+    // TTree where summary info from reconstructed Michels is stored for analysis
     TTree* _out_tree;
 
-    double _michel_clustered_charge;
-    int _michel_n_hits;
-    int _muon_n_hits;
-    int    _number_of_clusters;
-
-    int    _boundary;
+    double _michel_clustered_charge; ///< Total charge (in ADCs) for Michel electron
+    int    _michel_n_hits;           ///< Number of hits tagged for Michel electron
+    int    _electron_n_hits;         ///< Number of hits tagged for ionization-only segment
+    int    _photon_n_hits;           ///< Number of hits tagged for photons associated to Michel
+    int    _n_tagged_photons;        ///< Number of tagged photons associated to Michel
+    int    _muon_n_hits;             ///< Number of hits associated to Muon cluster
+    int    _boundary;                ///< Hit index for boundary between muon and Michel
 
     std::vector<double> _q_v;
-    double _chi_at_boundary;
-    double _mean_chi;
-    double _rms_chi;
-    double _lowest_chi;
-    double _mean_chi_michel;
-    double _mean_chi_muon;
+    // variables indicating linearity value (chi^2) calculated for various parameters
+    double _chi_at_boundary;         ///< Measured linearity at Muon-Michel boundary
+    double _mean_chi;                ///< Mean linearity for all hits
+    double _rms_chi;                 ///< RMS of linearity
+    double _lowest_chi;              ///< minimum linearity value
+    double _mean_chi_michel;         ///< mean linearity for michel hits
+    double _mean_chi_muon;           ///< mean linearity for muon hits
 
     bool _has_michel;
 
     // list of indices of hits in Michel cluster associated with:
     // the various photon clusters
     std::vector<int> _photon_clus_v;
-    // the 1 electron cluster
+    // the electron cluster
     std::vector<int> _electron_clus;
+    
+    // vector profiles of hits in muon-michel
+    std::vector<double> _t_q_v;      ///< Truncated mean charge profile
+    std::vector<double> _t_dqds_v;   ///< Truncated dQ/ds charge profile
+    std::vector<double> _chi_v;      ///< hit linearity profile
+    std::vector<double> _dirs_v;     ///< vector of 2D directions between consecutive hits
+    std::vector<double> _s_v;        ///< displacement along trajectory vector
 
-    std::vector<double> _t_q_v;
-    std::vector<double> _t_dqds_v;
-    std::vector<double> _chi_v;
-    std::vector<double> _dirs_v;
+    std::vector<double> _Z;          ///< vector of all Z positions
+    std::vector<double> _X;          ///< vector of all X positions
+    std::vector<int>    _idx;        ///< vector of hit indices (references Gaus hit his)
 
-    std::vector<double> _s_v;
-
-    std::vector<double> _Z;
-    std::vector<double> _X;
-    std::vector<int>    _idx;
-
-    std::vector<double> _michel_Z;
+    std::vector<double> _michel_Z;   ///<
     std::vector<double> _michel_X;
     std::vector<double> _michel_Q;
 
@@ -112,11 +115,6 @@ protected:
     
 
     std::vector<double> _slope_v;
-
-    // smallest time for a hit in the michel cluster
-    // this is used to eliminiate MIDs caused by cosmics going thru wire plane
-    // which have charge loop back and look like michels
-    double _lowest_hit_t;
 
 
     double get_lowest(const std::vector<double>& data);

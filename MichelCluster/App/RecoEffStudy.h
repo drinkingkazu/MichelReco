@@ -104,16 +104,27 @@ namespace larlite {
     TTree *_tree_mc;
     TTree *_tree_rc;
 
+    // event information
     int _event, _subrun, _run;
 
+    // truth position and creation time for tagged Michel electron
     double _mc_X, _mc_Y, _mc_Z, _mc_T;
+    // truth and reconstructed wire for Michel electron start point
     double _mc_wire, _rc_wire;
+    // truth and reconstructed time-tick for Michel electron start point
     double _mc_tick, _rc_tick;
+    // truth end-point of muon (time-tick)
     double _mc_tick_muon;
-    double _rc_ADCq_elec, _rc_ADCq_tot;
+    // reconstructed ADC charge for ionization-only electron segment
+    double _rc_ADCq_elec;
+    // reconstructed ADC charge for entire Michel electron energy
+    double _rc_ADCq_tot;
 
+    // vector storing energy (in ADCs) of each tagged photon
     std::vector<double> _photon_q_v;
+    // vector of wire coordinates for Michel electron
     std::vector<double> _electron_w_v;
+    // vector of time coordinates for Michel electron
     std::vector<double> _electron_t_v;
 
     double _trig_time;
