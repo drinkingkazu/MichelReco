@@ -142,7 +142,7 @@ namespace larlite {
 
       double q = h.Integral();
 
-      double qcalib = q * ( _avg_gain / _chchgain[chan] );
+      //double qcalib = q * ( _avg_gain / _chchgain[chan] );
 
       double w = h.WireID().Wire * w2cm;
       double t = h.PeakTime() * t2cm;
@@ -156,7 +156,7 @@ namespace larlite {
 	_p_v.push_back(p);
       }
 
-      all_hits_v.emplace_back( qcalib , w, t, hit_index, p );
+      all_hits_v.emplace_back( q , w, t, hit_index, p );
     }
     
     // all hits vector is registered to the manager for future use (search for local hits not clustered)
@@ -181,9 +181,11 @@ namespace larlite {
 	
 	if(h.WireID().Plane != 2) continue;
 
-	double qcalib = h.Integral() * (_avg_gain / _chchgain[ h.Channel() ] );
+	double q = h.Integral();
+
+	//double qcalib = h.Integral() * (_avg_gain / _chchgain[ h.Channel() ] );
 	
-	michel_cluster.emplace_back( qcalib,
+	michel_cluster.emplace_back( q,
 				     h.WireID().Wire * w2cm,
 				     h.PeakTime() * t2cm,
 				     hit_index,

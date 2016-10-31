@@ -41,12 +41,12 @@ my_unit.SetNChannels(8256)
 my_unit.set_outtxt_file( "michel_eventinfo.txt" )
 
 # load ch-by-ch gain values
-chchgains_f = open('%s/MichelReco/MichelCluster/mac/ChChGain.txt'%(os.environ['LARLITE_USERDEVDIR']),'r')
-for line in chchgains_f:
-    words = line.split()
-    chan = int(words[0])
-    gain = float(words[1])
-    my_unit.SetChGain(chan,5.3)
+#chchgains_f = open('%s/MichelReco/MichelCluster/mac/ChChGain.txt'%(os.environ['LARLITE_USERDEVDIR']),'r')
+#for line in chchgains_f:
+#    words = line.split()
+#    chan = int(words[0])
+#    gain = float(words[1])
+#    my_unit.SetChGain(chan,5.3)
 
 ###########################################################
 # set here if you want to save michels as an output cluster
