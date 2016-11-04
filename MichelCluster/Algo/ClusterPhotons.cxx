@@ -92,7 +92,10 @@ namespace michel{
 	      //std::cout << "remove indices " << idx1 << " and " << idx2 << " from vec of size " << cluster._michel._photon_clus_v.size() << std::endl;
 
 	      // erase the two clusters and replace with the merged version
+	      cluster._michel._photon_clus_v[ idx1 ] = {};
+	      cluster._michel._photon_clus_v[ idx2 ] = {};
 	      // start with the largest of the two
+	      /*
 	      if (idx1 > idx2){
 		cluster._michel._photon_clus_v.erase( cluster._michel._photon_clus_v.begin() + idx1 );
 		cluster._michel._photon_clus_v.erase( cluster._michel._photon_clus_v.begin() + idx2 );
@@ -101,6 +104,7 @@ namespace michel{
 		cluster._michel._photon_clus_v.erase( cluster._michel._photon_clus_v.begin() + idx2 );
 		cluster._michel._photon_clus_v.erase( cluster._michel._photon_clus_v.begin() + idx1 );
 	      }
+	      */
 	      // add new cluster
 	      cluster._michel._photon_clus_v.push_back( clnew );
 	      // for all indices in clnew -> add them to map
@@ -119,15 +123,20 @@ namespace michel{
 
 	  // is hit i recorded in the map?
 	  else if ( _hit_cluster_map.find( i ) != _hit_cluster_map.end() ){
+	    //std::cout << " hit i already in a cluster" << std::endl;
+	    //std::cout << " hit i goes to cluster " << _hit_cluster_map[i] << std::endl;
+	    //std::cout << " total # of clusters : " << cluster._michel._photon_clus_v.size() << std::endl;
 	    cluster._michel._photon_clus_v[ _hit_cluster_map[ i ] ].push_back( j );
 	    _hit_cluster_map[j] = _hit_cluster_map[i];
 	  }
 	  // is hit j recorded in the map?
 	  else if ( _hit_cluster_map.find( j ) != _hit_cluster_map.end() ){
+	    //std::cout << " hit j already in a cluster" << std::endl;
 	      cluster._michel._photon_clus_v[ _hit_cluster_map[ j ] ].push_back( i );
 	      _hit_cluster_map[i] = _hit_cluster_map[j];
 	  }
 	  else{
+	    //std::cout << " neither hit in a cluster" << std::endl;
 	    std::vector<size_t> new_clus = {i,j};
 	    cluster._michel._photon_clus_v.push_back( new_clus );
 	    _hit_cluster_map[i] = cluster._michel._photon_clus_v.size() - 1;
@@ -160,8 +169,17 @@ namespace michel{
     if ( cluster._michel._photon_clus_v.at( clus_idx ).size() <= 2)
       return false;
 
+    // save electron cluster
     cluster._michel._electron_hit_idx_v = cluster._michel._photon_clus_v.at( clus_idx );
     cluster._michel._photon_clus_v.erase( cluster._michel._photon_clus_v.begin() + clus_idx );
+
+    // erase any photon clusters of 0 size
+    auto photon_clusters = cluster._michel._photon_clus_v;
+    cluster._michel._photon_clus_v.clear();
+    for (auto const& photon : photon_clusters){
+      if (photon.size() != 0)
+	cluster._michel._photon_clus_v.push_back( photon );
+    }
 
     if(_verbosity <= msg::kINFO) {
       std::stringstream ss;
