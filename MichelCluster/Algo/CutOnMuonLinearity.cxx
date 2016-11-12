@@ -13,7 +13,7 @@ namespace michel{
   }
 
   bool CutOnMuonLinearity::ProcessCluster(MichelCluster& cluster,
-					    const std::vector<HitPt>& hits)
+					  const std::vector<HitPt>& hits)
   {
 
     // get the chi vector
@@ -39,19 +39,13 @@ namespace michel{
     // chi values for entire muon track
     std::vector<double> chi_muon;
 
-    // count of michel hits with chi above some value
-    int high_chi_michel = 0;
-    // total number of michel hits
-    int num_michel_hits = 0;
-
     // if the muon is too short -> ignore
-    double muon_len = 0;
     if (forward){
-      for (size_t i=0; i < boundary; i++)
+      for (int i = 0; i < boundary; i++)
 	chi_muon.push_back(fabs(chi_v[i]));
     }
     else{
-      for (size_t i=boundary; i < hit_v.size()-1; i++)
+      for (size_t i = boundary; i < hit_v.size()-1; i++)
 	chi_muon.push_back(fabs(chi_v[i]));
     }
 

@@ -65,8 +65,8 @@ namespace michel {
     for(auto& dqds : truncated_dqds)
       flipped_truncated_dqds.push_back(-1.0 * dqds);
     
-    int candidate_loc     = get_tspectrum_max(cluster._s_v,truncated_mean);
-    int dqdscandidate_loc = get_tspectrum_max(cluster._s_v,flipped_truncated_dqds);
+    auto candidate_loc     = get_tspectrum_max(cluster._s_v,truncated_mean);
+    auto dqdscandidate_loc = get_tspectrum_max(cluster._s_v,flipped_truncated_dqds);
     
     //We will used TSpectrum to get a list of peaks, problem is we have to put truncatedQ/dqds into TH1,
     //then make new TSpectrum, then run peakfinding then find the max "peaks" in each...
@@ -80,9 +80,9 @@ namespace michel {
     if(abs(dqdscandidate_loc - candidate_loc) > 20)
       return false;
     
-    auto window_size = 20;
-    auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
-    auto left  = candidate_loc;
+    int window_size = 20;
+    int right = cluster._ordered_pts.size() - 1 - candidate_loc;
+    int left  = candidate_loc;
     
     
     bool right_is_smaller;
@@ -106,7 +106,7 @@ namespace michel {
       iMax = candidate_loc + window_size;
       iMin = candidate_loc - left;
       
-      if(iMax >= cluster._ordered_pts.size()) iMax = cluster._ordered_pts.size() - 1;
+      if(iMax >= (int)cluster._ordered_pts.size()) iMax = (int)cluster._ordered_pts.size() - 1;
     }
     
     auto k   = 0.0;
@@ -130,7 +130,7 @@ namespace michel {
     if (k == 0) return 1;
   
     int result = n;
-    for( int i = 2; i <= k; ++i ) {
+    for( unsigned int i = 2; i <= k; ++i ) {
       result *= (n-i+1);
       result /= i;
     }
@@ -155,7 +155,7 @@ namespace michel {
     for(int o = 0; o < s; ++o) tdqds.push_back(0.0);
     
     //do smooth differentiation
-    for(int i = s; i < tmeans.size() - s + 1; ++i) {
+    for(size_t i = s; i < tmeans.size() - s + 1; ++i) {
       std::vector<double> f(tmeans.begin() + i - s, tmeans.begin() + i + s);
       std::vector<double> x(_dist.begin() + i - s , _dist.begin() + i + s );
       tdqds.push_back(do_smooth_derive(f,x,2*s+1));
@@ -197,7 +197,7 @@ namespace michel {
       charge.push_back(cluster._hits[o]._q);
 
     for(auto window : get_windows(charge,_n_window_size) ) {
-      if(window.size() > window_cutoff) 
+      if(window.size() > (size_t)window_cutoff) 
 	cut(window,p_above);
       truncatedQ.push_back(calc_mean(window));
     }
@@ -244,22 +244,22 @@ namespace michel {
     std::vector<std::vector<T> > data;
     
     auto w = window_size + 2;
-    w = (unsigned int)((w - 1)/2);
+    w = (size_t)((w - 1)/2);
     auto num = the_thing.size();
     
     data.reserve(num);
     
-    for(int i = 1; i <= num; ++i) {
+    for(size_t i = 1; i <= num; ++i) {
       std::vector<T> inner;
       inner.reserve(20);
       if(i < w) {
-	for(int j = 0; j < 2 * (i%w) - 1; ++j)
+	for(size_t j = 0; j < 2 * (i%w) - 1; ++j)
 	  inner.push_back(the_thing[j]);
       }else if (i > num - w + 1){
-	for(int j = num - 2*((num - i)%w)-1 ; j < num; ++j)
+	for(size_t j = num - 2*((num - i)%w)-1 ; j < num; ++j)
 	  inner.push_back(the_thing[j]);
       }else{
-	for(int j = i - w; j < i + w - 1; ++j)
+	for(size_t j = i - w; j < i + w - 1; ++j)
 	  inner.push_back(the_thing[j]);
       }
       data.emplace_back(inner);
@@ -304,7 +304,7 @@ namespace michel {
     
     double x[X.size() + 1];
 
-    for(int i = 0; i <= X.size(); ++i) {
+    for(size_t i = 0; i <= X.size(); ++i) {
       if(i == X.size())x[i] = X.at(i-1) + 0.3;
       else             x[i] = X.at(i);
 

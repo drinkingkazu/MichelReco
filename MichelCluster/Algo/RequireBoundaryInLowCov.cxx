@@ -27,9 +27,12 @@ namespace michel {
     double avg_covariance = 0;
     int    counts = 0;
 
-    for (int i = (idx-3); i < (idx+4); i++){ // -3 and +4 is hardcoded ok fine
+    if ( idx < 3)
+      return false;
+
+    for (size_t i = (idx-3); i < (idx+4); i++){ // -3 and +4 is hardcoded ok fine
       // make sure we fall in the vector's range
-      if ( (i >= 0) and (i < covariance.size()) ){
+      if ( i < covariance.size() ){
 	avg_covariance += fabs(covariance[i]);
 	counts += 1;
       }

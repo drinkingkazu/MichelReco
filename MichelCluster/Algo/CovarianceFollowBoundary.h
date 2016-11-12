@@ -86,7 +86,7 @@ namespace michel {
     /// min in trunc. dQdx and max in trunc. dQ
     /// if the min and max are more than this number of hits
     /// apart -> do not create a michel
-    int _maxDistance;
+    size_t _maxDistance;
     
     /// single dip in covariance strenght, must be below this value to
     /// be considered a dip
@@ -113,7 +113,7 @@ namespace michel {
     
     /// Try to correct edge effect by setting this number of points equal
     /// on both edges
-    int _edgefix;
+    size_t _edgefix;
  
     /// Should I require sign flip on windowed slope of MichelCluster?
     bool _require_slope_sign_flip;

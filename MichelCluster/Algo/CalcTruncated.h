@@ -79,7 +79,7 @@ namespace michel {
     
     /// Try to correct edge effect by setting this number of points equal
     /// on both edges
-    int _edgefix;
+    size_t _edgefix;
     
     // stop-watch for time-profiling
     TStopwatch _watch;

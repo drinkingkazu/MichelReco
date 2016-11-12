@@ -67,7 +67,7 @@ namespace michel {
       return false;
     }
     
-    for(int i = 0 ; i < _edgefix; ++i) {
+    for(size_t i = 0 ; i < _edgefix; ++i) {
       truncated_mean.at(i) = truncated_mean[_edgefix];
       truncated_mean.at(truncated_mean.size() - i - 1) = truncated_mean[truncated_mean.size() - _edgefix];
     }
