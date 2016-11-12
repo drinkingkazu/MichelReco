@@ -143,7 +143,7 @@ namespace michel {
   
   template<typename T>
   std::vector<std::vector<T> > ClusterVectorCalculator::get_windows(const std::vector<T>& the_thing,
-							       const int window_size) const
+								    const size_t window_size) const
   {
 
     // given a vector of values return a vector of the same length
@@ -481,8 +481,7 @@ namespace michel {
 
   std::vector<size_t> ClusterVectorCalculator::GetMIPindices(const std::vector<double>& dQ,
 							     const double& median,
-							     const double& rms,
-							     const double& alpha) const
+							     const double& rms) const
   {
 
     std::vector<size_t> indices;

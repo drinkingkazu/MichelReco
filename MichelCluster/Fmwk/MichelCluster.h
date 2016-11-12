@@ -32,7 +32,7 @@ namespace michel {
 
 class MichelCluster : public ColorPrint {
     friend class MichelRecoManager;
-    friend class MichelCluster;
+    //friend class MichelCluster;
 public:
     /// Default constructor
     MichelCluster(size_t min_nhits = 0,

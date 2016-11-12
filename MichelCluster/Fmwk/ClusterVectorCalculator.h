@@ -69,7 +69,7 @@ namespace michel {
     
     template<typename T>
     std::vector<std::vector<T> > get_windows(const std::vector<T>& the_thing,
-					     const int window_size) const;
+					     const size_t window_size) const;
 
 
 
@@ -109,8 +109,7 @@ namespace michel {
     // get indices for hits considered MIP (within some alpha*RMS of the median charge)
     std::vector<size_t> GetMIPindices(const std::vector<double>& dQ,
 				      const double& median,
-				      const double& rms,
-				      const double& alpha) const;
+				      const double& rms) const;
 
     // get a subvector containing the entries for the list of indices provided
     std::vector<double> GetSubVector(const std::vector<double> v,

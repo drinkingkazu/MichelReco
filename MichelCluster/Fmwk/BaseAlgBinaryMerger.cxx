@@ -32,7 +32,7 @@ namespace michel {
       }
 
       // Loop over possible combinations and try merging
-      for(int a_index=0; a_index<score_index_m.size(); ++a_index) {
+      for(size_t a_index=0; a_index<score_index_m.size(); ++a_index) {
 
 	// Find cluster a's index
 	auto score_iter_a = score_index_m.begin();
@@ -40,7 +40,7 @@ namespace michel {
 	// Obtain cluster a's reference
 	auto const& cluster_a = result_v[(*score_iter_a).second];
 
-	for(int b_index=(a_index+1); b_index<score_index_m.size(); ++b_index) {
+	for(size_t b_index=(a_index+1); b_index<score_index_m.size(); ++b_index) {
 
 	  // Find cluster b's index
 	  auto score_iter_b = score_index_m.begin();
