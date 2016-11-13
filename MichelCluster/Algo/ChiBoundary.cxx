@@ -45,7 +45,7 @@ namespace michel {
   }
   
   
-  std::vector<double> ChiBoundary::do_chi(const MichelCluster& cluster, int window_size){
+  std::vector<double> ChiBoundary::do_chi(const MichelCluster& cluster, size_t window_size){
     
     std::vector<double> chi;
 
@@ -67,7 +67,7 @@ namespace michel {
 	continue;
       }
     
-      for(int i = 0; i < window_size; ++i) {
+      for(size_t i = 0; i < window_size; ++i) {
 	graph.SetPoint( i,
 			cluster._hits[cluster._ordered_pts[i]]._w,
 			cluster._hits[cluster._ordered_pts[i]]._t);
@@ -93,7 +93,7 @@ namespace michel {
   
   template<typename T>
   std::vector<std::vector<T> > ChiBoundary::get_windows(const std::vector<T>& the_thing,
-							const int window_size)
+							const size_t window_size)
   {
   
     std::vector<std::vector<T> > data;
@@ -104,17 +104,17 @@ namespace michel {
 
     data.reserve(num);
   
-    for(int i = 1; i <= num; ++i) {
+    for(size_t i = 1; i <= num; ++i) {
       std::vector<T> inner;
       inner.reserve(20);
       if(i < w) {
-	for(int j = 0; j < 2 * (i%w) - 1; ++j)
+	for(size_t j = 0; j < 2 * (i%w) - 1; ++j)
 	  inner.push_back(the_thing[j]);
       }else if (i > num - w + 1){
-	for(int j = num - 2*((num - i)%w)-1 ; j < num; ++j)
+	for(size_t j = num - 2*((num - i)%w)-1 ; j < num; ++j)
 	  inner.push_back(the_thing[j]);
       }else{
-	for(int j = i - w; j < i + w - 1; ++j)
+	for(size_t j = i - w; j < i + w - 1; ++j)
 	  inner.push_back(the_thing[j]);
       }
       data.emplace_back(inner);
@@ -237,11 +237,11 @@ namespace michel {
   {
     float mean = 0;
     float rms = 0;
-    for (int i  = k; i < m; i++) mean += data.at(i);
+    for (size_t i  = k; i < m; i++) mean += data.at(i);
   
     mean = mean/window;
 
-    for (int i= k; i < m; i++){
+    for (size_t i= k; i < m; i++){
       float diff = data.at(i) - mean;
       rms += diff*diff;
     }

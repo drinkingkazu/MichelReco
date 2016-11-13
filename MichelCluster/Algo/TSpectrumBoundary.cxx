@@ -245,9 +245,9 @@ namespace michel {
     
     std::vector<std::vector<T> > data;
     
-    auto w = window_size + 2;
+    size_t w = window_size + 2;
     w = (size_t)((w - 1)/2);
-    auto num = the_thing.size();
+    size_t num = the_thing.size();
     
     data.reserve(num);
     

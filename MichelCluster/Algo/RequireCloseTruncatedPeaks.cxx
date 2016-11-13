@@ -31,8 +31,8 @@ namespace michel {
     
     //With this new information, calculate the boundary point between possible muon end and michel start
     
-    int candidate_loc     = _clusterCalc.find_max(cluster._t_mean_v);
-    int dqdscandidate_loc = _clusterCalc.find_min(cluster._t_dqds_v); 
+    size_t candidate_loc     = _clusterCalc.find_max(cluster._t_mean_v);
+    size_t dqdscandidate_loc = _clusterCalc.find_min(cluster._t_dqds_v); 
     
     if((candidate_loc     >= cluster._hits.size()))
       return false;

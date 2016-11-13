@@ -120,8 +120,6 @@ namespace michel {
 
       // perpendicular distance of point to line:
       double d_perp = _clusterCalc.GetPerpendicularDistance(h,slope,intercept);
-      double d_start = h.SqDist(start);
-
       if (d_perp < _max_perp_distance){
 	michel.push_back(h);
 	cnts += 1;

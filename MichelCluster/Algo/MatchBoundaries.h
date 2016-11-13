@@ -70,7 +70,7 @@ namespace michel {
     /// setter function for mitigating edge effect, this number of points on the
     /// edge set equal to truncatedQ[_edgefix], maybe 0 is best I don't know
     
-    void SetEdgeEffectFix(int e)             { _edgefix = e; }
+    void SetEdgeEffectFix(size_t e)             { _edgefix = e; }
 
     
   private:
@@ -79,7 +79,7 @@ namespace michel {
     /// min in trunc. dQdx and max in trunc. dQ
     /// if the min and max are more than this number of hits
     /// apart -> do not create a michel
-    int _maxDistance;
+    size_t _maxDistance;
 
     /// Maximum allowed covariance value for hits next to
     /// the start point
@@ -102,7 +102,7 @@ namespace michel {
     
     /// Try to correct edge effect by setting this number of points equal
     /// on both edges
-    int _edgefix;
+    size_t _edgefix;
 
   };
 }

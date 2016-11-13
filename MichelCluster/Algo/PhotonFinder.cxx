@@ -46,7 +46,7 @@ namespace michel {
 
     // make sure direction vector is unit-normalized
     // necessary for subsequent calculations
-    double mag = michelDir._w * michelDir._w + michelDir._t * michelDir._t;
+    //double mag = michelDir._w * michelDir._w + michelDir._t * michelDir._t;
     //std::cout << "Michel direction vector magnitude is " << mag << std::endl;
 
     // fit michel to a straight line

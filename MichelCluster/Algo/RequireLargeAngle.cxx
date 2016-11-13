@@ -105,7 +105,7 @@ namespace michel{
     // get the dS vector
     auto const& dist_v = cluster._s_v;
     // get the boundary point
-    auto const& boundary = (int)cluster._boundary;
+    auto const& boundary = cluster._boundary;
     // is the michel forward (from boundary to end) or back
     auto const& forward = cluster._forward;
 

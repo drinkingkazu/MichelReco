@@ -43,7 +43,7 @@ namespace michel {
 
     /// setter function for max distance between min in dQds
     /// and max in dQ
-    void SetMaxDistancesTruncatedQMaxQ(int n) { _maxDistance = n; }
+    void SetMaxDistancesTruncatedQMaxQ(size_t n) { _maxDistance = n; }
     
   private:
 
@@ -53,7 +53,7 @@ namespace michel {
     /// and find the maximum in that window. This becomes the michel
     /// boundary
     
-    int _maxDistance;
+    size_t _maxDistance;
     
   };
 

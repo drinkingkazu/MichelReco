@@ -53,7 +53,7 @@ namespace michel {
       return false;
     }
     
-    for(int i = 0 ; i < _edgefix; ++i) {
+    for(size_t i = 0 ; i < _edgefix; ++i) {
       truncated_mean.at(i) = truncated_mean[_edgefix];
       truncated_mean.at(truncated_mean.size() - i - 1) = truncated_mean[truncated_mean.size() - _edgefix];
     }
@@ -81,8 +81,8 @@ namespace michel {
     
     //With this new information, calculate the boundary point between possible muon end and michel start
     
-    int candidate_loc     = _clusterCalc.find_max(truncated_mean);
-    int dqdscandidate_loc = _clusterCalc.find_min(truncated_dqds); 
+    size_t candidate_loc     = _clusterCalc.find_max(truncated_mean);
+    size_t dqdscandidate_loc = _clusterCalc.find_min(truncated_dqds); 
 
     std::swap(cluster._t_mean_v,truncated_mean);
     std::swap(cluster._t_dqds_v,truncated_dqds);
@@ -97,11 +97,11 @@ namespace michel {
       return false;
     
 
-    auto right = cluster._ordered_pts.size() - 1 - candidate_loc;
-    auto left  = candidate_loc;
+    size_t right = cluster._ordered_pts.size() - 1 - candidate_loc;
+    size_t left  = candidate_loc;
     
-    int  iMin = 0;
-    int  iMax = 0;
+    size_t iMin = 0;
+    size_t iMax = 0;
     
     if(right >= _maxDistance) iMax  = _maxDistance   + candidate_loc;
     if(left  >= _maxDistance) iMin  = candidate_loc - _maxDistance;
@@ -112,9 +112,9 @@ namespace michel {
     // holder for hit with largest charge -> this will identify the location
     // of the hit that defines the michel boundary
     auto k   = 0.0;
-    auto idx = 0;
+    size_t idx = 0;
     
-    for(int w = iMin; w <= iMax; ++w) {
+    for(size_t w = iMin; w <= iMax; ++w) {
       auto c = cluster._hits[cluster._ordered_pts[w]]._q;
       // if this hit has more charge than any other
       if(c > k) { k = c; idx = w; }
@@ -124,9 +124,13 @@ namespace michel {
     // idx is the position of the reconstructed michel start
     double avg_covariance = 0;
     int counts = 0;
-    for (int i = (idx-3); i < (idx+4); i++){
+
+    size_t start = 0;
+    if (idx >= 3) start = idx-3;
+    
+    for (size_t i = start; i < (idx+4); i++){
       // make sure we fall in the vector's range
-      if ( (i >= 0) and (i < covariance.size()) ){
+      if ( i < covariance.size() ){
 	avg_covariance += fabs(covariance[i]);
 	counts += 1;
       }

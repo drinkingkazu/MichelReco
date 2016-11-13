@@ -28,19 +28,11 @@ namespace michel{
     // get the hit vector
     auto const& hit_v = cluster._hits;
     // get the boundary point
-    auto const& boundary = (int)cluster._boundary;
+    auto const& boundary = cluster._boundary;
     // is the michel forward (from boundary to end) or back
     auto const& forward = cluster._forward;
     // michel's start point
     auto const& start = cluster._hits[boundary];
-
-    // ***************************************************
-    // the boundary defines where the michel starts in the
-    // ordered hit list. If less then 0 then wtf
-    if (boundary < 0){
-      std::cout << "boundary not set..." << std::endl;
-      return false;
-    }
 
     // how this algorithm works:
     // the idea is to take the straight track of a the muon-portion

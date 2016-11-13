@@ -39,11 +39,11 @@ namespace michel {
 			const std::vector<HitPt>& hits);
 
     //other functions
-    std::vector<double> do_chi(const MichelCluster& cluster, int window_size);
+    std::vector<double> do_chi(const MichelCluster& cluster, size_t window_size);
     
     template<typename T>
     std::vector<std::vector<T> > get_windows(const std::vector<T>& the_thing,
-					     const int window_size);
+					     const size_t window_size);
     
     std::vector<HitIdx_t> find_max_pos(const std::vector<double> chi,
 				       bool forward,
