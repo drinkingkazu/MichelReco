@@ -12,7 +12,9 @@ namespace michel {
   
   bool RequireBoundaryInLowCov::ProcessCluster(MichelCluster& cluster,
 					       const std::vector<HitPt>& hits)
-  { 
+  {
+
+    if (hits.size() == 0) return false;
 
     if(cluster._chi2_v.size() < cluster._hits.size()) {
       Print(msg::kEXCEPTION,this->Name(),"Covariance vector size less than num hits, run CalcTruncated");

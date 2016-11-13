@@ -15,6 +15,8 @@ namespace michel{
 				      const std::vector<HitPt>& hits)
   {
 
+    if (hits.size() == 0) return false;
+    
     // grab michel hits
     auto const& michel_hits = cluster._michel;
 

@@ -10,6 +10,8 @@ namespace michel {
   
   bool RadiusMichelCluster::ProcessCluster(MichelCluster& cluster,
 					   const std::vector<HitPt>& hits) {
+
+    if (hits.size() == 0) return false;
     
     auto& michel = cluster._michel;
     

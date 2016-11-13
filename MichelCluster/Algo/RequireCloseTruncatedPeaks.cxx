@@ -14,7 +14,9 @@ namespace michel {
   
   bool RequireCloseTruncatedPeaks::ProcessCluster(MichelCluster& cluster,
 						  const std::vector<HitPt>& hits)
-  { 
+  {
+
+    if (hits.size() == 0) return false;
     
     if(cluster._t_mean_v.size() < cluster._hits.size()) {
       Print(msg::kEXCEPTION,this->Name(),"Truncated Mean vector size less than num hits, run CalcTruncated");

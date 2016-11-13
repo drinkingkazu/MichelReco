@@ -13,7 +13,10 @@ namespace michel {
   
   bool RequireSlopeSignFlip::ProcessCluster(MichelCluster& cluster,
 					    const std::vector<HitPt>& hits)
-  { 
+  {
+
+    if (hits.size() == 0) return false;
+    
     if(cluster._dirs_v.size() < cluster._hits.size()) {
       Print(msg::kEXCEPTION,this->Name(),"slope vector size less than num hits, run CalcTruncated");
       throw MichelException();

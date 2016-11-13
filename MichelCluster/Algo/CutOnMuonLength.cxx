@@ -15,6 +15,8 @@ namespace michel{
 					    const std::vector<HitPt>& hits)
   {
 
+    if (hits.size() == 0) return false;
+
     // get the hit vector
     auto const& hit_v = cluster._hits;
     // get the boundary point

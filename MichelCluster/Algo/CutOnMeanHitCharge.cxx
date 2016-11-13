@@ -15,6 +15,8 @@ namespace michel{
 					  const std::vector<HitPt>& hits)
   {
 
+    if (hits.size() == 0) return false;
+    
     //  get number of Michel hits and total charge in them
     double Qtot = 0.;
     int num_michel_hits = cluster._michel.size();

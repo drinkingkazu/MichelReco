@@ -23,6 +23,8 @@ namespace michel {
   bool StepSuperSonicCluster::ProcessCluster(MichelCluster& cluster,
 					     const std::vector<HitPt>& hits){
 
+    if (hits.size() == 0) return false;
+    
     auto& michel = cluster._michel;
     
     /// This michel was bogus when it came in, don't cluster further

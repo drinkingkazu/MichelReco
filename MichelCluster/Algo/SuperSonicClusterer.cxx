@@ -22,6 +22,7 @@ namespace michel {
   bool SuperSonicClusterer::ProcessCluster(MichelCluster& cluster,
 					   const std::vector<HitPt>& hits){
 
+    if (hits.size() == 0) return false;
 
     double dMax = _max_radius*_max_radius;
 

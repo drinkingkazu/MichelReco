@@ -11,7 +11,9 @@ namespace michel {
   
   bool TSpectrumBoundary::ProcessCluster(MichelCluster& cluster,
 					 const std::vector<HitPt>& hits)
-  { 
+  {
+
+    if (hits.size() == 0) return false;
     
     std::vector<double> truncated_mean;
     std::vector<double> truncated_dqds;

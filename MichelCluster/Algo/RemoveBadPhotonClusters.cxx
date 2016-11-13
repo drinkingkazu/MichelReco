@@ -18,7 +18,7 @@ namespace michel{
 					       const std::vector<HitPt>& hits)
   {
 
-    //std::cout << "remove bad photons " << std::endl;
+    if (hits.size() == 0) return false;
     
     ClusterVectorCalculator _clusterCalc;
 
@@ -109,7 +109,7 @@ namespace michel{
       for (auto const& photon_hit_idx : photon_hit_v){
 	auto const& photon_hit = michel.at( photon_hit_idx );
 	if (photon_hit.Dist(boundary) < 20){
-	  close == true;
+	  close = true;
 	  break;
 	}// if close
       }// for all photon hits

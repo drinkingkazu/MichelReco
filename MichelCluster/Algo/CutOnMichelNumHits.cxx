@@ -17,6 +17,8 @@ namespace michel{
 					    const std::vector<HitPt>& hits)
   {
 
+    if (hits.size() == 0) return false;
+
     // get number of hits in the michel
     int num_michel_hits = cluster._michel.size();
 

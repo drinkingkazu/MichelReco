@@ -11,6 +11,8 @@ namespace michel {
   bool MaxQBoundary::ProcessCluster(MichelCluster& cluster,
 				    const std::vector<HitPt>& hits)
   { 
+
+    if (hits.size() == 0) return false;
     
     std::vector<double> charges;
     charges.reserve(cluster._ordered_pts.size());

@@ -12,6 +12,8 @@ namespace michel {
   bool ForwardMichelID::ProcessCluster(MichelCluster& cluster,
 				       const std::vector<HitPt>& hits)
   {
+
+    if (hits.size() == 0) return false;
     
     if(cluster._boundary == kINVALID_SIZE) { return false; }
     //no check on cluster size here...
@@ -33,7 +35,7 @@ namespace michel {
     //Determines which point is the michel start    
     if(determine_forward(cluster,n_cutoff,c_cutoff,w_cutoff,cluster._forward)) {
       if(cluster._forward) {
-	if(idx >= cluster._ordered_pts.size() - 1) {
+	if(idx >= (int)cluster._ordered_pts.size() - 1) {
 	  the_michel_start = idx;
 	}
 	else {

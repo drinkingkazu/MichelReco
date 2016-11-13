@@ -16,6 +16,8 @@ namespace michel{
 					  const std::vector<HitPt>& hits)
   {
 
+    if (hits.size() == 0) return false;
+
     // get the chi vector
     auto const& chi_v = cluster._chi2_v;
     // get the hit vector

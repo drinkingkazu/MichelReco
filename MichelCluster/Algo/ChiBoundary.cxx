@@ -14,6 +14,8 @@ namespace michel {
   bool ChiBoundary::ProcessCluster(MichelCluster& cluster,
 				   const std::vector<HitPt>& hits) {
 
+    if (hits.size() == 0) return false;
+
     //stolen from run_michel
     float  _chi2_rise = 5;
     float _chi2_fall = 6;

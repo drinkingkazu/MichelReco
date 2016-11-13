@@ -15,6 +15,8 @@ namespace michel{
 					  const std::vector<HitPt>& hits)
   {
 
+    if (hits.size() == 0) return false;
+    
     // grab hits from hits associated to Michel electron part only
     // (no photons) and find a 2D direction for this Michel
 

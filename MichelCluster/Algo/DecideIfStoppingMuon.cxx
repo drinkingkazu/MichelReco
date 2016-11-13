@@ -19,6 +19,8 @@ namespace michel{
 					    const std::vector<HitPt>& hits)
   {
 
+    if (hits.size() == 0) return false;
+
     // get the slope vector for the cluster
     auto const& slope_v = cluster._dirs_v;
     // get the chi vector

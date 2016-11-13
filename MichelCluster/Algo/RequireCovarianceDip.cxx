@@ -14,7 +14,9 @@ namespace michel {
   
   bool RequireCovarianceDip::ProcessCluster(MichelCluster& cluster,
 					    const std::vector<HitPt>& hits)
-  { 
+  {
+
+    if (hits.size() == 0) return false;
 
     /// May be later I will extend this to N number of dips but it's
     /// probably overkill

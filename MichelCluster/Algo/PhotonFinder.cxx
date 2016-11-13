@@ -20,8 +20,10 @@ namespace michel {
   {}
   
   bool PhotonFinder::ProcessCluster(MichelCluster& cluster,
-					   const std::vector<HitPt>& hits){
+				    const std::vector<HitPt>& hits){
 
+    if (hits.size() == 0) return false;
+    
     // calculator tool
     ClusterVectorCalculator _clusterCalc;
 

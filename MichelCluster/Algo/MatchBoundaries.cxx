@@ -15,6 +15,8 @@ namespace michel {
 				       const std::vector<HitPt>& hits)
   { 
 
+    if (hits.size() == 0) return false;
+    
     /// call instance of "ClusterVectorCalculator"
     /// this class has a bunch of utility functions
     /// to calculate stuff based on the vecor of

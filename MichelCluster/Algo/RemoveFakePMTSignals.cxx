@@ -16,7 +16,10 @@ namespace michel{
 
   bool RemoveFakePMTSignals::ProcessCluster(MichelCluster& cluster,
 					    const std::vector<HitPt>& hits)
+
   {
+
+    if (hits.size() == 0) return false;
 
     ClusterVectorCalculator _clusterCalc;
 

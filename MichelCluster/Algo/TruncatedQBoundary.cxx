@@ -13,7 +13,9 @@ namespace michel {
   
   bool TruncatedQBoundary::ProcessCluster(MichelCluster& cluster,
 					  const std::vector<HitPt>& hits)
-  { 
+  {
+
+    if (hits.size() == 0) return false;
 
     /// call instance of "ClusterVectorCalculator"
     /// this class has a bunch of utility functions
